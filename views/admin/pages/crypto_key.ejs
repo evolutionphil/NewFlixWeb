@@ -1,0 +1,28 @@
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-body">
+            <form method="post" action="/admin/saveCryptoApiKey">
+                <div class="form-group">
+                    <label>Public Key</label>
+                    <input type="text" name="crypto_public_key" value="<%=crypto_public_key%>" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Private Key</label>
+                    <input type="text" name="crypto_private_key" value="<%=crypto_private_key%>" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Merchant ID</label>
+                    <input type="text" name="crypto_merchant_id" value="<%=crypto_merchant_id%>" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>IPN Secret</label>
+                    <input type="text" name="crypto_ipn_secret" value="<%=crypto_ipn_secret%>" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

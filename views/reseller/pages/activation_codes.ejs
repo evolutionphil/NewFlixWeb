@@ -1,0 +1,246 @@
+
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-heading">
+            <h3 class="panel-title">Activation Codes</h3>
+        </div>
+        <div class="panel-body">
+            <div id="reseller-credit-summary-container">
+                <div class="reseller-credit-summary-item">
+                    <span class="reseller-credit-summary-label">Total Credits:</span>
+                    <span class="reseller-credit-summary-value" id="total-credits"><%=user.max_connections%></span>
+                </div>
+                <div class="reseller-credit-summary-item">
+                    <span class="reseller-credit-summary-label">Used Credits:</span>
+                    <span class="reseller-credit-summary-value" id="used-credits"><%=user.used_count%></span>
+                </div>
+                <div class="reseller-credit-summary-item">
+                    <span class="reseller-credit-summary-label">Remain Credits:</span>
+                    <span class="reseller-credit-summary-value" id="remain-credits"><%=user.max_connections-user.used_count%></span>
+                </div>
+            </div>
+            <div class="list-wrapper">
+                <div class="text-right mb-10">
+                    <button class="btn btn-primary" id="add-new-btn">Create New</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table" id="item-list-table">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Code</th>
+                            <th>Used Credits</th>
+                            <th>Duration</th>
+                            <th>Created Time (GMT)</th>
+                            <th>Used Time (GMT)</th>
+                            <th>Mac Address</th>
+                            <th>Used?</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbody">
+                            <%activation_codes.map(item=>{%>
+                                <tr>
+                                    <td><%=item.code%></td>
+                                    <td><%=item.used_credit%></td>
+                                    <td><%=item.duration%></td>
+                                    <td><%=item.created_time%></td>
+                                    <td><%=item.used_time%></td>
+                                    <td><%=item.mac_address%></td>
+                                    <td>
+                                        <span style="color:<%=item.is_used ? 'red' : '#222'%>">
+                                            <%=item.is_used ? 'Used' : 'Not Used' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <%if(!item.is_used){%>
+                                            <button class="btn btn-primary btn-edit" data-code_id="<%=item._id%>">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-danger btn-delete" data-code_id="<%=item._id%>">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        <%}%>
+                                    </td>
+                                </tr>
+                            <%})%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="edit-modal">
+    <div class="modal-dialog modal-simple modal-center">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title">Add/Edit Code</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Credit Package*</label>
+                    <select class="form-control" id="credit-package">
+                        <%credit_packages.map(item=>{%>
+                            <option value="<%=item.credit_count%>"><%=item.name%></option>
+                        <%})%>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Number of codes you want to generate(Default: 1)</label>
+                    <input id="code_count" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" onclick="addReseller()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="delete-modal" aria-hidden="true">
+    <div class="modal-dialog modal-simple modal-center">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title">Confirm Delete</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure to delete this reseller</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="confirmDelete()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var current_tr, current_code_id, dataTable;
+    $(document).ready(function () {
+        dataTable=$('#item-list-table').DataTable({
+            "order": [[ 3, "desc" ]],
+            autoFill: false
+        });
+    })
+    $('#add-new-btn').click(function () {
+        current_code_id=-1;
+        $('#code_count').val('');
+        $('#credit-package').val('');
+        $('#edit-modal').modal('show');
+        $('#code_count').removeAttr('disabled');
+    });
+
+    $(document).on('click','.btn-edit', function () {
+        $('#code_count').attr('disabled',true);
+        current_tr=$(this).closest('tr');
+        current_code_id=$(this).data('code_id');
+        let used_credits=$(current_tr).find('td:eq(1)').text();
+        $('#credit-package').val(used_credits).trigger('update');
+        $('#code_count').val('');
+        $('#edit-modal').modal('show');
+    })
+
+    function addReseller() {
+        var credit_count=$('#credit-package').val();
+        if(!credit_count)
+            credit_count=1;
+        let code_count=$('#code_count').val();
+        if(!code_count)
+            code_count=1;
+        $.ajax({
+            method:'post',
+            dataType:'json',
+            url:site_url+"/reseller/create-code",
+            data:{
+                code_id:current_code_id,
+                credit_count:credit_count,
+                code_count:code_count
+            },
+            success:data=>{
+                if(data.status=='success'){
+                    $('#edit-modal').modal('hide');
+                    updateCreditSummary(data.used_count);
+                    if(current_code_id!=-1){
+                        let reseller_code=data.reseller_code;
+                        let used_html=`<span style="color:#222">Not Used</span>`
+                        let html1=`
+                            <td class="text-center">
+                                <button class="btn btn-primary btn-edit" data-code_id="${current_code_id}">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-delete" data-code_id="${current_code_id}">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                        `
+                        dataTable.row(current_tr).data([reseller_code.code,reseller_code.used_credit,reseller_code.duration,reseller_code.created_time,'','',used_html,html1]).draw();
+                    }else{
+                        let codes=data.codes;
+                        if(data.error_exist==1)
+                            showErrorNotify(data.msg);
+                        else
+                            showSuccessNotify(data.msg);
+                        let used_html=`<span style="color:#222">Not Used</span>`
+                        codes.map(item=>{
+                            let html1=`
+                                <td class="text-center">
+                                    <button class="btn btn-primary btn-edit" data-code_id="${item._id}">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-delete" data-code_id="${item._id}">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            `
+                            dataTable.row.add([item.code,item.used_credit,item.duration,item.created_time,'','',used_html,html1]);
+                        })
+                        dataTable.draw();
+                    }
+                }else{
+                    showErrorNotify(data.msg);
+                }
+            }
+        })
+    }
+
+    function updateCreditSummary(used_credits){
+        used_credits=parseInt(used_credits);
+        let total_credits=parseInt($('#total-credits').text());
+        let remain_credits=total_credits-used_credits;
+        $('#used-credits').text(used_credits);
+        $('#remain-credits').text(remain_credits);
+    }
+
+    $(document).on('click','.btn-delete', function () {
+        current_tr=$(this).closest('tr');
+        current_code_id=$(this).data('code_id');
+        $('#delete-modal').modal('show');
+    })
+    function confirmDelete() {
+        $.ajax({
+            method:'post',
+            dataType:'json',
+            url:site_url+"/reseller/delete-code",
+            data:{
+                code_id:current_code_id,
+            },
+            success:data=>{
+                if(data.status=='success'){
+                    $('#delete-modal').modal('hide');
+                    dataTable.row(current_tr).remove().draw(false);
+                    updateCreditSummary(data.used_count);
+                }else{
+                    showErrorNotify(data.msg);
+                }
+            }
+        })
+    }
+</script>

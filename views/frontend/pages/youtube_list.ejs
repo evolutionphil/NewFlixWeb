@@ -1,0 +1,87 @@
+<link rel="stylesheet" href="/frontend/mylist.css">
+<div class="news-section-container">
+    <%if(mylist_content){%>
+        <%-mylist_content.contents%>
+    <%}%>
+    <form method="post" action="/saveYoutubeLists">
+        <div class="row mt-20 pr-30" id="form-container">
+            <div class="col-12 col-md-5 form-group">
+                <div class="row m-0 mt-5">
+                    <label>Mac Address:</label>
+                    <input type="text" class="form-control mac-address" placeholder="00:aa:bb:cc:dd:11" name="mac_address" maxlength="17" required>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-7 position-relative" id="youtube-vue">
+                <div class="add-url-btn position-absolute" @click="addUrl()">
+                    <i class="fa fa-plus"></i>
+                </div>
+                <div class="position-relative mb-20 mt-5" v-for="(item,index) in urls">
+                    <div class="youtube-list-item-container position-relative">
+                        <i class="fa fa-trash delete-url-icon" v-if="urls.length>1" @click="deleteUrl(index)"></i>
+                        <div class="row youtube-list-item-name-wrapper m-0">
+                            <label class="youtube-url-label">Name: </label>
+                            <input type="text" class="form-control youtube-url-input" name="names[]" v-model="item.name" required>
+                        </div>
+                        <div class="row youtube-list-item-url-wrapper m-0">
+                            <label class="youtube-url-label">Playlist ID: </label>
+                            <input type="text" class="form-control youtube-url-input" name="playlist_ids[]" v-model="item.playlist_id" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="recaptcha_token" class="recaptcha_token">
+        <div class="text-center m-20">
+            <button class="btn btn-primary btn-lg" id="send-url-btn">Send</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://www.google.com/recaptcha/api.js?render=<%=recaptcha_site_key%>"></script>
+<script>
+    var recaptcha_token=null;
+
+    var app=new Vue({
+        el:"#youtube-vue",
+        data:{
+            urls:[
+                {
+                    name:"",
+                    playlist_id:""
+                }
+            ]
+        },
+        methods:{
+            addUrl(){
+                this.urls.push(
+                    {
+                        name:"",
+                        playlist_id:""
+                    }
+                )
+            },
+            deleteUrl(index){
+                this.urls.splice(index,1);
+            }
+        }
+    });
+    $('form').submit(function (e){
+        var that=this;
+        if(!recaptcha_token){
+            e.preventDefault();
+            var recaptcha_site_key='<%=recaptcha_site_key%>'
+            grecaptcha.execute(recaptcha_site_key, {action:'verify'})
+                .then(function(token) {
+                    $('.recaptcha_token').val(token);
+                    console.log(token);
+                    recaptcha_token=token;
+                    that.submit();
+                });
+        }else
+            return true;
+    });
+
+
+</script>

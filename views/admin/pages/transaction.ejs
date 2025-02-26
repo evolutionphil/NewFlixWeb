@@ -1,0 +1,202 @@
+<style>
+    .filter-wrapper label{
+        color:#fff !important;
+    }
+    .search-filter-label {
+        margin-top:10px;
+    }
+</style>
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-heading">
+            <h3 class="panel-title">Transactions</h3>
+        </div>
+        <div class="panel-body">
+            <div class="list-container">
+                <div class="filter-wrapper">
+                    <div class="select-country-wrapper">
+                        <div class="search-filter-label">App Type</div>
+                        <div class="checkbox-custom checkbox-primary">
+                            <input type="checkbox" id="show_android" checked>
+                            <label for="show_android">Show Android</label>
+                        </div>
+                        <div class="checkbox-custom checkbox-primary">
+                            <input type="checkbox" id="show_samsung" checked>
+                            <label for="show_samsung">Show Samsung</label>
+                        </div>
+                        <div class="checkbox-custom checkbox-primary">
+                            <input type="checkbox" id="show_lg" checked>
+                            <label for="show_lg">Show Lg</label>
+                        </div>
+                        <div class="checkbox-custom checkbox-primary">
+                            <input type="checkbox" id="show_ios" checked>
+                            <label for="show_ios">Show Ios</label>
+                        </div>
+                        <div class="checkbox-custom checkbox-primary">
+                            <input type="checkbox" id="show_tvOS" checked>
+                            <label for="show_tvOS">Show tvOS</label>
+                        </div>
+                        <div class="checkbox-custom checkbox-primary">
+                            <input type="checkbox" id="show_macOS" checked>
+                            <label for="show_macOS">Show macOS</label>
+                        </div>
+                        <div class="search-filter-label">Payment Type</div>
+                        <select class="form-control" id="payment-type">
+                            <option value="all">All</option>
+                            <option value="paypal">Paypal</option>
+                            <option value="stripe">Stripe</option>
+                            <option value="crypto">Crypto</option>
+                            <option value="google_pay">Google Pay</option>
+                            <option value="app_purchase">App Purchase</option>
+                        </select>
+                        <div class="form-group">
+                            <div class="search-filter-label">Mac Address</div>
+                            <input class="form-control" id="mac-address"
+                                onkeyup="updateTableWithTimer()"
+                                onchange="updateTableWithTimer()"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <div class="search-filter-label">Transaction Date</div>
+                            <input class="form-control" id="transaction_date"
+                                   onkeyup="updateTableWithTimer()"
+                                   onchange="updateTableWithTimer()"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <div class="search-filter-label">IP Address</div>
+                            <input class="form-control" id="ip"
+                                   onkeyup="updateTableWithTimer()"
+                                   onchange="updateTableWithTimer()"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <div class="search-filter-label">User Agent</div>
+                            <input class="form-control" id="user_agent"
+                                   onkeyup="updateTableWithTimer()"
+                                   onchange="updateTableWithTimer()"
+                            >
+                        </div>
+
+                    </div>
+                </div>
+                <div class="list-wrapper">
+                    <div class="table-responsive">
+                        <table class="table" id="item-list-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Mac Address</th>
+                                    <th>App Type</th>
+                                    <th>Pay Amount</th>
+                                    <th>Payment Time</th>
+                                    <th>Payment Type</th>
+                                    <th>IP Address</th>
+                                    <th>User Agent</th>
+                                    <th>Payment ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var current_tr, current_playlist_id, dataTable, current_button, timer=null;
+    $(document).ready(function () {
+        dataTable=$('#item-list-table').DataTable({});
+        setTimeout(function () {
+            var iets = $('.dataTables_filter input');
+            iets.unbind().bind("keyup", function (e) {
+                clearTimeout(timer);
+                timer=setTimeout(function () {
+                    dataTable.search(iets.val()).draw();
+                },400)
+            });
+        },700)
+    })
+    var columns=[
+        { data: 'mac_address',sortable:true },
+        { data: 'app_type',sortable:true },
+        { data:'amount',sortable:true},
+        { data: 'pay_time',sortable:true},
+        { data: 'payment_type',sortable:true},
+        { data: 'ip',sortable:true},
+        { data: 'user_agent',sortable:true},
+        { data: 'payment_id',sortable:true}
+    ]
+
+    $(document).ready(function () {
+        updateDataTable();
+    })
+    function updateDataTable(){
+        dataTable.destroy();
+        dataTable=$('#item-list-table').DataTable({
+            'processing': true,
+            'serverSide': true,
+            'serverMethod': 'post',
+            "order": [[ 3, "desc" ]],
+            autoFill: false,
+            pageLength: 50,
+            'ajax':{
+                url:"/admin/getTransactions",
+                data:{
+                    show_samsung:$('#show_samsung').prop('checked'),
+                    show_android:$('#show_android').prop('checked'),
+                    show_lg:$('#show_lg').prop('checked'),
+                    show_ios:$('#show_ios').prop('checked'),
+                    show_tvos:$('#show_tvOS').prop('checked'),
+                    show_macos:$('#show_macOS').prop('checked'),
+                    payment_type:$('#payment-type').val(),
+                    mac_address:$('#mac-address').val(),
+                    ip:$('#ip').val(),
+                    transaction_date:$('#transaction_date').val(),
+                    user_agent:$('#user_agent').val()
+                },
+                "dataSrc": function ( json ) {
+                    let data=json.data;
+                    return data;
+                }
+            },
+            'columns': columns
+        });
+    }
+    $('#show_android').change(function () {
+        updateTableWithTimer();
+    })
+    $('#show_samsung').change(function () {
+        updateTableWithTimer();
+    })
+    $('#show_ios').change(function () {
+        updateTableWithTimer();
+    })
+    $('#show_lg').change(function () {
+        updateTableWithTimer();
+    })
+    $('#show_tvOS').change(function () {
+        updateTableWithTimer();
+    })
+    $('#show_macOS').change(function () {
+        updateTableWithTimer();
+    })
+    $('#payment-type').change(function () {
+        updateTableWithTimer();
+    })
+    function updateTableWithTimer(){
+        clearTimeout(timer);
+        timer=setTimeout(updateDataTable,400);
+    }
+    $(window).load(function(){
+
+    });
+</script>
+
+
+
+
+
+
+

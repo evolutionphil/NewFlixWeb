@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+    <%- include('../partials/head'); %>
+    <body>
+        <div class="container">
+            <%- include('../partials/header'); %>
+            <div class="content-container">
+                <%- body %>
+            </div>
+
+            <div class="modal fade status-modal" id="success-modal">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <div class="close-button-container text-right">
+                                <button type="button" class="close" data-dismiss="modal"
+                                        onclick="closeModal()"
+                                >
+                                    <i class="far fa-times-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <div class="status-icon">
+                                <i class="fa fa-check"></i>
+                            </div>
+                            <div class="status-message" id="status-success-message">
+                                Thanks For your payment<br>
+                                Your account is active now<br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade status-modal" id="error-modal">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <div class="close-button-container text-right">
+                                <button type="button" class="close" data-dismiss="modal"
+                                        onclick="closeModal()"
+                                >
+                                    <i class="far fa-times-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <div class="status-icon error-icon">
+                                <i class="fa fa-info"></i>
+                            </div>
+                            <div class="status-message" id="status-error-message">
+                                Sorry, You are already activated.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer>
+                <div class="footer-container text-center">
+                    <a class="footer-link" href="/terms&conditions">
+                        Terms and Conditions
+                    </a>
+                    <a class="footer-link" href="/privacy-policy">
+                        Privacy and Policy
+                    </a>
+                </div>
+            </footer>
+        </div>
+        <script>
+            function showErrorMessage(status,msg=''){
+                if(status=='success'){
+                    $('#status-success-message').html(msg);
+                    $('#success-modal').modal('show');
+                }else{
+                    $('#status-error-message').html(msg);
+                    $('#error-modal').modal('show');
+                }
+            }
+            function closeModal() {
+                $('.modal').modal('hide');
+            }
+            $(document).ready(function () {
+                let messages=JSON.parse(`<%- JSON.stringify(messages)%>`)
+                if(typeof messages.success!="undefined"){
+                    showErrorMessage('success',messages.success[0]);
+                }
+                else if(typeof messages.error!='undefined'){
+                    showErrorMessage('error',messages.error[0])
+                }
+            })
+
+            $(document).on('keyup', '.mac-address', function () {
+                makeMacAddressFormat(this)
+            })
+            $(document).on('change','.mac-address',function () {
+                makeMacAddressFormat(this)
+            })
+            function makeMacAddressFormat(targetElement) {
+                var origin_value=$(targetElement).val();
+                var max_count=origin_value.length>=16 ? 16 : origin_value.length;
+                for(var i=2;i<max_count;i+=3) {
+                    if (origin_value[i] !== ':')
+                        origin_value = [origin_value.slice(0,i),':',origin_value.slice(i)].join('');
+                }
+                $(targetElement).val(origin_value);
+            }
+
+            $('#header-toggle').click(function () {
+                $('.header-items-container').toggleClass('open');
+            })
+        </script>
+    </body>
+</html>

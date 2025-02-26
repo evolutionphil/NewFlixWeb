@@ -1,0 +1,126 @@
+<%
+   var menu= typeof menu!="undefined"? menu : '';
+%>
+<nav class="site-navbar navbar navbar-default navbar-fixed-top navbar-mega" role="navigation">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler hamburger hamburger-close navbar-toggler-left hided"
+                data-toggle="menubar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="hamburger-bar"></span>
+        </button>
+        <button type="button" class="navbar-toggler collapsed" data-target="#site-navbar-collapse"
+                data-toggle="collapse">
+            <i class="icon wb-more-horizontal" aria-hidden="true"></i>
+        </button>
+        <div class="navbar-brand navbar-brand-center site-gridmenu-toggle" data-toggle="gridmenu" style="padding:0.5715rem 1.429rem">
+            <img class="navbar-brand-logo" src="/images/logo1.png" title="IPTV" style="height:100%;margin-top:0;border-radius:50%">
+            <span class="navbar-brand-text hidden-xs-down">Flix IPTV</span>
+        </div>
+        <button type="button" class="navbar-toggler collapsed" data-target="#site-navbar-search"
+                data-toggle="collapse">
+            <span class="sr-only">Toggle Search</span>
+            <i class="icon wb-search" aria-hidden="true"></i>
+        </button>
+    </div>
+
+    <div class="navbar-container container-fluid">
+        <!-- Navbar Collapse -->
+        <div class="collapse navbar-collapse navbar-collapse-toolbar" id="site-navbar-collapse">
+            <!-- Navbar Toolbar -->
+            <ul class="nav navbar-toolbar">
+                <li class="nav-item hidden-float" id="toggleMenubar">
+                    <a class="nav-link" data-toggle="menubar" href="#" role="button">
+                        <i class="icon hamburger hamburger-arrow-left">
+                            <span class="sr-only">Toggle menubar</span>
+                            <span class="hamburger-bar"></span>
+                        </i>
+                    </a>
+                </li>
+                <li class="nav-item hidden-float">
+                    <a class="nav-link icon wb-search" data-toggle="collapse" href="#" data-target="#site-navbar-search"
+                       role="button">
+                        <span class="sr-only">Toggle Search</span>
+                    </a>
+                </li>
+            </ul>
+            <!-- End Navbar Toolbar -->
+
+
+            <ul class="nav navbar-toolbar navbar-right navbar-toolbar-right">
+                <li class="nav-item dropdown">
+                    <a class="nav-link navbar-avatar" data-toggle="dropdown" href="#" aria-expanded="false"
+                       data-animation="scale-up" role="button">
+                <span class="avatar avatar-online">
+                  <img src="/images/avatar.png" alt="...">
+                  <i></i>
+                </span>
+                    </a>
+                    <div class="dropdown-menu" role="menu">
+                        <a class="dropdown-item" href="/reseller/logout" >
+                            <i class="icon wb-power" aria-hidden="true">
+                            </i>
+                            Logout
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+
+        <!-- Site Navbar Seach -->
+        <div class="collapse navbar-search-overlap" id="site-navbar-search">
+            <form role="search">
+                <div class="form-group">
+                    <div class="input-search">
+                        <i class="input-search-icon wb-search" aria-hidden="true"></i>
+                        <input type="text" class="form-control" name="site-search" placeholder="Search...">
+                        <button type="button" class="input-search-close icon wb-close" data-target="#site-navbar-search"
+                                data-toggle="collapse" aria-label="Close"></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- End Site Navbar Seach -->
+    </div>
+</nav>
+<div class="site-menubar">
+    <div class="site-menubar-body">
+        <div>
+            <div>
+                <ul class="site-menu" data-plugin="menu">
+                    <li class="site-menu-category"> </li>
+                    <li class="site-menu-item <%= menu=='profile' ? 'active' : ''%>">
+                        <a href="/reseller/profile">
+                            <i class="site-menu-icon fas fa-tasks" aria-hidden="true"></i>
+                            <span class="site-menu-title">Profile</span>
+                        </a>
+                    </li>
+                    <li class="site-menu-item <%= menu=='activate-device' ? 'active' : ''%>">
+                        <a href="/reseller/activate-device">
+                            <i class="site-menu-icon fas fa-tasks" aria-hidden="true"></i>
+                            <span class="site-menu-title">Activate Device</span>
+                        </a>
+                    </li>
+
+                        <li class="site-menu-item <%= menu=='resellers' ? 'active' : ''%>">
+                            <a href="/reseller/my-resellers">
+                                <i class="site-menu-icon fas fa-tasks" aria-hidden="true"></i>
+                                <span class="site-menu-title">My Resellers</span>
+                            </a>
+                        </li>
+
+                    <li class="site-menu-item <%= menu=='reseller-devices' ? 'active' : ''%>">
+                        <a href="/reseller/activity-log">
+                            <i class="site-menu-icon fas fa-tasks" aria-hidden="true"></i>
+                            <span class="site-menu-title">Activity Log</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="site-menubar-section">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="site-menubar-footer">
+    </div>
+</div>

@@ -1,0 +1,23 @@
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-body">
+            <form method="post" action="/admin/saveSendGridSetting">
+                <div class="form-group">
+                    <label>Api Key</label>
+                    <input type="text" name="sendgrid_api_key" value="<%=sendgrid_api_key%>" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>From Email</label>
+                    <input type="text" name="sendgrid_email_from" value="<%=sendgrid_email_from%>" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Template ID</label>
+                    <input type="text" name="sendgrid_template_id" value="<%=sendgrid_template_id%>" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

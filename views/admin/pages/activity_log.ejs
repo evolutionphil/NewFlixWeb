@@ -1,0 +1,175 @@
+<style>
+    .filter-wrapper label{
+        color:#fff !important;
+    }
+</style>
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-heading">
+            <h3 class="panel-title">Reseller Activity Log</h3>
+        </div>
+        <div class="panel-body" id="reseller-activity-panel-body">
+            <div class="reseller-detail">
+                <div class="reseller-info-item">
+                    <span class="reseller-info-label">Max Connections:</span>
+                    <span class="reseller-info-value" id="max-connection"><%=reseller.max_connections%></span>
+                </div>
+                <div class="reseller-info-item">
+                    <span class="reseller-info-label">Used Connections:</span>
+                    <span class="reseller-info-value" id="used_count"><%=reseller.used_count%></span>
+                </div>
+                <div class="reseller-info-item">
+                    <span class="reseller-info-label">Remain Connections:</span>
+                    <span class="reseller-info-value" id="remain_count"><%=reseller.max_connections-reseller.used_count%></span>
+                </div>
+            </div>
+            <h3 class="panel-title" style="padding-left:0">Activated Devices.</h3>
+            <div class="list-wrapper">
+                <div class="table-responsive">
+                    <table class="table" id="item-list-table">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Mac Address</th>
+                                <th>Used Credit</th>
+                                <th>Activity Time (UTC)</th>
+                                <th>From</th>
+                                <th>To</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <%activities.map(item=>{%>
+                            <tr>
+                                <td><%=item.mac_address%></td>
+                                <td><%=item.used_credit%></td>
+                                <td><%=item.activity_time%></td>
+                                <td><%=item.from_date%></td>
+                                <td><%=item.to_date%></td>
+                            </tr>
+                            <%})%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <%if(live_resellers.length>0){%>
+            <h3 class="panel-title" style="padding-left:0; margin-top:20px">Resellers</h3>
+            <div class="list-wrapper">
+                <div class="table-responsive">
+                    <table class="table" id="live-reseller-table">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Email</th>
+                            <th>Credits</th>
+                            <th>Used Credits</th>
+                            <th>Created Time (UTC)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <%live_resellers.map(item=>{%>
+                        <tr>
+                            <td><%=item.email%></td>
+                            <td><%=item.max_connections%></td>
+                            <td><%=item.used_count%></td>
+                            <td><%=item.created_time ? item.created_time : ''%></td>
+                        </tr>
+                        <%})%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <%}%>
+            <%if(deleted_resellers.length>0){%>
+            <h3 class="panel-title" style="padding-left:0; margin-top:20px">Deleted Resellers and Refunded Credits</h3>
+            <div class="list-wrapper">
+                <div class="table-responsive">
+                    <table class="table" id="item-list-table">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Email</th>
+                            <th>Credits</th>
+                            <th>Used Credits</th>
+                            <th>Credits Refunded To You</th>
+                            <th>Created Time (UTC)</th>
+                            <th>Deleted Time (UTC)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <%deleted_resellers.map(item=>{%>
+                        <tr>
+                            <td><%=item.email%></td>
+                            <td><%=item.max_connections%></td>
+                            <td><%=item.used_count%></td>
+                            <td><%=item.max_connections-item.used_count%></td>
+                            <td><%=item.created_time%></td>
+                            <td><%=item.deleted_time%></td>
+                        </tr>
+                        <%})%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <%}%>
+            <%if(credits_receive_history.length>0){%>
+            <h3 class="panel-title" style="padding-left:0; margin-top:20px">Credits Receive History</h3>
+            <div class="list-wrapper">
+                <div class="table-responsive">
+                    <table class="table" id="item-list-table">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Got From</th>
+                            <th>Credits</th>
+                            <th>Notes</th>
+                            <th>Time (UTC)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <%credits_receive_history.map(item=>{%>
+                        <tr>
+                            <td><%=item.created_by%></td>
+                            <td><%=item.credits%></td>
+                            <td><%=item.note%></td>
+                            <td><%=item.activity_time%></td>
+                        </tr>
+                        <%})%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <%}%>
+            <%if(credit_give_history.length>0){%>
+            <h3 class="panel-title" style="padding-left:0; margin-top:20px">Credits Give History</h3>
+            <div class="list-wrapper">
+                <div class="table-responsive">
+                    <table class="table" id="item-list-table">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Give To</th>
+                            <th>Credits</th>
+                            <th>Notes</th>
+                            <th>Time (UTC)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <%credit_give_history.map(item=>{%>
+                        <tr>
+                            <td><%=item.give_to%></td>
+                            <td><%=item.credits%></td>
+                            <td><%=item.note%></td>
+                            <td><%=item.activity_time%></td>
+                        </tr>
+                        <%})%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <%}%>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(()=>{
+        $('#item-list-table').DataTable({
+            order:[[3,'desc']],
+            autoFill: false
+        });
+    })
+</script>

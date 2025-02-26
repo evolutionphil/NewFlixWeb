@@ -1,0 +1,19 @@
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-body">
+            <form method="post" action="/admin/saveStripeSetting">
+                <div class="form-group">
+                    <label>Public Key</label>
+                    <input type="text" name="public_key" value="<%=stripe_public_key%>" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Secret Key</label>
+                    <input type="text" name="secret_key" value="<%=stripe_secret_key%>" class="form-control">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

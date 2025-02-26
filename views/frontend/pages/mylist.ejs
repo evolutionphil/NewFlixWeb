@@ -1,0 +1,98 @@
+<link rel="stylesheet" href="/frontend/mylist.css">
+<div class="news-section-container">
+    <%if(mylist_content){%>
+        <%-mylist_content.contents%>
+    <%}%>
+    <form method="post" action="/savePlaylists">
+        <div class="row mt-20 pr-30" id="form-container">
+            <div class="col-12 col-md-5 form-group">
+                <div class="row m-0 mt-5">
+                    <label>Mac Address:</label>
+                    <input type="text" class="form-control mac-address" placeholder="00:aa:bb:cc:dd:11" name="mac_address" maxlength="17" required>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-7 position-relative" id="vue">
+                <div class="add-url-btn position-absolute" @click="addUrl()">
+                    <i class="fa fa-plus"></i>
+                </div>
+                <div class="row position-relative pr-25 m-0 mt-5" v-for="(item,index) in urls">
+                    <i class="fa fa-trash delete-url-icon" v-if="urls.length>1" @click="deleteUrl(index)"></i>
+                    <label class="url-label">Url: </label>
+                    <input type="text" class="form-control url-input" name="urls[]" v-model="item.url" required>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="recaptcha_token" class="recaptcha_token">
+        <div class="text-center m-20">
+            <button class="btn btn-primary btn-lg" id="send-url-btn">Send</button>
+        </div>
+    </form>
+
+    <form method="post" action="/updatePinCode">
+       
+        <div id="change-pin-label">Change Parent Pin Code</div>
+        <div class="row" id="delete-form-container">
+            <div class="col-12 col-md-5 form-group">
+                <div class="row m-0 mt-5">
+                    <label>Mac Address:</label>
+                    <input type="text" class="form-control mac-address" placeholder="00:aa:bb:cc:dd:11" name="mac_address" maxlength="17" required="">
+                </div>
+            </div>
+            <div class="col-12 col-md-7 form-group">
+                <div class="row m-0 mt-5">
+                    <label>Pin Code:</label>
+                    <input type="number" class="form-control" placeholder="0000" name="pin_code" maxlength="4" required>
+                </div>
+            </div>
+            <input type="hidden" name="recaptcha_token" class="recaptcha_token">
+        </div>
+        <div class="delete-playlist-button-container">
+            <button type="submit" class="btn btn-warning">Save</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://www.google.com/recaptcha/api.js?render=<%=recaptcha_site_key%>"></script>
+<script>
+    var recaptcha_token=null;
+
+    var app=new Vue({
+        el:"#vue",
+        data:{
+            urls:[
+                {
+                    url:""
+                }
+            ]
+        },
+        methods:{
+            addUrl(){
+                this.urls.push(
+                    {url:""}
+                )
+            },
+            deleteUrl(index){
+                this.urls.splice(index,1);
+            }
+        }
+    });
+    $('form').submit(function (e){
+        var that=this;
+        if(!recaptcha_token){
+            e.preventDefault();
+            var recaptcha_site_key='<%=recaptcha_site_key%>'
+            grecaptcha.execute(recaptcha_site_key, {action:'verify'})
+                .then(function(token) {
+                    $('.recaptcha_token').val(token);
+                    console.log(token);
+                    recaptcha_token=token;
+                    that.submit();
+                });
+        }else
+            return true;
+    });
+
+
+</script>

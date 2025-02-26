@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html class="no-js css-menubar" lang="en">
+<%- include('./head') %>
+<body>
+<%- include('./header') %>
+<div class="page">
+    <%- body %>
+</div>
+<%- include('./footer') %>
+<script>
+    function showLoaderImage(){
+        $('.reseller-act-loader-container').show();
+    }
+    function hideLoaderImage(){
+        $('.reseller-act-loader-container').hide();
+    }
+</script>
+</body>
+</html>
+

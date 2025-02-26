@@ -1,0 +1,331 @@
+<style>
+    .filter-wrapper label{
+        color:#fff !important;
+    }
+    .password-leave-blank {
+        margin-left: 5px;
+        color: #838684;
+        font-size: 13px;
+    }
+    #new-credit-details-container {
+        margin-top: 5px;
+        margin-left: 10px;
+        font-size: 12px;
+        color: #0b4301;
+        font-weight: bold;
+    }
+</style>
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-heading">
+            <h3 class="panel-title">Resellers</h3>
+        </div>
+        <div class="panel-body">
+            <div class="reseller-detail">
+                <div class="reseller-info-item">
+                    <span class="reseller-info-label">Max Connections:</span>
+                    <span class="reseller-info-value" id="max-connection"><%=reseller.max_connections%></span>
+                </div>
+                <div class="reseller-info-item">
+                    <span class="reseller-info-label">Used Connections:</span>
+                    <span class="reseller-info-value" id="used_count"><%=reseller.used_count%></span>
+                </div>
+                <div class="reseller-info-item">
+                    <span class="reseller-info-label">Remain Connections:</span>
+                    <span class="reseller-info-value" id="remain_count"><%=reseller.max_connections-reseller.used_count%></span>
+                </div>
+            </div>
+            <div class="list-wrapper">
+                <div class="text-right mb-20">
+                    <button class="btn btn-primary" id="add-new-btn">
+                        Add New
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table" id="item-list-table">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Email</th>
+                            <th>Total Credits</th>
+                            <th>Used Credits</th>
+                            <th>Remaining Credits</th>
+                            <th>Created Time</th>
+                            <th>Notes</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbody">
+                            <%resellers.map(item=>{%>
+                                <tr>
+                                    <td><%=item.email%></td>
+                                    <td><%=item.max_connections%></td>
+                                    <td><%=item.used_count%></td>
+                                    <td><%=item.max_connections-item.used_count%></td>
+                                    <td><%=item.created_time%></td>
+                                    <td><%=item.note%></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-dark" data-reseller_id="<%=item._id%>" data-max_connections="<%=item.max_connections%>">
+                                            <a href="/reseller/activity-log/<%=item._id%>" style="color: #fff" target="_blank">
+                                                <i class="fa fa-eye"></i>
+                                            </a>
+                                        </button>
+                                        <button class="btn btn-primary btn-edit" data-reseller_id="<%=item._id%>">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger btn-delete" data-reseller_id="<%=item._id%>">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <%})%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="edit-modal">
+    <div class="modal-dialog modal-simple modal-center">
+        <div class="modal-content">
+            <div class="reseller-act-loader-container">
+                <div class="reseller-act-loader-wrapper">
+                    <img src="/images/loader_white.gif">
+                </div>
+            </div>
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title">Add/Edit Reseller</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input id="reseller_email" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Password<span class="password-leave-blank">(Leave as blank if you don't want to change)</span> </label>
+                    <input id="reseller_password" class="form-control" type="password">
+                </div>
+                <div class="form-group">
+                    <label>Password Confirm<span class="password-leave-blank">(Leave as blank if you don't want to change)</span></label>
+                    <input id="reseller_password_confirm" class="form-control" type="password">
+                </div>
+                <div class="form-group">
+                    <label>Reseller Notes</label>
+                    <textarea id="notes" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Credits To Add</label>
+                    <input id="connections" class="form-control" min="0" type="number"
+                        onkeyup="newCreditChange()"
+                        onchange="newCreditChange()"
+                    >
+                    <div id="new-credit-details-container">
+                        <div class="new-credit-detail-item">
+                            <span class="new-credit-detail-item-label">Currently Available Credits:</span>
+                            <span class="new-credit-detail-item-value" id="current-credits"></span>
+                        </div>
+                        <div class="new-credit-detail-item">
+                            <span class="new-credit-detail-item-label">Available Credits After Adding Credits:</span>
+                            <span class="new-credit-detail-item-value" id="new-credits"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notes For Credits</label>
+                    <textarea id="credit-note" class="form-control"></textarea>
+                </div>
+            </div>
+            <div class="alert alert-danger reseller-error-message" id="reseller-create-error-message">Sorry, No Enough Credits</div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" onclick="addReseller()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="delete-modal" aria-hidden="true">
+    <div class="modal-dialog modal-simple modal-center">
+        <div class="modal-content">
+            <div class="reseller-act-loader-container">
+                <div class="reseller-act-loader-wrapper">
+                    <img src="/images/loader_white.gif">
+                </div>
+            </div>
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title">Confirm Delete</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure to delete this reseller</p>
+                <p>You will be return back the available credits of current reseller after removing reseller</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="confirmDelete()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var current_tr, current_reseller_id, dataTable, origin_count;
+    $(document).ready(function () {
+        dataTable=$('#item-list-table').DataTable({
+            "order": [[ 4, "desc" ]],
+            autoFill: false
+        });
+    })
+    $('#add-new-btn').click(function () {
+        current_reseller_id=-1;
+        $('#reseller_email').val('').removeAttr('disabled');
+        $('#connections').val('');
+        $('#reseller_password').val('');
+        $('#reseller_password_confirm').val('');
+        $('.password-leave-blank').css({visibility:'hidden'})
+        $('#current-credits').text(0);
+        $('#notes').val('');
+        $('#credit-note').val('');
+        newCreditChange();
+        $('#edit-modal').modal('show');
+    });
+
+    $(document).on('click','.btn-edit', function () {
+        current_tr=$(this).closest('tr');
+        current_reseller_id=$(this).data('reseller_id');
+        var email=$(current_tr).find('td:eq(0)').text();
+        var remain_credits=$(current_tr).find('td:eq(3)').text();
+        $('#current-credits').text(remain_credits);
+        $('#reseller_email').val(email).attr('disabled',true);
+        $('#reseller_password').val('');
+        $('#reseller_password_confirm').val('');
+        $('#connections').val('');
+        let note=$(current_tr).find('td:eq(5)').text();
+        $('#notes').val(note);
+        $('#credit-note').val('');
+        $('.password-leave-blank').css({visibility:'visible'})
+        newCreditChange();
+        $('#edit-modal').modal('show');
+    })
+
+    function addReseller() {
+        let max_connections=$('#max-connection').text();
+        let used_connections=$('#used_count').text();
+
+        var connections=$('#connections').val();
+        let reseller_email=$('#reseller_email').val();
+        let password=$('#reseller_password').val();
+        let password_confirm=$('#reseller_password_confirm').val();
+
+
+        if(current_reseller_id==-1){
+            if(password==''){
+                alert('Password is required');
+                return;
+            }
+            if(!connections){
+                alert("sorry, credits needed to create reseller")
+            }
+        }
+        if(password!='' && password!=password_confirm){
+            alert('Sorry, Password does not match');
+            return;
+        }
+        if(max_connections-used_connections<connections) {
+            alert('Sorry, No enough credits');
+            return;
+        }
+        if(connections<0){
+            alert("Sorry, credit count should be greater than 0");
+            return;
+        }
+
+        showLoaderImage();
+        $.ajax({
+            method:'post',
+            dataType:'json',
+            url:site_url+"/reseller/my-resellers/create",
+            data:{
+                reseller_id:current_reseller_id,
+                credits:connections,
+                email:reseller_email,
+                password:password,
+                note:$('#notes').val(),
+                credit_note:$('#credit-note').val()
+            },
+            success:data=>{
+                hideLoaderImage();
+                if(data.status=='success'){
+                    $('#edit-modal').modal('hide');
+                    let html1=`
+                        <td class="text-center">
+                            <button class="btn btn-dark">
+                                <a href="/reseller/activity-log/${data.id}" style="color: #fff" target="_blank">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                            </button>
+                            <button class="btn btn-primary btn-edit" data-reseller_id="${data.id}">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-delete" data-reseller_id="${data.id}">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    `
+                    if(current_reseller_id==-1)
+                        dataTable.row.add([reseller_email,data.max_connections,data.used_count,data.remain_count,data.created_time,data.note,html1]).draw();
+                    else
+                        dataTable.row(current_tr).data([reseller_email,data.max_connections,data.used_count,data.remain_count,data.created_time,data.note,html1]).draw();
+                    $('#used_count').text(data.master_used_count);
+                    $('#remain_count').text(data.master_remain_count);
+                }else{
+                    showErrorNotify(data.msg);
+                }
+            }
+        })
+    }
+
+    $(document).on('click','.btn-delete', function () {
+        current_tr=$(this).closest('tr');
+        current_reseller_id=$(this).data('reseller_id');
+        $('#delete-modal').modal('show');
+    })
+    function confirmDelete() {
+        showLoaderImage();
+        $.ajax({
+            method:'post',
+            dataType:'json',
+            url:site_url+"/reseller/my-resellers/delete",
+            data:{
+                reseller_id:current_reseller_id,
+            },
+            success:data=>{
+                if(data.status=='success'){
+                    $('#delete-modal').modal('hide');
+                    dataTable.row(current_tr).remove().draw(false);
+                    $('#used_count').text(data.master_used_count);
+                    $('#remain_count').text(data.master_remain_count);
+                }else{
+                    showErrorNotify(data.msg);
+                }
+                hideLoaderImage();
+            }
+        })
+    }
+
+    function newCreditChange(){
+        let new_credits=parseInt($('#connections').val());
+        if(!new_credits)
+            new_credits=0;
+        let current_credits=parseInt($('#current-credits').text());
+        let total_credits=new_credits+current_credits;
+        $('#new-credits').text(total_credits);
+    }
+    
+</script>

@@ -1,0 +1,163 @@
+<style>
+    #error-message {
+        margin-left: 5px;
+        margin-top: 5px;
+        color: #ff0000;
+        display: none;
+    }
+</style>
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="reseller-act-loader-container">
+            <div class="reseller-act-loader-wrapper">
+                <img src="/images/loader_white.gif">
+            </div>
+        </div>
+        <div class="panel-heading">
+            <h3 class="panel-title">Device Activation For Resellers</h3>
+        </div>
+        <div class="panel-body">
+            <div class="reseller-detail">
+                <div class="reseller-info-item">
+                    <span class="reseller-info-label">Max Connections:</span>
+                    <span class="reseller-info-value" id="max-connection"><%=user.max_connections%></span>
+                </div>
+                <div class="reseller-info-item">
+                    <span class="reseller-info-label">Used Connections:</span>
+                    <span class="reseller-info-value" id="used_count"><%=user.used_count%></span>
+                </div>
+                <div class="reseller-info-item">
+                    <span class="reseller-info-label">Remain Connections:</span>
+                    <span class="reseller-info-value" id="remain_count"><%=user.max_connections-user.used_count%></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-7 col-lg-5">
+                    <div class="form-group">
+                        <label>Mac Address:</label>
+                        <input class="form-control mac-address" type="text" id="mac-address" placeholder="aa:bb:cc:dd:ee">
+                        <div class="error-message" id="error-message">
+                            Sorry, something is wrong
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Credit Package*</label>
+                        <select class="form-control" id="credit-package">
+                            <%credit_packages.map(item=>{%>
+                            <option value="<%=item.credit_count%>"><%=item.name%></option>
+                            <%})%>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select App</label>
+                        <select class="form-control" id="app-name">
+                            <option value="flix">Flix</option>
+                            <option value="quzu">Quzu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Note (Optional)</label>
+                        <textarea class="form-control" rows="4" id="note">
+                        </textarea>
+                    </div>
+                    <button class="btn btn-primary" id="btn-activate">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="activate-confirm-modal">
+        <div class="modal-dialog modal-simple modal-center">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title">Confirm Activation</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure to activate this playlist?</p>
+                    <!--                <div class="radio-custom radio-primary">-->
+                    <!--                    <input type="radio" id="inputRadiosUnchecked" name="credit-count" value="1">-->
+                    <!--                    <label for="inputRadiosUnchecked">Activate for 1 Year (1 Credit)</label>-->
+                    <!--                </div>-->
+                    <!--&lt;!&ndash;                -->
+                    <div class="radio-custom radio-primary">
+                        <input type="radio" id="inputRadiosChecked" name="credit-count" value="forever">
+                        <label for="inputRadiosChecked">Activate Permanently ( 2 Credit)</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmActivate()">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var search_timer=null;
+    $('#btn-activate').click(function () {
+        let mac_address=$('#mac-address').val();
+        if(!mac_address){
+            $('#error-message').text('Sorry, mac address is needed').slideDown();
+            return;
+        }
+        let max_connections=$('#max-connection').text();
+        let used_connections=$('#used_count').text();
+        let credit_count=parseInt($('#credit-package').val());
+        let remain_connections=max_connections-used_connections;
+        if(remain_connections<credit_count){
+            $('#error-message').text("Sorry, you don't have enough credits").slideDown();
+            return;
+        }
+        $('#error-message').slideUp();
+        showLoaderImage();
+        $.ajax({
+            method:'post',
+            dataType:'json',
+            url:"/reseller/post-activate",
+            data:{
+                mac_address:mac_address,
+                note:$('#note').val(),
+                credit_count:credit_count,
+                app_name:$('#app-name').val()
+            },
+            success:data=>{
+                if(data.status==='success'){
+                    showSuccessNotify(data.msg);
+                    setTimeout(function () {
+                        $('#mac-address').val('');
+                        $('#note').val('');
+                    },1000);
+                    $('#used_count').text(data.used_count);
+                    $('#remain_count').text(data.remain_count);
+                }else{
+                    $('#error-message').text(data.msg).slideDown();
+                    setTimeout(function () {
+                        $('#error-message').slideUp();
+                        $('#mac-address').val('');
+                    },5000)
+                }
+                hideLoaderImage();
+            }
+        })
+    });
+
+    $(document).on('keyup', '.mac-address', function () {
+        makeMacAddressFormat(this)
+    })
+    $(document).on('change','.mac-address',function () {
+        makeMacAddressFormat(this)
+    })
+
+    function makeMacAddressFormat(targetElement) {
+        var origin_value=$(targetElement).val();
+        var max_count=origin_value.length>=16 ? 16 : origin_value.length;
+        for(var i=2;i<max_count;i+=3) {
+            if (origin_value[i] !== ':')
+                origin_value = [origin_value.slice(0,i),':',origin_value.slice(i)].join('');
+        }
+        $(targetElement).val(origin_value);
+    }
+</script>

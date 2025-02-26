@@ -1,0 +1,32 @@
+.reseller-detail {
+    margin-bottom: 20px;
+    background: #e8eded;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+.reseller-error-message {
+    display: none;
+}
+#reseller-activity-panel-body .table-responsive{
+    min-height: fit-content;
+}
+.reseller-act-loader-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    max-height: calc(100vh - 100px);
+    background: rgba(0, 0, 0, 0.28);
+    z-index: 9999;
+    display: none;
+}
+.reseller-act-loader-wrapper {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+.reseller-act-loader-wrapper img{
+    width:100px;
+}

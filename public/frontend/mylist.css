@@ -1,0 +1,106 @@
+label{
+    width:120px;
+    color:#111;
+    font-size:17px;
+    margin-top:5px;
+}
+input.form-control{
+    width:calc(100% - 120px);
+    color: #222 !important;
+    font-size: 20px;
+    letter-spacing: 0.4px
+}
+@media screen and (min-width:768px){
+    label.url-label{
+        width:50px;
+    }
+    input.url-input{
+        width:calc(100% - 50px);
+    }
+}
+
+@media screen and (min-width:768px){
+    label.youtube-url-label{
+        width:120px;
+    }
+    input.youtube-url-input{
+        width:calc(100% - 120px);
+    }
+}
+
+#vue{
+    padding-left:20px;
+    padding-right:60px;
+}
+#youtube-vue{
+    padding-right:60px;
+}
+.delete-playlist-button-container{
+    text-align: center;
+}
+.delete-playlist-button-container .btn{
+    width: 270px;
+    border-radius: 10px;
+    font-size: 25px;
+}
+
+.add-url-btn {
+    right: 0px;
+    top: 0px;
+    font-size: 25px;
+    color: #06a506;
+    line-height: 42px;
+    width: 40px;
+    height: 40px;
+    border-radius: 30px;
+    background: #fff;
+    box-shadow: 0 0 5px #000;
+    text-align: center;
+    cursor:pointer;
+}
+.delete-url-icon {
+    position: absolute;
+    right: 0px;
+    font-size: 20px;
+    color: #ce2206;
+    cursor: pointer;
+}
+#youtube-vue .add-url-btn {
+    right:-5px;
+}
+.youtube-list-item-container .delete-url-icon {
+    right:-20px;
+    top:5px;
+}
+#delete-form-container label {
+    width: fit-content;
+    margin-right: 10px;
+}
+@media screen and (max-width:767px){
+    #vue{
+        padding-right:0;
+        padding-bottom:50px;
+    }
+    .add-url-btn {
+        top:unset;
+        bottom:0px;
+    }
+    #delete-form-container label{
+        width: 103px;
+    }
+    #change-pin-label{
+        margin-top:80px;
+    }
+}
+#send-url-btn{
+    width: 270px;
+    border-radius: 10px;
+    font-size: 25px;
+}
+
+#change-pin-label {
+    font-size: 25px;
+    color: #333;
+    margin-top: 70px;
+    margin-bottom: 10px;
+}

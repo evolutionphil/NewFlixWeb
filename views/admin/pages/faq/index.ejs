@@ -1,0 +1,94 @@
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-heading">
+            <h3 class="panel-title">Faqs</h3>
+        </div>
+        <div class="panel-body">
+            <div class="text-right mb-10">
+                <a href="/admin/faq/create">
+                    <button class="btn btn-primary">Create New</button>
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table" id="news-sections-table">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>No</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <% for(var i=0;i<faqs.length;i++){ %>
+                    <tr>
+                        <td><%= i+1 %></td>
+                        <td><%= faqs[i].title %></td>
+                        <td><%- faqs[i].status %></td>
+                        <td>
+                            <a href="/admin/faq/create/<%= faqs[i]._id %>">
+                                <button class="btn btn-sm btn-primary"><i class="fa fa-edit"></i></button>
+                            </a>
+                            <button class="btn btn-sm btn-danger" onclick="deleteNewsSection(this,'<%= faqs[i]._id %>')">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="delete-news-confirm-modal"
+
+     >
+    <div class="modal-dialog modal-simple modal-center">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                    <span >×</span>
+                </button>
+                <h4 class="modal-title">Confirm Delete News</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure to delete this news section?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="confirmDelete()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <script>
+        var current_tr, current_section_id, dataTable;
+        $(document).ready(function () {
+            dataTable=$('#news-sections-table').DataTable();
+        })
+        function deleteNewsSection(targetElement, section_id) {
+            current_tr=$(targetElement).closest('tr');
+            current_section_id=section_id;
+            $('#delete-news-confirm-modal').modal('show');
+        }
+        function confirmDelete() {
+            $.ajax({
+                method:'post',
+                url:site_url+"/admin/faq/delete/"+current_section_id,
+                success:data=>{
+                    $('#delete-news-confirm-modal').modal('hide');
+                    showSuccessNotify("Faq section saved successfully");
+                    dataTable.row( current_tr ).remove().draw();
+                },
+                error:error=>{
+                    showErrorNotify("Sorry, Something is wrong, please try later")
+                    $('#delete-news-confirm-modal').modal('hide');
+                }
+            })
+        }
+    </script>
+</div>
+

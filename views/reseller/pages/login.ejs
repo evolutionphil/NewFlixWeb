@@ -1,0 +1,57 @@
+<style>
+    #reseller-contents-wrapper {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    #reseller-contact-message {
+        margin-top: -10px;
+    }
+</style>
+<div class="news-section-container" id="reseller-login-main-container">
+    <div id="reseller-login-main-wrapper">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 mb-5 mb-lg-0">
+                <h2 class="font-weight-bold text-5 mb-10">Reseller Login</h2>
+                <div id="reseller-contents-wrapper">
+                    <%- reseller_content ? reseller_content.contents : ''%>
+                </div>
+                <form action="/reseller/login" id="frmSignIn" method="post" class="needs-validation">
+                    <div class="row">
+                        <div class="form-group col">
+                            <label for="mac">Email</label>
+                            <input required="" type="text" name="email" id="email" class="form-control inputt" placeholder="">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <label for="key">Password</label>
+                            <input required="" type="password" placeholder="" name="password" id="password" autocomplete="new-password" class="form-control inputt">
+                        </div>
+                    </div>
+
+                    <div class="alert alert-danger col" id="error-message" style=" display:none;"></div>
+
+                    <div class="row">
+                        <div class="form-group col">
+                            <button type="submit" class="btn btn-dark btn-modern w-100 text-uppercase rounded-0 font-weight-bold text-3 py-3" data-loading-text="Loading...">Login</button>
+                        </div>
+                    </div>
+                    <div id="reseller-contact-message">
+                        Want to be a reseller? Contact <a href="mailto:<%=support_email%>"><%=support_email%></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        let messages=JSON.parse(`<%- JSON.stringify(messages)%>`)
+        if(messages['reseller-auth-error']){
+            $('#error-message').text(messages['reseller-auth-error']).slideDown();
+            setTimeout(()=>{
+                $('#error-message').slideUp();
+            },6000)
+        }
+    })
+</script>

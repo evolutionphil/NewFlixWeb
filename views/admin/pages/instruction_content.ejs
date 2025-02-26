@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="/public/admin_assets/template/vendor/summernote/summernote.css'">
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-body">
+            <form method="post" action="/admin/instruction/save/<%=kind%>">
+                <div class="form-group">
+                    <label>Instruction <%=kind=='summary' ? 'Summary' : ''%> Content (required *)</label>
+                    <textarea id="section-content" class="form-control" required name="section-content">
+                        <%- contents ? contents.content : '' %>
+                    </textarea>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div>
+    <script src="/public/admin_assets/template/vendor/summernote/summernote.min.js')}}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#section-content').summernote({
+                height:400,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ['insert', ['link', 'picture', 'video','table']],
+                    ['view', ['fullscreen', 'codeview', 'help']],
+                ]
+            });
+        })
+    </script>
+</div>
+

@@ -1,0 +1,30 @@
+.instruction-detail-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 30px;
+    padding:30px;
+    background: #484A60;
+    border-radius: 10px;
+    margin:20px 0;
+}
+.instruction-detail-item-image{
+    border-radius: 20px;
+    height: 21rem;
+    overflow: hidden;
+}
+.instruction-detail-item-image img{
+    width: 100%;
+    height: 100%;
+}
+.instruction-detail-item-info-title{
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 20px;
+}
+.instruction-detail-item-info-desc{
+    text-align: justify;
+    color: #eee;
+    font-size: 16px;
+
+}

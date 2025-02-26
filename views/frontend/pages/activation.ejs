@@ -1,0 +1,455 @@
+<link rel="stylesheet" href="frontend/activation.css">
+
+<div class="news-section-container">
+    <%if(activation_content){%>
+        <%- activation_content.contents %>
+    <%}%>
+    <form method="post" action="/saveActivation" id="form">
+        <h2 style="margin-top:50px;margin-bottom:0">Activation</h2>
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <div class="form-group">
+                    <label>Mac Address:</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1"><i class="fas fa-map-marker"></i></span>
+                        </div>
+                        <input name="mac_address" id="mac-address" type="text" class="form-control mac-address" placeholder="00:aa:bb:cc:dd:11" required>
+                        <div class="input-group-append">
+                            <button type="button" onclick="checkValidMac();" class="btn btn-sm btn-outline-secondary waves-effect" style="border-radius: 0px;"><i class="fas fa-check"></i> Check</button>
+                        </div>
+                    </div>
+                    <div id="mac-invalid-info-container">
+
+                    </div>
+                </div>
+                <div id="mac-valid-info-container">
+                    <div id="expire-date-container">
+                            <span id="expire-date-label">
+                                Expire Date after activate:
+                            </span>
+                        <span id="expire-date-value">
+                                Life time.
+                            </span>
+                    </div>
+                    <p id="price-text"><span>Price:</span><span class="price-value">&euro;<%=price%></span></p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6" id="payment-methods-part">
+                <div id="billing-info-section">
+                    <div class="payment-section-label">
+                        Billing Info
+                    </div>
+<!--                    <div class="form-group">-->
+                        <label>Email *</label>
+                        <input type="email" class="form-control" name="email" required placeholder="Your Email" id="email">
+<!--                    </div>-->
+                        <div id="email-error-message">Sorry, Email is not correct</div>
+                </div>
+                <div class="payment-section-label">
+                    Select Payment Way
+                </div>
+                <div class="position-relative" id="payment-items-container">
+                    <%if(show_paypal==1){%>
+                        <div id="paypal-element"></div>
+                        <%if(show_coin==1 || show_mollie==1 || show_stripe==1){%>
+                            <div id="" class="position-relative or-container">
+                                <div class="or-border"></div>
+                                <div class="or text-center">Or</div>
+                            </div>
+                        <%}%>
+                    <%}%>
+                    <%if(show_stripe==1){%>
+                        <div class="payment-item-container">
+                            <div class="payment-method-item-container">
+                                Pay with Stripe
+                            </div>
+                            <div class="text-center mt-10 mb-10">
+                                <button class="btn btn-primary submit-btn" id="submit-btn-stripe">Pay Now</button>
+                            </div>
+                        </div>
+                        <%if(show_coin==1){%>
+                            <div class="position-relative or-container">
+                                <div class="or-border"></div>
+                                <div class="or text-center">Or</div>
+                            </div>
+                        <%}%>
+                    <%}%>
+                    <%if(show_mollie==1){%>
+                        <div class="payment-item-container">
+                            <div class="payment-method-item-container">
+                                Pay with Mollie
+                            </div>
+                            <div class="text-center mt-10 mb-10">
+                                <button class="btn btn-warning submit-btn" id="submit-btn-stripe">Pay Now</button>
+                            </div>
+                        </div>
+                        <%if(show_coin==1){%>
+                            <div class="position-relative or-container">
+                                <div class="or-border"></div>
+                                <div class="or text-center">Or</div>
+                            </div>
+                        <%}%>
+                    <%}%>
+                    <%if(show_coin==1){%>
+                        <div class="payment-item-container">
+                            <div class="payment-method-item-container">
+                                Pay with Crypto Currency
+                            </div>
+                            <div id="coin-select">
+
+                                <label>Select Crypto Type</label>
+                                <select class="form-control" id="coin_type">
+                                    <%coin_list.map(item=>{%>
+                                    <option value="<%=item['code']%>"><%=item['name']%></option>
+                                    <%})%>
+                                </select>
+                                <div class="text-center mt-10">
+                                    <button class="btn btn-primary submit-btn" id="submit-btn">Pay Now</button>
+                                </div>
+                            </div>
+                        </div>
+                    <%}%>
+                    <!--
+                    <div id="or-container" class="position-relative">
+                        <div id="or-border"></div>
+                        <div id="or" class="text-center">Or</div>
+                    </div>
+                    <div class="payment-item-container">
+                        <div class="payment-method-item-container">
+                            Pay with Credit Card
+                        </div>
+                        <div class="accepted-cards-logo"></div>
+                        <div id="coin-select">
+                         <!--   <div class="form-group">
+                                <label>
+                                    Phone Number
+                                    <input type="text" class="form-control" placeholder="Insert phone number" name="phonenumber" required>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="width: 97%;">
+                                    <small style="font-weight:600">Card Number</small>
+
+                                    <input type="text" class="form-control" placeholder="Insert card number" name="cardnumber" required>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                               <label style="width: 97%;">
+                                   <small style="font-weight:600">Card Holder Full Name</small>
+
+                                    <input type="text" class="form-control" placeholder="Insert card holder full name" name="cardHolderFullName" required>
+                                </label>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-4">
+                                     <label style="width: 100%;">
+                                          <small style="font-weight:600">Expire Month</small>
+
+                                        <input type="number" min="01" max="12" minlength="2" maxlength="2" class="form-control" name="expMonth" placeholder="MM" required>
+                                    </label>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label style="width: 100%;">
+                                         <small style="font-weight:600">Expire Year</small>
+
+                                        <input type="number" min="2021" max="2500" class="form-control" name="expYear" placeholder="YYYY" required>
+                                    </label>
+                                </div>
+                                 <div class="col-sm-4">
+                                    <label style="width: 90%;">
+                                        <small style="font-weight:600;font-size:12px">CVC</small>
+                                        <input type="password" class="form-control" name="cvcNumber" placeholder="***" required>
+                                    </label>
+                                </div>
+                            </div>
+
+
+
+                            <div class="text-center mt-10">
+                                <button class="btn btn-primary" name="payment_type" value="">Pay Now</button>
+                            </div>
+                        </div>
+                         -->
+                </div>
+
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="https://www.paypal.com/sdk/js?client-id=<%=paypal_client_id%>&currency=EUR"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    let stripe;
+    try{
+        stripe=Stripe('<%= stripe_public_key%>')
+    }catch (e){
+
+    }
+    var payment_type='crypto', mac_valid=false, mac_address, email_valid=false;
+    $(document).ready(function () {
+        let messages=JSON.parse(`<%- JSON.stringify(messages)%>`)
+        if(typeof messages.success!="undefined"){
+            showErrorMessage('success',messages.success[0]);
+        }
+        else if(typeof messages.error!='undefined'){
+            showErrorMessage('error',messages.error[0])
+        }
+    })
+
+    function checkMacEmailValid(key){
+        let mac_address=$('#mac-address').val()
+        let email=$('#email').val();
+        if(key=='mac-address'){
+            let mac_regex= /^([0-9a-zA-Z]{2}[:]){5}[0-9a-f]{2}$/gmi;
+            mac_valid=mac_regex.test(mac_address);
+            if(mac_valid)
+                $('#mac-error-message').slideUp();
+            else
+                $('#mac-error-message').slideDown();
+        }
+        if(key=='email'){
+            let email_regex=/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            email_valid=email_regex.test(email)
+            if(email_valid)
+                $('#email-error-message').slideUp();
+            else
+                $('#email-error-message').slideDown();
+        }
+    }
+
+    $('#mac-address').change(function () {
+        checkMacEmailValid('mac-address');
+    })
+    $('#email').change(function () {
+        checkMacEmailValid('email');
+    })
+    $('#mac-address').keyup(function () {
+        checkMacEmailValid('mac-address');
+    })
+    $('#email').keyup(function () {
+        checkMacEmailValid('email');
+    })
+
+
+    paypal.Buttons({
+        // onInit: function(data, actions) {
+        //     actions.disable();
+        //
+        // },
+        onClick: function(data,actions) {
+            if(!(mac_valid)){
+                // showErrorMessage('error','Sorry, Mac address or Email is not valid');
+                checkMacEmailValid('mac-address');
+                return actions.reject();
+            }
+            if(!email_valid){
+                checkMacEmailValid('email');
+                return actions.reject();
+            }
+            let mac_address=$('#mac-address').val();
+            return fetch("/checkMacValid",{
+                method:'post',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body:JSON.stringify({
+                    mac_address:mac_address
+                }),
+            }).then(function (res) {
+                return res.json();
+            }).then(data=>{
+                console.log(data);
+                if (data.status=='success') {
+                    return actions.resolve();
+                } else {
+                    showErrorMessage('error',data.msg);
+                    return actions.reject();
+                }
+            })
+        },
+        createOrder: function(data, actions) {
+            let mac_address=$('#mac-address').val();
+            return fetch(`/paypal/order/create`, {
+                method: 'post',
+                dataType:'json',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body:JSON.stringify({
+                    mac_address:mac_address
+                })
+            }).then(function(res) {
+                if(res.ok){
+                    return res.json();
+                }else{
+                    $('#error-message').text(res.msg).slideDown();
+                }
+            }).then(
+                function(orderData) {
+                    console.log(orderData);
+                    return orderData.id;
+                },
+                function (error) {
+                    console.log(error);
+                }
+            );
+        },
+        // Finalize the transaction
+        onApprove: function(data, actions) {
+            return fetch(`/paypal/order/capture/${data.orderID}`, {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body:JSON.stringify({
+                    mac_address:$('#mac-address').val(),
+                    email:$('#email').val()
+                })
+            }).then(function(res) {
+                console.log(res);
+                return res.json();
+            }).then(function(orderData) {
+                console.log(orderData);
+                var errorDetail = Array.isArray(orderData.details) && orderData.details[0];
+                if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
+                    return actions.restart();
+                }
+                if (errorDetail) {
+                    var msg = 'Sorry, your transaction could not be processed.';
+                    if (errorDetail.description) msg += '\n\n' + errorDetail.description;
+                    if (orderData.debug_id) msg += ' (' + orderData.debug_id + ')';
+                    // Show a failure message
+                    return alert(msg);
+                }
+                showErrorMessage('success','Thanks for your payment, your mac address activated now.')
+                // alert('Transaction completed by ' + orderData.payer.name.given_name);
+            });
+        }
+    }).render('#paypal-element');
+    $('#submit-btn').click(function (e) {
+        console.log('i ve clicked');
+        e.preventDefault();
+        if(!email_valid){
+            checkMacEmailValid('email');
+            return;
+        }
+        payment_type='crypto'
+        let post_data={
+            mac_address: $('#mac-address').val()
+        };
+        $.ajax({
+            method:'post',
+            url:'/checkMacValid',
+            dataType:'json',
+            data:post_data,
+            success:(data)=>{
+                if(data.status=='success'){
+                    checkOut();
+                }else{
+                    showErrorMessage('error',data.msg);
+                }
+            }
+        })
+    })
+    $('#submit-btn-stripe').click(function (e) {
+        console.log('i ve clicked');
+        e.preventDefault();
+        if(!email_valid){
+            checkMacEmailValid('email');
+            return;
+        }
+        payment_type='stripe'
+        let post_data={
+            mac_address: $('#mac-address').val()
+        };
+        $.ajax({
+            method:'post',
+            url:'/checkMacValid',
+            dataType:'json',
+            data:post_data,
+            success:(data)=>{
+                if(data.status=='success'){
+                    checkOut();
+                }else{
+                    showErrorMessage('error',data.msg);
+                }
+            }
+        })
+    })
+    function checkOut() {
+        if(payment_type!='stripe'){
+            $("<input />").attr("type", "hidden")
+                .attr("name", "payment_type")
+                .attr("value", payment_type)
+                .appendTo("#form");
+            $("<input />").attr("type", "hidden")
+                .attr("name", "coin_type")
+                .attr("value", $('#coin_type').val())
+                .appendTo("#form");
+            $("#form").submit();
+        }else{
+            $('#submit-btn-stripe').attr('disabled',true)
+            $.ajax(
+                {
+                    method:'post',
+                    url:'/saveActivation',
+                    data:{
+                        mac_address:$('#mac-address').val(),
+                        email:$('#email').val(),
+                        payment_type:'stripe'
+                    },
+                    dataType: 'json',
+                    success:data=>{
+                        if(data.status==='success'){
+                            stripe
+                                .redirectToCheckout({
+                                    sessionId: data.session_id,
+                                })
+                                .then(result=>{
+                                    if(result.error)
+                                    {
+                                        alert(result.error.message)
+                                        $('#submit-btn-stripe').removeAttr('disabled')
+                                    }
+                                });
+                        }
+                        else {
+                            showErrorMessage('error','Sorry, something is wrong, please try again later')
+                            $('#submit-btn-stripe').removeAttr('disabled')
+                        }
+                    }
+                }
+            )
+        }
+    }
+    function checkValidMac(){
+        mac_address=$('#mac-address').val();
+        if(mac_address.length==17){
+            $.ajax({
+                method:'post',
+                url:"/checkMacValid",
+                dataType:'json',
+                data:{
+                    mac_address:mac_address
+                },
+                success:res=>{
+                    if(res.status==="success"){
+                        $('#payment-methods-part').slideDown();
+                        // $('#expire-date-value').text(res.msg);
+                        $('#mac-invalid-info-container').hide();
+                        $('#mac-valid-info-container').slideDown();
+                    }else{
+                        $('#mac-valid-info-container').hide();
+                        $('#mac-invalid-info-container').text(res.msg).slideDown();
+                        $('#payment-methods-part').slideUp();
+                    }
+                }
+            })
+        }
+    }
+</script>

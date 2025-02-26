@@ -1,0 +1,22 @@
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-body">
+            <form method="post" action="/admin/saveAndroidUpdate" enctype="multipart/form-data">
+                <div class="form-group">
+                    <a href="<%=apk_url%>" target="_blank">Current Apk Url</a>
+                </div>
+                <div class="form-group">
+                    <label>Version Code</label>
+                    <input type="text" name="android_version_code" value="<%=android_version_code%>" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Apk File</label>
+                    <input type="file" name="apk_file" id="apk_file" class="form-control" accept=".apk">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" id="submit-btn">Upload Now</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
