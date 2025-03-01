@@ -9,15 +9,15 @@ const useragent = require('express-useragent');
 const sendgridClient = require('@sendgrid/client');
 const handlebars = require('handlebars');
 const sgMail = require('@sendgrid/mail')
+const dotenv = require('dotenv');
 
-
-
+dotenv.config();
 
 let axios=require('axios');
 app.use(expressLayouts);
 
 const OS = require('opensubtitles.com')
-const os = new OS({apikey: 'TY51Na9C9Q61Kmd2hLtPker9Q4M2qztx'})
+const os = new OS({apikey: process.env.OPENSUBTITLES_API_KEY})
 
 const fs = require('fs');
 const path=require('path');
@@ -45,8 +45,6 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use('/static', express.static(path.join(__dirname, 'public')))
 app.set('layout', './frontend/partials/layout');
-const dotenv = require('dotenv');
-dotenv.config();
 
 let Device=require('./models/Device.model');
 let PlayList=require('./models/PlayList.model');
@@ -55,11 +53,6 @@ let Word=require('./models/Word.model');
 let LanguageWord=require('./models/LanguageWord.model');
 let Setting=require('./models/Setting.model');
 let Transaction=require('./models/Transaction.model');
-
-
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config()
-}
 
 const passport = require('passport')
 const flash = require('express-flash')
@@ -76,10 +69,7 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
-if(process.env.NODE_ENV==='develop')
-    mongoose.connect('mongodb://127.0.0.1:27017/Flix', { useNewUrlParser: true,useUnifiedTopology: true});
-else
-    mongoose.connect('mongodb+srv://flixapp:Bita**2016%23@cluster0.pxiwd.mongodb.net/FlixIPTV?retryWrites=true&w=majority', { useNewUrlParser: true,useUnifiedTopology: true});
+mongoose.connect(process.env.DATABASE_DSN, { useNewUrlParser: true,useUnifiedTopology: true});
 const connection = mongoose.connection;
 connection.once('open', async function() {
     console.log("MongoDB database connection established successfully");
