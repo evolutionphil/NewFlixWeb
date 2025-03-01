@@ -2,9 +2,9 @@
   "name": "NewFlixWeb",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -48,5 +48,8 @@
     "pug": "^3.0.2",
     "puppeteer": "^19.6.3",
     "stripe": "^8.142.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   }
 }
