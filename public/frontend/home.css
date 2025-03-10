@@ -96,6 +96,14 @@
     background-image: radial-gradient(circle at top, rgba(114, 71, 240, 0.2), transparent 60%);
 }
 
+@media screen and (min-width: 768px) and (max-width: 1200px) {
+    .feature-card:after {
+        left: -40%;
+        background-image: radial-gradient(circle at top, rgba(114, 71, 240, 0.2), transparent 30%);
+    }
+
+}
+
 .feature-title {
     font-size: 16px;
 }
