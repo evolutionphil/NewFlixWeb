@@ -1,56 +1,70 @@
 <link rel="stylesheet" href="frontend/activation.css">
 
-<div class="news-section-container">
-    <%if(activation_content){%>
-        <%- activation_content.contents %>
-    <%}%>
-    <form method="post" action="/saveActivation" id="form">
-        <h2 style="margin-top:50px;margin-bottom:0">Activation</h2>
-        <div class="row">
-            <div class="col-12 col-md-6">
-                <div class="form-group">
-                    <label>Mac Address:</label>
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1"><i class="fas fa-map-marker"></i></span>
-                        </div>
-                        <input name="mac_address" id="mac-address" type="text" class="form-control mac-address" placeholder="00:aa:bb:cc:dd:11" required>
-                        <div class="input-group-append">
-                            <button type="button" onclick="checkValidMac();" class="btn btn-sm btn-outline-secondary waves-effect" style="border-radius: 0px;"><i class="fas fa-check"></i> Check</button>
-                        </div>
-                    </div>
-                    <div id="mac-invalid-info-container">
+<section style="--background-color: #0C1018; --border-color: #473590; --angle: 112deg" class="news-container fancy-card">
+    <div class="news-section-header">
+        <h1 class="text-white news-section-title">Flix TV Activation</h1>
+        <p>Set up Flix TV on your device</p>
+    </div>
 
+    <div class="row">
+    <div class="col-md-6 text-white">
+        <%if(activation_content){%>
+            <%- activation_content.contents %>
+        <%}%>
+    </div>
+
+    <form class="col-md-6" method="post" action="/saveActivation" id="form">
+        <div class="payment-card">
+            <div class="row">
+                <div class="col-12">
+                    <div class="payment-card-header">
+                        <h4 class="text-white">Payment</h4>
                     </div>
                 </div>
-                <div id="mac-valid-info-container">
-                    <div id="expire-date-container">
+                <div class="col-12 col-md-6">
+                    <div class="form-group">
+                        <label>Mac Address:</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1"><i class="fas fa-map-marker"></i></span>
+                            </div>
+                            <input name="mac_address" id="mac-address" type="text" class="form-control" placeholder="00:aa:bb:cc:dd:11" required>
+                            <div class="input-group-append">
+                                <button type="button" onclick="checkValidMac();" class="btn btn-sm btn-outline-secondary waves-effect" style="border-radius: 0px;"><i class="fas fa-check"></i> Check</button>
+                            </div>
+                        </div>
+                        <div id="mac-invalid-info-container">
+
+                        </div>
+                    </div>
+                    <div id="mac-valid-info-container">
+                        <div id="expire-date-container">
                             <span id="expire-date-label">
                                 Expire Date after activate:
                             </span>
-                        <span id="expire-date-value">
+                            <span id="expire-date-value">
                                 Life time.
                             </span>
+                        </div>
+                        <p id="price-text"><span>Price:</span><span class="price-value">&euro;<%=price%></span></p>
                     </div>
-                    <p id="price-text"><span>Price:</span><span class="price-value">&euro;<%=price%></span></p>
                 </div>
-            </div>
-            <div class="col-12 col-md-6" id="payment-methods-part">
-                <div id="billing-info-section">
-                    <div class="payment-section-label">
-                        Billing Info
-                    </div>
-<!--                    <div class="form-group">-->
+                <div class="col-12 col-md-6" id="payment-methods-part">
+                    <div id="billing-info-section">
+                        <div class="payment-section-label">
+                            Billing Info
+                        </div>
+                        <!--                    <div class="form-group">-->
                         <label>Email *</label>
                         <input type="email" class="form-control" name="email" required placeholder="Your Email" id="email">
-<!--                    </div>-->
+                        <!--                    </div>-->
                         <div id="email-error-message">Sorry, Email is not correct</div>
-                </div>
-                <div class="payment-section-label">
-                    Select Payment Way
-                </div>
-                <div class="position-relative" id="payment-items-container">
-                    <%if(show_paypal==1){%>
+                    </div>
+                    <div class="payment-section-label">
+                        Select Payment Way
+                    </div>
+                    <div class="position-relative" id="payment-items-container">
+                        <%if(show_paypal==1){%>
                         <div id="paypal-element"></div>
                         <%if(show_coin==1 || show_mollie==1 || show_stripe==1){%>
                             <div id="" class="position-relative or-container">
@@ -58,8 +72,8 @@
                                 <div class="or text-center">Or</div>
                             </div>
                         <%}%>
-                    <%}%>
-                    <%if(show_stripe==1){%>
+                        <%}%>
+                        <%if(show_stripe==1){%>
                         <div class="payment-item-container">
                             <div class="payment-method-item-container">
                                 Pay with Stripe
@@ -74,8 +88,8 @@
                                 <div class="or text-center">Or</div>
                             </div>
                         <%}%>
-                    <%}%>
-                    <%if(show_mollie==1){%>
+                        <%}%>
+                        <%if(show_mollie==1){%>
                         <div class="payment-item-container">
                             <div class="payment-method-item-container">
                                 Pay with Mollie
@@ -90,8 +104,8 @@
                                 <div class="or text-center">Or</div>
                             </div>
                         <%}%>
-                    <%}%>
-                    <%if(show_coin==1){%>
+                        <%}%>
+                        <%if(show_coin==1){%>
                         <div class="payment-item-container">
                             <div class="payment-method-item-container">
                                 Pay with Crypto Currency
@@ -109,76 +123,79 @@
                                 </div>
                             </div>
                         </div>
-                    <%}%>
-                    <!--
-                    <div id="or-container" class="position-relative">
-                        <div id="or-border"></div>
-                        <div id="or" class="text-center">Or</div>
+                        <%}%>
+                        <!--
+                        <div id="or-container" class="position-relative">
+                            <div id="or-border"></div>
+                            <div id="or" class="text-center">Or</div>
+                        </div>
+                        <div class="payment-item-container">
+                            <div class="payment-method-item-container">
+                                Pay with Credit Card
+                            </div>
+                            <div class="accepted-cards-logo"></div>
+                            <div id="coin-select">
+                             <!--   <div class="form-group">
+                                    <label>
+                                        Phone Number
+                                        <input type="text" class="form-control" placeholder="Insert phone number" name="phonenumber" required>
+                                    </label>
+                                </div>
+
+                                <div class="form-group">
+                                    <label style="width: 97%;">
+                                        <small style="font-weight:600">Card Number</small>
+
+                                        <input type="text" class="form-control" placeholder="Insert card number" name="cardnumber" required>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                   <label style="width: 97%;">
+                                       <small style="font-weight:600">Card Holder Full Name</small>
+
+                                        <input type="text" class="form-control" placeholder="Insert card holder full name" name="cardHolderFullName" required>
+                                    </label>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                         <label style="width: 100%;">
+                                              <small style="font-weight:600">Expire Month</small>
+
+                                            <input type="number" min="01" max="12" minlength="2" maxlength="2" class="form-control" name="expMonth" placeholder="MM" required>
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <label style="width: 100%;">
+                                             <small style="font-weight:600">Expire Year</small>
+
+                                            <input type="number" min="2021" max="2500" class="form-control" name="expYear" placeholder="YYYY" required>
+                                        </label>
+                                    </div>
+                                     <div class="col-sm-4">
+                                        <label style="width: 90%;">
+                                            <small style="font-weight:600;font-size:12px">CVC</small>
+                                            <input type="password" class="form-control" name="cvcNumber" placeholder="***" required>
+                                        </label>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="text-center mt-10">
+                                    <button class="btn btn-primary" name="payment_type" value="">Pay Now</button>
+                                </div>
+                            </div>
+                             -->
                     </div>
-                    <div class="payment-item-container">
-                        <div class="payment-method-item-container">
-                            Pay with Credit Card
-                        </div>
-                        <div class="accepted-cards-logo"></div>
-                        <div id="coin-select">
-                         <!--   <div class="form-group">
-                                <label>
-                                    Phone Number
-                                    <input type="text" class="form-control" placeholder="Insert phone number" name="phonenumber" required>
-                                </label>
-                            </div>
 
-                            <div class="form-group">
-                                <label style="width: 97%;">
-                                    <small style="font-weight:600">Card Number</small>
-
-                                    <input type="text" class="form-control" placeholder="Insert card number" name="cardnumber" required>
-                                </label>
-                            </div>
-                            <div class="form-group">
-                               <label style="width: 97%;">
-                                   <small style="font-weight:600">Card Holder Full Name</small>
-
-                                    <input type="text" class="form-control" placeholder="Insert card holder full name" name="cardHolderFullName" required>
-                                </label>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-sm-4">
-                                     <label style="width: 100%;">
-                                          <small style="font-weight:600">Expire Month</small>
-
-                                        <input type="number" min="01" max="12" minlength="2" maxlength="2" class="form-control" name="expMonth" placeholder="MM" required>
-                                    </label>
-                                </div>
-                                <div class="col-sm-4">
-                                    <label style="width: 100%;">
-                                         <small style="font-weight:600">Expire Year</small>
-
-                                        <input type="number" min="2021" max="2500" class="form-control" name="expYear" placeholder="YYYY" required>
-                                    </label>
-                                </div>
-                                 <div class="col-sm-4">
-                                    <label style="width: 90%;">
-                                        <small style="font-weight:600;font-size:12px">CVC</small>
-                                        <input type="password" class="form-control" name="cvcNumber" placeholder="***" required>
-                                    </label>
-                                </div>
-                            </div>
-
-
-
-                            <div class="text-center mt-10">
-                                <button class="btn btn-primary" name="payment_type" value="">Pay Now</button>
-                            </div>
-                        </div>
-                         -->
                 </div>
-
             </div>
         </div>
     </form>
 </div>
+</section>
+
 
 <script src="https://www.paypal.com/sdk/js?client-id=<%=paypal_client_id%>&currency=EUR"></script>
 <script src="https://js.stripe.com/v3/"></script>

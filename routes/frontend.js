@@ -3,7 +3,7 @@ var router = express.Router();
 const frontendController=require('../controllers/FrontendController');
 
 
-router.get('/',frontendController.mylist);
+router.get('/',frontendController.home);
 router.get('/news',frontendController.news);
 router.get('/faq',frontendController.faq);
 router.get('/instruction/:kind?',frontendController.instruction);

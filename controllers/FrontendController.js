@@ -116,6 +116,29 @@ exports.activation=(req,res)=>{
         res.render('frontend/pages/activation', {menu: 'activation',...data});
     });
 }
+
+exports.home=async(req,res)=>{
+    let keys=['mylist_meta_title','mylist_meta_keyword','mylist_meta_content']
+
+    let data={}
+
+    keys.map(key => {
+        data[key] = settings[key] ? settings[key] : ''
+    })
+
+    let recaptcha_site_key=process.env.RECAPTCHA_SITE_KEY;
+    let title = data.mylist_meta_title;
+    let keyword = data.mylist_meta_keyword;
+    let description = data.mylist_meta_content;
+    let meta_data = {
+        title: title, keyword: keyword, description: description
+    }
+
+    let mylist_content=await MyListContent.findOne();
+
+    res.render('frontend/pages/home', {menu: 'home',...meta_data,mylist_content:mylist_content,recaptcha_site_key:recaptcha_site_key});
+}
+
 exports.mylist=async(req,res)=>{
     let keys=['mylist_meta_title','mylist_meta_keyword','mylist_meta_content']
     let data={}

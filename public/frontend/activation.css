@@ -1,3 +1,10 @@
+.payment-card {
+    background: #0C1018;
+    border: 1px solid #1E293B;
+    border-radius: 10px;
+    padding: 24px;
+}
+
 #payment-methods-part{
     display: none;
 }
