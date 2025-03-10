@@ -135,6 +135,10 @@
 }
 
 @media screen and (max-width: 767px) {
+    .why-flix-title {
+        font-size: 36px;
+    }
+
     .screenshot-content {
         flex-direction: column;
         gap: 20px;
