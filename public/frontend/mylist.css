@@ -89,6 +89,8 @@
     background-repeat: no-repeat;
     background-position: 0 -40px;
     border-radius: 10px;
+
+    pointer-events: none;
 }
 
 label {
