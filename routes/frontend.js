@@ -5,6 +5,7 @@ const frontendController=require('../controllers/FrontendController');
 
 router.get('/',frontendController.home);
 router.get('/news',frontendController.news);
+router.get('/news/:id',frontendController.showNewsDetail);
 router.get('/faq',frontendController.faq);
 router.get('/instruction/:kind?',frontendController.instruction);
 router.get('/activation',frontendController.activation);

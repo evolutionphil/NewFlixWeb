@@ -145,11 +145,6 @@ body:after {
 
 }
 
-.news-section-container:not(:last-child) {
-    padding: 20px 0;
-    border-bottom: 1px solid #18212F;
-}
-
 .footer-container {
     background: #ddd;
     padding: 10px 20px;

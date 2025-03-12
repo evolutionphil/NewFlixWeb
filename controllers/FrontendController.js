@@ -22,6 +22,7 @@ let moment=require('moment');
 let Coinpayments =require('coinpayments');
 const { createMollieClient } = require('@mollie/api-client');
 let stripe = require('stripe');
+const {convert} = require("html-to-text");
 
 exports.news=(req,res)=>{
     let keys=['news_meta_title','news_meta_keyword','news_meta_content']
@@ -29,15 +30,44 @@ exports.news=(req,res)=>{
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
-    News.find().sort({_id:-1}).then(news=>{
+    News.find()
+        .sort({_id:-1})
+        .exec()
+        .then(news=>{
         let title=data.news_meta_title;
         let keyword=data.news_meta_keyword;
         let description=data.news_meta_content;
-        res.render('frontend/pages/news',
-            {menu:'news',title:title, keyword:keyword,description:description,news:news}
+
+        res.render('frontend/pages/news/index',
+            {
+                menu: 'news',
+                title: title,
+                keyword: keyword,
+                description: description,
+                news: news.map(item=>({_id: item._id, title: item.title, content: convert(item.content).substring(0, 80)})),
+            }
         );
     })
 }
+
+exports.showNewsDetail = (req, res) => {
+    News.findOne({_id: req.params.id})
+        .exec()
+        .then(news => {
+            let title = news.title;
+            let description = news.content;
+
+            res.render('frontend/pages/news/show',
+                {
+                    menu: 'news/show',
+                    title: title,
+                    description: description,
+                    news: news
+                }
+            );
+        })
+}
+
 exports.faq=(req,res)=>{
     let keys=['faq_meta_title','faq_meta_keyword','faq_meta_content']
     let data={}
