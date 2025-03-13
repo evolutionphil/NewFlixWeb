@@ -83,29 +83,58 @@ exports.faq=(req,res)=>{
         );
     })
 }
-exports.instruction=async (req,res)=>{
-    let keys=['instruction_meta_title','instruction_meta_keyword','instruction_meta_content']
-    let data={}
+
+exports.instructions = async (req, res) => {
+    let keys = ['instruction_meta_title', 'instruction_meta_keyword', 'instruction_meta_content']
+
+    let data = {}
+
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
-    var kind=req.params.kind;
-    if(!kind)
-        kind='summary';
-    kind=kind.toLocaleLowerCase();
-    let promises=[];
-    let instruction= await Instruction.findOne({kind:kind})
-    Promise.all(promises).then(values=>{
-        let title=data.instruction_meta_title;
-        let keyword=data.instruction_meta_keyword;
-        let description=data.instruction_meta_content;
 
-        let meta_data={
-            title:title, keyword:keyword,description:description
+    let instructions = await Instruction.find({
+        kind: {
+            $ne: 'summary'
         }
-        res.render('frontend/pages/instruction',{menu:'instruction',instruction:instruction,...meta_data});
-    })
+    }).sort({kind: 1})
+
+    let title = data.instruction_meta_title;
+    let keyword = data.instruction_meta_keyword;
+    let description = data.instruction_meta_content;
+
+    let meta_data = {
+        title: title, keyword: keyword, description: description
+    }
+
+    res.render('frontend/pages/instructions/index', {menu: 'instruction', instructions: instructions, ...meta_data});
 }
+
+exports.showInstructionDetail = async (req, res) => {
+    let keys = ['instruction_meta_title', 'instruction_meta_keyword', 'instruction_meta_content']
+    let data = {}
+
+    keys.map(key => {
+        data[key] = settings[key] ? settings[key] : ''
+    })
+
+    var kind = req.params.kind;
+
+    kind = kind.toLocaleLowerCase();
+
+    let instruction = await Instruction.findOne({kind: kind})
+
+    let title = data.instruction_meta_title;
+    let keyword = data.instruction_meta_keyword;
+    let description = data.instruction_meta_content;
+
+    let meta_data = {
+        title: title, keyword: keyword, description: description
+    }
+
+    res.render('frontend/pages/instructions/show', {menu: 'instruction', instruction: instruction, ...meta_data});
+}
+
 exports.activation=(req,res)=>{
     let promises=[];
     let keys=[

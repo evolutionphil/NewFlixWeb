@@ -1,38 +1,35 @@
 .instruction-info-container{
     padding-top:40px;
 }
-#instruction-info-desc {
-    color: #bbb;
-    font-size: 20px;
-    margin-top: 30px;
-    margin-bottom: 30px;
-}
-.instruction-info-item-wrapper {
-    border: 1px solid #777;
-    margin: 25px 0;
-    border-radius: 10px;
-    color: #dfdfdf;
-    padding:10px 20px;
-}
-.instruction-info-item-wrapper .fas,.instruction-info-item-wrapper .fa{
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 20px;
-}
-.instruction-info-item-title {
-    display: inline-block;
-    vertical-align: middle;
-}
-.instruction-info-item-wrapper:hover{
-    background:linear-gradient(to right,#B132DF,#ffffff00);
-}
-#instruction-sliders-wrapper {
-    margin-top:200px;
-    margin-left:50px;
-}
-@media only screen and (max-width: 992px) {
-    #instruction-sliders-wrapper{
-        margin-left:0px;
-    }
+.instruction-list-card {
+    padding: 18px 0;
 }
 
+.instruction-list-card:not(:last-child) {
+    border-bottom: 1px solid #18212F;
+}
+.instruction-card-thumbnail {
+    width: 220px;
+    height: 80px;
+    background-size: cover;
+    border-radius: 10px;
+    margin-right: 20px;
+    background: rgba(65, 65, 69, 0.15);
+    color: grey;
+    text-transform: capitalize;
+    text-decoration: none !important;
+}
+.instruction-card-content-container {
+    flex: 1
+}
+.instruction-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.instruction-card-content {
+    color: #A2ACB9;
+    font-size: 14px;
+    text-overflow: ellipsis;
+}

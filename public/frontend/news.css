@@ -23,7 +23,10 @@
     font-weight: 600;
     margin-bottom: 10px;
 }
-
+.news-section-subtitle {
+    font-size: 14px;
+    color: #A2ACB9;
+}
 .news-card-content {
     color: #A2ACB9;
     font-size: 14px;
