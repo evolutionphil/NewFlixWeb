@@ -13,7 +13,9 @@
                 <h1 class="text-white news-card-title">
                     <a href="/news/<%- item._id %>" class="text-white"><%- item.title %></a>
                 </h1>
-                <p class="news-card-content m-0"><%= item.content %></p>
+                <p class="news-card-content m-0">
+                    <%= item.content %><% if (item.content.length > 50) { %>...<% } %>
+                </p>
             </div>
         </div>
     <%})%>

@@ -44,6 +44,10 @@ body:after {
     }
 }
 
+.w-full {
+    width: 100%;
+}
+
 .fancy-card {
     border: solid 1px transparent;
     border-radius: 8px;
@@ -52,6 +56,14 @@ body:after {
     background-origin: border-box;
     background-clip: padding-box, border-box;
     position: relative;
+}
+
+.fancy-card-title {
+
+}
+
+.fancy-card-subtitle {
+
 }
 
 .overflow-hidden {
@@ -135,6 +147,10 @@ body:after {
     font-size: 26px;
 }
 
+.news-section-subtitle {
+    font-size: 14px;
+    color: #A2ACB9;
+}
 .news-section-header {
     text-align: center;
 }
