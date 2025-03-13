@@ -86,7 +86,8 @@ input.form-control::placeholder {
 .fancy-card {
     border: solid 1px transparent;
     border-radius: 8px;
-    background-image: linear-gradient(var(--background-color), var(--background-color)), linear-gradient(var(--angle, 152deg), #232834 0%, #353d4b 13.66%, var(--border-color) 32.82%, #363c4a 51.65%);
+    background-image: linear-gradient(var(--background-color), var(--background-color)),
+    linear-gradient(var(--angle, 162deg), #1f2127 0%, #1f2127 14%, var(--border-color) 40%, #1f2127 50%);
     background-origin: border-box;
     background-clip: padding-box, border-box;
     position: relative;
