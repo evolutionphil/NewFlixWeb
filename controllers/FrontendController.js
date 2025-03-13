@@ -13,7 +13,8 @@ let Instruction=require('../models/Instruction.model');
 let MyListContent=require('../models/MyListContent.model');
 let YoutubeListContent=require('../models/YoutubeListContent.model');
 let YoutubeList=require('../models/YoutubeList.model');
-
+const fs = require('node:fs');
+const process = require('node:process');
 
 
 const axios = require('axios');
@@ -23,6 +24,7 @@ let Coinpayments =require('coinpayments');
 const { createMollieClient } = require('@mollie/api-client');
 let stripe = require('stripe');
 const {convert} = require("html-to-text");
+const path = require("path");
 
 exports.news=(req,res)=>{
     let keys=['news_meta_title','news_meta_keyword','news_meta_content']
@@ -103,9 +105,17 @@ exports.instructions = async (req, res) => {
     let keyword = data.instruction_meta_keyword;
     let description = data.instruction_meta_content;
 
+
     let meta_data = {
         title: title, keyword: keyword, description: description
     }
+    instructions = instructions.map((instruction) => {
+        let imagePath = path.resolve(__dirname, `../public/images/devices/${instruction.kind}.png`);
+        return {
+            ...instruction._doc,
+            image: fs.existsSync(imagePath) ? `/images/devices/${instruction.kind}.png` : null
+        }
+    })
 
     res.render('frontend/pages/instructions/index', {menu: 'instruction', instructions: instructions, ...meta_data});
 }

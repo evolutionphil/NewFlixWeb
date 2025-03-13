@@ -1,20 +1,31 @@
 <link rel="stylesheet" href="/frontend/instruction.css">
 
-<section style="--background-color: #0C1018; --border-color: #473590; --angle: 112deg" class="news-container fancy-card">
+<section style="--background-color: #0C1018; --border-color: #473590; --angle: 112deg"
+         class="news-container fancy-card">
     <div class="pb-4 news-section-header">
         <h1 class="text-white pb-1 news-section-title">Instructions</h1>
         <p class="news-section-subtitle"> Set up Flix TV on your device</p>
     </div>
     <% instructions.map(instruction=>{ %>
         <div class="instruction-list-card d-flex align-items-center">
-            <a href="/instructions/<%- instruction.kind %>"
-               class="d-flex justify-content-center align-items-center instruction-card-thumbnail">
-                <p class="m-0"><%- instruction.kind %></p>
-            </a>
+            <!--            if image exists -->
+
+            <% if (instruction.image) { %>
+                <a href="/instructions/<%- instruction.kind %>"
+                   class="d-flex justify-content-center align-items-center instruction-card-thumbnail">
+                    <img class="h-full" src="<%- instruction.image %>" alt="">
+                </a>
+            <% } else { %>
+                <a href="/instructions/<%- instruction.kind %>"
+                   class="d-flex justify-content-center align-items-center instruction-card-thumbnail">
+                    <p class="m-0"><%- instruction.kind %></p>
+                </a>
+            <% } %>
 
             <div class="pl-2 instruction-card-content-container">
                 <h1 class="text-white instruction-card-title">
-                    <a href="/instructions/<%- instruction.kind %>" class="text-white">Introduction for <span class="text-capitalize"><%- instruction.kind %></span></a>
+                    <a href="/instructions/<%- instruction.kind %>" class="text-white">Introduction for <span
+                                class="text-capitalize"><%- instruction.kind %></span></a>
                 </h1>
                 <p class="instruction-card-content m-0">Installation guide for Amazon</p>
             </div>
