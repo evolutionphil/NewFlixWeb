@@ -71,6 +71,7 @@ body:after {
 }
 
 .flixtv-info-badge {
+    width: max-content;
     position: relative;
     display: flex;
     border-radius: 50px;
