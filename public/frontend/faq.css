@@ -1,0 +1,15 @@
+.faq-card {
+    background: #1E293B;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.faq-card-title {
+    text-decoration: none !important;
+    font-size: 16px;
+    background: #1E293B;
+}
+
+.faq-card {
+    background: #1E293B;
+}
