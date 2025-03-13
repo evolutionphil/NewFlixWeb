@@ -102,18 +102,6 @@ label {
     margin-top: 5px;
 }
 
-input.form-control, input.form-control:focus {
-    outline: none;
-    color: #ffffff !important;
-    background: #14181f;
-    font-size: 14px;
-    letter-spacing: 0.4px;
-    border-color: #4B5462;
-    border-radius: 8px;
-}
-input.form-control::placeholder {
-    color: #5e697f;
-}
 .url-input-container {
     gap: 10px;
 }

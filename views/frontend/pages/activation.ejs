@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="frontend/activation.css">
 
-<section style="--background-color: #0C1018; --border-color: #473590; --angle: 112deg" class="news-container fancy-card">
+<section style="--background-color: #06080C; --border-color: #473590; --angle: 112deg" class="news-container fancy-card">
     <div class="pb-4 news-section-header">
         <h1 class="text-white news-section-title">Flix TV Activation</h1>
         <p class="news-section-subtitle">Set up Flix TV on your device</p>
@@ -15,13 +15,11 @@
 
     <form class="col-md-6" method="post" action="/saveActivation" id="form">
         <div class="payment-card">
-            <div class="row">
-                <div class="col-12">
-                    <div class="payment-card-header">
-                        <h4 class="text-white">Payment</h4>
-                    </div>
+                <div class="payment-card-header">
+                    <h4 class="text-white">Payment</h4>
                 </div>
-                <div class="col-12 col-md-6">
+
+                <div class="mt-4">
                     <div class="form-group">
                         <label>Mac Address:</label>
                         <div class="input-group">
@@ -30,26 +28,30 @@
                             </div>
                             <input name="mac_address" id="mac-address" type="text" class="form-control" placeholder="00:aa:bb:cc:dd:11" required>
                             <div class="input-group-append">
-                                <button type="button" onclick="checkValidMac();" class="btn btn-sm btn-outline-secondary waves-effect" style="border-radius: 0px;"><i class="fas fa-check"></i> Check</button>
+                                <button type="button" onclick="checkValidMac();" class="btn btn-sm btn-outline-secondary waves-effect">
+                                    <i class="fas fa-check"></i> Check
+                                </button>
                             </div>
                         </div>
                         <div id="mac-invalid-info-container">
 
                         </div>
                     </div>
+
                     <div id="mac-valid-info-container">
                         <div id="expire-date-container">
-                            <span id="expire-date-label">
+                            <span id="expire-date-label" class="text-white">
                                 Expire Date after activate:
                             </span>
-                            <span id="expire-date-value">
+                            <span id="expire-date-value" class="text-white">
                                 Life time.
                             </span>
                         </div>
-                        <p id="price-text"><span>Price:</span><span class="price-value">&euro;<%=price%></span></p>
+                        <p id="price-text" class="text-white"><span>Price:</span><span class="price-value"> &euro;<%=price%></span></p>
                     </div>
                 </div>
-                <div class="col-12 col-md-6" id="payment-methods-part">
+
+                <div id="payment-methods-part">
                     <div id="billing-info-section">
                         <div class="payment-section-label">
                             Billing Info
@@ -60,9 +62,11 @@
                         <!--                    </div>-->
                         <div id="email-error-message">Sorry, Email is not correct</div>
                     </div>
+
                     <div class="payment-section-label">
                         Select Payment Way
                     </div>
+
                     <div class="position-relative" id="payment-items-container">
                         <%if(show_paypal==1){%>
                         <div id="paypal-element"></div>
@@ -79,7 +83,7 @@
                                 Pay with Stripe
                             </div>
                             <div class="text-center mt-10 mb-10">
-                                <button class="btn btn-primary submit-btn" id="submit-btn-stripe">Pay Now</button>
+                                <button class="btn btn-primary" id="submit-btn-stripe">Pay Now</button>
                             </div>
                         </div>
                         <%if(show_coin==1){%>
@@ -95,7 +99,7 @@
                                 Pay with Mollie
                             </div>
                             <div class="text-center mt-10 mb-10">
-                                <button class="btn btn-warning submit-btn" id="submit-btn-stripe">Pay Now</button>
+                                <button class="btn btn-warning" id="submit-btn-stripe">Pay Now</button>
                             </div>
                         </div>
                         <%if(show_coin==1){%>
@@ -111,16 +115,16 @@
                                 Pay with Crypto Currency
                             </div>
                             <div id="coin-select">
-
                                 <label>Select Crypto Type</label>
                                 <select class="form-control" id="coin_type">
                                     <%coin_list.map(item=>{%>
                                     <option value="<%=item['code']%>"><%=item['name']%></option>
                                     <%})%>
                                 </select>
-                                <div class="text-center mt-10">
-                                    <button class="btn btn-primary submit-btn" id="submit-btn">Pay Now</button>
-                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button class="btn btn-primary" id="submit-btn">Pay Now</button>
                             </div>
                         </div>
                         <%}%>
@@ -190,7 +194,6 @@
                     </div>
 
                 </div>
-            </div>
         </div>
     </form>
 </div>

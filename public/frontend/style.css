@@ -44,6 +44,36 @@ body:after {
     }
 }
 
+input.form-control, input.form-control:focus {
+    outline: none;
+    color: #ffffff !important;
+    background: #14181f;
+    font-size: 14px;
+    border-color: #4B5462;
+    border-radius: 8px;
+}
+
+input.form-control::placeholder {
+    color: #5e697f;
+}
+
+.input-group .form-control {
+    border: none;
+}
+
+.input-group-append button {
+    background: #1E293B;
+    border: none;
+    border-radius: 8px;
+}
+
+.input-group-text {
+    background: #1E293B;
+    border: none;
+    color: #C1C7D1;
+    border-radius: 8px;
+}
+
 .w-full {
     width: 100%;
 }
@@ -51,8 +81,7 @@ body:after {
 .fancy-card {
     border: solid 1px transparent;
     border-radius: 8px;
-    background-image: linear-gradient(var(--background-color), var(--background-color)),
-    linear-gradient(var(--angle, 152deg), #0C1018 13.66%, var(--border-color) 32.82%, #1C2332 51.65%);;
+    background-image: linear-gradient(var(--background-color), var(--background-color)), linear-gradient(var(--angle, 152deg), #232834 0%, #353d4b 13.66%, var(--border-color) 32.82%, #363c4a 51.65%);
     background-origin: border-box;
     background-clip: padding-box, border-box;
     position: relative;
