@@ -70,6 +70,15 @@ body:after {
     overflow: hidden;
 }
 
+.flixtv-info-badge {
+    position: relative;
+    display: flex;
+    border-radius: 50px;
+    border: 1px solid #1E293B;
+    gap: 10px;
+    padding: 8px 12px;
+}
+
 .header {
     z-index: 1;
     border: 1px solid #1E293B;

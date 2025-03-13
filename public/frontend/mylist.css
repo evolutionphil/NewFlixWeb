@@ -92,7 +92,9 @@
 
     pointer-events: none;
 }
-
+.my-list-form-card h1 {
+    font-size: 26px;
+}
 label {
     width: 120px;
     color: #C1C7D1;
