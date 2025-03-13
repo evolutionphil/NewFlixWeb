@@ -74,6 +74,11 @@ input.form-control::placeholder {
     border-radius: 8px;
 }
 
+.input-group {
+    border: 1px solid #4B5462;
+    border-radius: 8px;
+}
+
 .w-full {
     width: 100%;
 }
