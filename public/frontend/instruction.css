@@ -1,28 +1,66 @@
 .instruction-info-container{
     padding-top:40px;
 }
+
 .instruction-list-card {
-    padding: 18px 0;
+    overflow: hidden;
+    padding: 13px;
+
+    background: #0C1018;
+    border: 1px solid #1E293B;
+    border-radius: 10px;
 }
 
 .instruction-list-card:not(:last-child) {
-    border-bottom: 1px solid #18212F;
+    margin-bottom: 10px;
 }
+
 .instruction-card-thumbnail {
     width: 220px;
     height: 80px;
-    background-size: cover;
-    border-radius: 10px;
+
     margin-right: 20px;
+    border-radius: 6px;
+
     background: rgba(65, 65, 69, 0.15);
+}
+
+.instruction-card-thumbnail.image {
+    background-size: cover;
+    background-position: center center;
+}
+
+.instruction-card-thumbnail.text {
+    overflow: hidden;
     color: grey;
+    white-space: nowrap;
     text-transform: capitalize;
     text-decoration: none !important;
 }
+
 .instruction-card-content-container {
+    overflow: hidden;
+    padding: 13px;
+
     flex: 1
 }
+
+.instruction-card-anchor {
+    position: absolute;
+    inset: 0;
+}
+
+.instruction-card-icon-container {
+    padding: 13px;
+}
+
+.instruction-card-icon {
+    width: 34px;
+    height: 34px;
+}
+
 .instruction-card-title {
+    white-space: nowrap;
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 10px;
@@ -31,5 +69,32 @@
 .instruction-card-content {
     color: #A2ACB9;
     font-size: 14px;
-    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+@media screen and (max-width: 768px) {
+    .instruction-list-card {
+        padding: 0;
+    }
+
+    .instruction-card-thumbnail {
+        background-size: 100%;
+        margin-right: 14px;
+        width: 100px;
+        border-radius: 0;
+    }
+
+    .instruction-card-thumbnail.text {
+        font-size: 14px;
+    }
+
+    .instruction-card-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    .instruction-card-title {
+        font-size: 14px;
+    }
 }

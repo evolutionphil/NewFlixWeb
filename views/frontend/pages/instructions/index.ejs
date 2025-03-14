@@ -1,34 +1,46 @@
 <link rel="stylesheet" href="/frontend/instruction.css">
 
-<section style="--background-color: #0C1018; --border-color: #473590; --angle: 112deg"
+<section style="--background-color: #06080C; --border-color: #473590; --angle: 112deg"
          class="news-container fancy-card">
-    <div class="pb-4 news-section-header">
-        <h1 class="text-white pb-1 news-section-title">Instructions</h1>
+    <div class="pb-md-4 news-section-header">
+        <h1 class="text-white pb-md-1 news-section-title">Instructions</h1>
         <p class="news-section-subtitle"> Set up Flix TV on your device</p>
     </div>
     <% instructions.map(instruction=>{ %>
-        <div class="instruction-list-card d-flex align-items-center">
-            <!--            if image exists -->
+        <div class="instruction-list-card d-flex align-items-center position-relative">
+            <a href="/instructions/<%- instruction.kind %>"
+               class="instruction-card-anchor"
+            >
+            </a>
 
             <% if (instruction.image) { %>
-                <a href="/instructions/<%- instruction.kind %>"
-                   class="d-flex justify-content-center align-items-center instruction-card-thumbnail">
-                    <img class="h-full" src="<%- instruction.image %>" alt="">
-                </a>
+                <div
+                   class="d-flex justify-content-center align-items-center instruction-card-thumbnail image"
+                    style="background-image: url('<%- instruction.image %>');"
+                >
+                </div>
             <% } else { %>
-                <a href="/instructions/<%- instruction.kind %>"
-                   class="d-flex justify-content-center align-items-center instruction-card-thumbnail">
+                <div href="/instructions/<%- instruction.kind %>"
+                   class="d-flex justify-content-center align-items-center instruction-card-thumbnail text">
                     <p class="m-0"><%- instruction.kind %></p>
-                </a>
+                </div>
             <% } %>
 
             <div class="pl-2 instruction-card-content-container">
                 <h1 class="text-white instruction-card-title">
-                    <a href="/instructions/<%- instruction.kind %>" class="text-white">Introduction for <span
-                                class="text-capitalize"><%- instruction.kind %></span></a>
+                    <a href="/instructions/<%- instruction.kind %>" class="text-white">
+                        Introduction for <span class="text-capitalize"><%- instruction.kind %></span>
+                    </a>
                 </h1>
-                <p class="instruction-card-content m-0">Installation guide for Amazon</p>
+                <p class="instruction-card-content m-0">Installation guide for <span class="text-capitalize"><%- instruction.kind %></span></p>
             </div>
+
+            <span class="instruction-card-icon-container">
+                <svg class="instruction-card-icon" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.2502 32.2292H12.7502C5.05766 32.2292 1.771 28.9425 1.771 21.25V12.75C1.771 5.05751 5.05766 1.77084 12.7502 1.77084H21.2502C28.9427 1.77084 32.2293 5.05751 32.2293 12.75V21.25C32.2293 28.9425 28.9427 32.2292 21.2502 32.2292ZM12.7502 3.89584C6.21933 3.89584 3.896 6.21918 3.896 12.75V21.25C3.896 27.7808 6.21933 30.1042 12.7502 30.1042H21.2502C27.781 30.1042 30.1043 27.7808 30.1043 21.25V12.75C30.1043 6.21918 27.781 3.89584 21.2502 3.89584H12.7502Z" fill="#A2ACB9"/>
+                    <path d="M15.2152 23.0633C14.946 23.0633 14.6769 22.9642 14.4644 22.7517C14.0535 22.3408 14.0535 21.6608 14.4644 21.25L18.7144 17L14.4644 12.75C14.0535 12.3392 14.0535 11.6592 14.4644 11.2483C14.8752 10.8375 15.5552 10.8375 15.966 11.2483L20.9669 16.2492C21.3777 16.66 21.3777 17.34 20.9669 17.7508L15.966 22.7517C15.7535 22.9642 15.4844 23.0633 15.2152 23.0633Z" fill="#A2ACB9"/>
+                </svg>
+            </span>
         </div>
     <% }) %>
 </section>
