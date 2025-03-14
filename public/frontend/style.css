@@ -188,6 +188,12 @@ input.form-control::placeholder {
     padding: 30px;
 }
 
+@media screen and (max-width: 768px) {
+    .news-container {
+        padding: 10px;
+    }
+}
+
 .news-section-title {
     font-size: 26px;
 }

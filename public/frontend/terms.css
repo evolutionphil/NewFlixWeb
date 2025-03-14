@@ -1,0 +1,9 @@
+ul {
+    padding: 0;
+}
+
+@media screen and (max-width: 768px) {
+    .news-container {
+        padding: 40px 20px;
+    }
+}
