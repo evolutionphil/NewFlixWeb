@@ -57,6 +57,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th>Mac Address</th>
+                            <th>IP Address</th>
                             <th>App Type</th>
                             <th>Created Time</th>
                             <th>Expire Date</th>
@@ -119,12 +120,14 @@
             autoFill: false
         });
     })
-    var columns=[
-        { data: 'mac_address',sortable:false },
-        { data: 'app_type',sortable:true },
-        { data: 'created_time',sortable:true },
-        { data: 'expire_date',sortable:true },
-        { data:'action',sortable:false}
+
+    var columns = [
+        {data: 'mac_address', sortable: false},
+        {data: 'ip', sortable: true},
+        {data: 'app_type', sortable: true},
+        {data: 'created_time', sortable: true},
+        {data: 'expire_date', sortable: true},
+        {data: 'action', sortable: false}
     ];
 
     $(document).ready(function () {
@@ -152,8 +155,7 @@
                     show_trial:$('#show_trial').prop('checked')
                 },
                 "dataSrc": function ( json ) {
-                    let data=json.data;
-                    return data;
+                    return json.data;
                 }
             },
             'columns': columns

@@ -1680,17 +1680,20 @@ exports.getPlaylists=async (req,res)=>{
         filter_condition = combineFilterCondition(filter_condition,
             {
                 $or:[
-                    {mac_address: {$regex: searchValue,$options: "i"}},
-                    {app_type:{$regex: searchValue,$options: "i"}}
+                    {mac_address: {$regex: searchValue, $options: "i"}},
+                    {ip: {$regex: searchValue, $options: "i"}},
+                    {app_type: {$regex: searchValue, $options: "i"}}
                 ]
             }
         );
     }
-    let select_field={_id:1,mac_address:1,app_type:1,is_trial:1,created_time:1,expire_date:1};
+    let select_field={_id:1,mac_address:1,app_type:1,is_trial:1,created_time:1,expire_date:1, ip: 1};
     let totalRecords=await Device.countDocuments(filter_condition);
     let playlists,sort_filter={};
     if(columnName=='app_type')
         sort_filter={app_type:columnSortOrder==='asc' ? 1 : -1}
+    if(columnName=='ip')
+        sort_filter={ip:columnSortOrder==='asc' ? 1 : -1}
     if(columnName=='expire_date')
         sort_filter={expire_date:columnSortOrder==='asc' ? 1 : -1}
     if(columnName=='created_time')
@@ -1705,6 +1708,7 @@ exports.getPlaylists=async (req,res)=>{
         let temp={
             _id:item._id,
             mac_address:item.mac_address,
+            ip:item.ip || '',
             app_type:item.app_type ? item.app_type: '',
             expire_date:item.expire_date,
             created_time:item.created_time,
