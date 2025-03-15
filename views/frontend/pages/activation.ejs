@@ -69,26 +69,13 @@
 
                     <div class="position-relative" id="payment-items-container">
                         <%if(show_paypal==1){%>
-
-                        <div class="payment-item-container">
-                            <div class="payment-method-item-container">
-                                Pay with Paypal
+                        <div id="paypal-element"></div>
+                        <%if(show_coin==1 || show_mollie==1 || show_stripe==1){%>
+                            <div id="" class="position-relative or-container">
+                                <div class="or-border"></div>
+                                <div class="or text-center">Or</div>
                             </div>
-                            <div class="text-center mt-10 mb-10">
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paypalButtonsModal">
-                                    See Options
-                                </button>
-                            </div>
-                        </div>
-
-
-
-                            <%if(show_coin==1 || show_mollie==1 || show_stripe==1){%>
-                                <div id="" class="position-relative or-container">
-                                    <div class="or-border"></div>
-                                    <div class="or text-center">Or</div>
-                                </div>
-                            <%}%>
+                        <%}%>
                         <%}%>
                         <%if(show_stripe==1){%>
                         <div class="payment-item-container">
@@ -209,21 +196,6 @@
                 </div>
         </div>
     </form>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="paypalButtonsModal" tabindex="-1" aria-labelledby="paypalButtonsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div id="paypal-element"></div>
-            </div>
-        </div>
-    </div>
 </div>
 </section>
 
