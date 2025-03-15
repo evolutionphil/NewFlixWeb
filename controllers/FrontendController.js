@@ -612,7 +612,9 @@ exports.saveActivation=async (req,res)=>{
                         break;
                     case 'stripe':
                         let stripe_secret_key=settings.stripe_secret_key;
-                        let stripe1=stripe(stripe_secret_key);
+                        let stripe1=stripe(stripe_secret_key, {
+                            apiVersion: '2020-08-27',
+                        });
                         stripe1.checkout.sessions.create({
                             success_url: 'https://'+host_name+'/stripe/success?transaction_id='+transaction._id+'&session_id={CHECKOUT_SESSION_ID}',
                             cancel_url: 'https://'+host_name+'/stripe/cancel?transaction_id='+transaction._id,
@@ -671,7 +673,9 @@ exports.stripeSuccess=async(req,res)=>{
     let session_id=req.query.session_id;
     if(session_id){
         let stripe_secret_key=settings.stripe_secret_key;
-        let stripe1 =stripe(stripe_secret_key);
+        let stripe1 =stripe(stripe_secret_key, {
+            apiVersion: '2020-08-27',
+        });
         const session = await stripe1.checkout.sessions.retrieve(session_id);
         if(session.status==='complete') {
             let transaction_id = req.query.transaction_id;
