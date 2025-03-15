@@ -273,6 +273,7 @@ input.form-control::placeholder {
 }
 
 .status-message {
+    color: black;
     font-size: 40px;
     font-weight: bold;
     margin-top: 20px;
