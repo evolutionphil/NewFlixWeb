@@ -683,31 +683,26 @@ global.sendEmail=async(json_body)=>{
             try{
                 var template = handlebars.compile(body.versions[0].html_content);
                 var outputString = template(json_body);
-                // const puppeteer = require('puppeteer');
-                // const browser = await puppeteer.launch({
-                //     args: ['--no-sandbox'],
-                //     headless:true
-                // });
-                // const page = await browser.newPage();
-                // await page.setContent(outputString, { waitUntil: 'domcontentloaded' });
-                // await page.emulateMediaType('screen');
-                // const pdf = await page.pdf({
-                //     path: `${dir}/${file_name}`,
-                //     margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' , padding:0},
-                //     printBackground: true,
-                //     format: 'A4',
-                // });
-                // // Close the browser instance
-                // await browser.close();
+                
+                const puppeteer = require('puppeteer');
 
-                var pdf = require('html-pdf');
-                pdf.create(outputString,{
-                    "format": "A3"
-                }).toFile(`${dir}/${file_name}`, function(err, res1){
-                    console.log(res1.filename);
+                const browser = await puppeteer.launch({
+                    args: ['--no-sandbox'],
+                    headless:true
+                });
+
+                const page = await browser.newPage();
+                await page.setContent(outputString, { waitUntil: 'domcontentloaded' });
+                await page.emulateMediaType('screen');
+
+                await page.pdf({
+                    path: `${dir}/${file_name}`,
+                    margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' , padding:0},
+                    printBackground: true,
+                    format: 'A4',
                 });
             }catch (e) {
-                console.log(e);
+                console.dir(e, {depth: null});
             }
             return outputString;
             // return res.render(outputString);
