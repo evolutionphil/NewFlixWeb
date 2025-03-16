@@ -583,6 +583,8 @@ app.get('/test-email',async(req, res)=>{
 })
 
 app.get('/test-email-content',async (req,res)=>{
+    const puppeteer = require('puppeteer');
+
     let api_key=settings.sendgrid_api_key ? settings.sendgrid_api_key : "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";
     sendgridClient.setApiKey(api_key);
     let template_id=settings.sendgrid_template_id ? settings.sendgrid_template_id : 'd-9fc7f92b33c245e4b1c90b714a8ecf34';
@@ -603,7 +605,10 @@ app.get('/test-email-content',async (req,res)=>{
             var template = handlebars.compile(body.versions[0].html_content);
             var outputString = template(json_body);
 
-            const browser = await puppeteer.launch();
+            const browser = await puppeteer.launch({
+                args: ['--no-sandbox'],
+                headless:true
+            });
             const page = await browser.newPage();
             await page.setContent(outputString, { waitUntil: 'domcontentloaded' });
             await page.emulateMediaType('screen');
