@@ -1927,6 +1927,10 @@ exports.getPlaylistSummary = async (req, res) => {
             mac_address: searchValue
         })
 
+        if (!device) {
+            return res.json({data: [], draw: draw, iTotalDisplayRecords: 0, iTotalRecords: 0});
+        }
+
         filter_condition = combineFilterCondition(filter_condition,
             {device_id: device ? device._id.toString() : null},
         );
