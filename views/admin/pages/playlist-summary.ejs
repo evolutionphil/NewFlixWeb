@@ -1,0 +1,68 @@
+<style>
+    .filter-wrapper label{
+        color:#fff !important;
+    }
+</style>
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-heading">
+            <h3 class="panel-title">Playlist Summary</h3>
+        </div>
+        <div class="panel-body">
+            <div class="">
+                <div class="list-wrapper w-full">
+                    <div class="table-responsive">
+                <table class="table" id="item-list-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>MAC Address</th>
+                            <th>Total Playlist URLs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+</div>
+<script>
+    var current_tr, current_playlist_id, dataTable, current_button;
+    $(document).ready(function () {
+        dataTable=$('#item-list-table').DataTable({
+            autoFill: false
+        });
+    })
+
+    var columns = [
+        {data: 'mac_address', sortable: false},
+        {data: 'total_urls', sortable: true},
+    ];
+
+    $(document).ready(function () {
+        updateDataTable();
+    })
+    function updateDataTable(){
+        dataTable.destroy();
+        dataTable=$('#item-list-table').DataTable({
+            'processing': true,
+            'serverSide': true,
+            'serverMethod': 'post',
+            "order": [[ 1, "desc" ]],
+            autoFill: false,
+            pageLength: 50,
+            'ajax':{
+                url:site_url+"/admin/get-playlist-summary",
+                data:{
+                },
+                "dataSrc": function ( json ) {
+                    return json.data;
+                }
+            },
+            'columns': columns
+        });
+    }
+
+</script>

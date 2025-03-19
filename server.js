@@ -583,6 +583,8 @@ app.get('/test-email',async(req, res)=>{
 })
 
 app.get('/test-email-content',async (req,res)=>{
+    const puppeteer = require('puppeteer');
+
     let api_key=settings.sendgrid_api_key ? settings.sendgrid_api_key : "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";
     sendgridClient.setApiKey(api_key);
     let template_id=settings.sendgrid_template_id ? settings.sendgrid_template_id : 'd-9fc7f92b33c245e4b1c90b714a8ecf34';
@@ -603,7 +605,10 @@ app.get('/test-email-content',async (req,res)=>{
             var template = handlebars.compile(body.versions[0].html_content);
             var outputString = template(json_body);
 
-            const browser = await puppeteer.launch();
+            const browser = await puppeteer.launch({
+                args: ['--no-sandbox'],
+                headless:true
+            });
             const page = await browser.newPage();
             await page.setContent(outputString, { waitUntil: 'domcontentloaded' });
             await page.emulateMediaType('screen');
@@ -678,31 +683,26 @@ global.sendEmail=async(json_body)=>{
             try{
                 var template = handlebars.compile(body.versions[0].html_content);
                 var outputString = template(json_body);
-                // const puppeteer = require('puppeteer');
-                // const browser = await puppeteer.launch({
-                //     args: ['--no-sandbox'],
-                //     headless:true
-                // });
-                // const page = await browser.newPage();
-                // await page.setContent(outputString, { waitUntil: 'domcontentloaded' });
-                // await page.emulateMediaType('screen');
-                // const pdf = await page.pdf({
-                //     path: `${dir}/${file_name}`,
-                //     margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' , padding:0},
-                //     printBackground: true,
-                //     format: 'A4',
-                // });
-                // // Close the browser instance
-                // await browser.close();
+                
+                const puppeteer = require('puppeteer');
 
-                var pdf = require('html-pdf');
-                pdf.create(outputString,{
-                    "format": "A3"
-                }).toFile(`${dir}/${file_name}`, function(err, res1){
-                    console.log(res1.filename);
+                const browser = await puppeteer.launch({
+                    args: ['--no-sandbox'],
+                    headless:true
+                });
+
+                const page = await browser.newPage();
+                await page.setContent(outputString, { waitUntil: 'domcontentloaded' });
+                await page.emulateMediaType('screen');
+
+                await page.pdf({
+                    path: `${dir}/${file_name}`,
+                    margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' , padding:0},
+                    printBackground: true,
+                    format: 'A4',
                 });
             }catch (e) {
-                console.log(e);
+                console.dir(e, {depth: null});
             }
             return outputString;
             // return res.render(outputString);

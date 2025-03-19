@@ -1,60 +1,236 @@
-body{
-    background: #888;
-    color: inherit;
+@import "variables.css";
+
+body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 2%;
+    height: 600px;
+    width: 600px;
+    background-image: radial-gradient(circle at top, rgba(114, 71, 240, 0.2) 0%, transparent 50%);
+    z-index: -1;
+}
+
+body:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 40%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 400px;
+    background: radial-gradient(circle at top, #33868326 0%, transparent 40%);
+    z-index: -1;
+}
+
+@media screen and (max-width: 768px) {
+    body:before {
+        top: 0;
+        left: 0;
+        height: 500px;
+        width: 100%;
+    }
+
+    body:after {
+        display: none;
+    }
+}
+
+input.form-control, input.form-control:focus {
+    outline: none;
+    color: #ffffff !important;
+    background: #14181f;
+    font-size: 14px;
+    border-color: #4B5462;
+    border-radius: 8px;
+}
+
+input.form-control::placeholder {
+    color: #5e697f;
+}
+
+.input-group .form-control {
+    border: none;
+}
+
+.input-group-append button {
+    background: #1E293B;
+    border: none;
+    border-radius: 8px;
+}
+
+.input-group-text {
+    background: #1E293B;
+    border: none;
+    color: #C1C7D1;
+    border-radius: 8px;
+}
+
+.input-group {
+    border: 1px solid #4B5462;
+    border-radius: 8px;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.fancy-card {
+    border: solid 1px transparent;
+    border-radius: 8px;
+    background-image: linear-gradient(var(--background-color), var(--background-color)),
+    linear-gradient(var(--angle, 162deg), #1f2127 0%, #1f2127 14%, var(--border-color) 40%, #1f2127 50%);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    position: relative;
+}
+
+.fancy-card-title {
+
+}
+
+.fancy-card-subtitle {
+
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.flixtv-info-badge {
+    width: max-content;
+    position: relative;
+    display: flex;
+    border-radius: 50px;
+    border: 1px solid #1E293B;
+    gap: 10px;
+    padding: 8px 12px;
 }
 
 .header {
-    background: #fff;
-    padding: 10px 10px;
+    z-index: 1;
+    border: 1px solid #1E293B;
     border-radius: 10px;
+    background: #0f1117;
+    color: var(--foreground);
+    padding: 10px 20px;
     margin-bottom: 20px;
     margin-top: 20px;
 }
 
+.header::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 35%;
+
+    border-bottom: 1px solid;
+    border-image-source: linear-gradient(90deg, rgba(18, 25, 35, 0) 0%, #738FB6 50%, rgba(18, 25, 35, 0) 100%);
+    border-image-slice: 1;
+
+    z-index: -1;
+}
+
+.header-logo {
+    height: auto;
+    padding: 0;
+    margin: 0;
+    font-size: 22px;
+    text-decoration: none !important;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255, 255, 255)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+}
+
+.navbar-dark .navbar-toggler, .navbar-dark .navbar-toggler:focus, .navbar-dark .navbar-toggler:hover {
+    border-color: transparent;
+    outline: none;
+}
+
+.navbar-nav {
+    margin-left: auto;
+    gap: 15px;
+}
+
 .header-item-wrapper {
     font-size: 18px;
-    padding: 0 10px;
     display: inline-block;
     text-shadow: 0 0.05px;
 }
-.header-item-wrapper a{
-    color:#333;
+
+.header-item-wrapper a {
+    font-size: 14px;
     text-decoration: none !important;
-    letter-spacing: 0.5px;
+    color: #C1C7D1;
     transition: all 0.5s;
 }
-.header-item-wrapper.active a,.header-item-wrapper:hover a {
-    color: #e4980e;
+
+.header-item-wrapper.active a, .header-item-wrapper:hover a {
+    color: var(--foreground);
 }
-.content-container{
-    margin:20px 0;
+
+.content-container {
+    margin: 20px 0;
 }
-.news-section-container {
-    background: #fff;
-    padding: 20px;
-    margin:15px 0;
-    border-radius: 10px;
+
+.news-container {
+    padding: 30px;
 }
-.footer-container{
+
+@media screen and (max-width: 768px) {
+    .news-container {
+        padding: 10px;
+    }
+}
+
+.news-section-title {
+    font-size: 26px;
+}
+
+.news-section-subtitle {
+    font-size: 14px;
+    color: #A2ACB9;
+}
+.news-section-header {
+    text-align: center;
+}
+@media screen and (max-width: 768px) {
+    .news-section-header {
+        text-align: left;
+    }
+
+}
+
+.footer-container {
     background: #ddd;
     padding: 10px 20px;
     border-radius: 10px;
     font-size: 16px;
-    margin-bottom:10px;
+    margin-bottom: 10px;
 }
-.footer-link{
+
+.footer-link {
     margin-right: 10px;
-    margin-left:10px;
+    margin-left: 10px;
 }
 
-.content-container img{
-    max-width:100% !important;
+.content-container img {
+    max-width: 100% !important;
 }
 
 
-
-
-.status-icon{
+.status-icon {
     width: 80px;
     height: 80px;
     border-radius: 40px;
@@ -62,22 +238,26 @@ body{
     background: #B132DF;
     color: #fff;
 }
-.status-icon.error-icon{
+
+.status-icon.error-icon {
     background: #F50261;
 }
-.status-icon i{
+
+.status-icon i {
     font-size: 45px;
     line-height: 80px;
 }
 
-.status-modal .modal-body{
+.status-modal .modal-body {
     text-align: center;
     padding-bottom: 50px;
 }
-.close-button-container{
+
+.close-button-container {
     width: 100%;
 }
-.status-modal button.close{
+
+.status-modal button.close {
     font-size: 40px;
     border-radius: 20px;
     text-align: center;
@@ -87,13 +267,16 @@ body{
     margin-right: 0px;
     float: right;
 }
-.status-modal .modal-header{
+
+.status-modal .modal-header {
     border-bottom: none;
 }
+
 .status-message {
+    color: black;
     font-size: 40px;
     font-weight: bold;
-    margin-top:20px;
+    margin-top: 20px;
 }
 
 
@@ -101,10 +284,26 @@ body{
     position: relative;
     min-height: calc(100vh - 200px);
 }
+
 #reseller-login-main-wrapper {
     position: absolute;
     left: 20px;
     top: 50%;
     right: 20px;
     transform: translateY(-50%);
+}
+
+footer {
+    border-top: 1px solid #282E38;
+}
+
+.footer-separator {
+    height: 1px;
+    width: 85px;
+    margin: 20px auto;
+    background-color: #282E38;
+}
+
+footer a {
+    font-size: 14px;
 }

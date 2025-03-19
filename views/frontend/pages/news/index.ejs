@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="/frontend/news.css">
+
+<section style="--background-color: #0C1018; --border-color: #473590; --angle: 110deg" class="news-container fancy-card">
+    <h1 class="text-white news-section-title">News</h1>
+
+    <% news.map(item=>{%>
+        <div class="news-list-card d-flex align-items-center">
+            <a href="/news/<%- item._id %>" class="d-flex justify-content-center align-items-center news-card-thumbnail">
+                <p class="m-0"><span class="font-weight-bold">Flix</span><span>TV</span></p>
+            </a>
+
+            <div class="pl-2 news-card-content-container">
+                <h1 class="text-white news-card-title">
+                    <a href="/news/<%- item._id %>" class="text-white"><%- item.title %></a>
+                </h1>
+                <p class="news-card-content m-0">
+                    <%= item.content %><% if (item.content.length > 50) { %>...<% } %>
+                </p>
+            </div>
+        </div>
+    <%})%>
+</section>

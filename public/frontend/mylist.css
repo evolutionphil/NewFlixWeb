@@ -1,44 +1,143 @@
-label{
-    width:120px;
-    color:#111;
-    font-size:17px;
-    margin-top:5px;
+.mylist-info-card {
+    background: #0C1018;
+    border-radius: 10px;
+    border: 1px solid #1E293B;
+    padding: 15px;
+    gap: 15px;
 }
-input.form-control{
-    width:calc(100% - 120px);
-    color: #222 !important;
+
+@media screen and (max-width: 768px) {
+    .mylist-info-card.test-url {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .mylist-info-card.android {
+        border-radius: 0;
+        border-bottom: none;
+        border-top: none;
+    }
+    .mylist-info-card.default-parental-pin {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+}
+
+.mylist-info-card-icon {
+    height: 42px;
+    width: 42px;
+    border: 1px solid;
+    border-radius: 4px;
     font-size: 20px;
-    letter-spacing: 0.4px
 }
-@media screen and (min-width:768px){
-    label.url-label{
-        width:50px;
-    }
-    input.url-input{
-        width:calc(100% - 50px);
+
+.mylist-info-card-icon.test-url {
+    border-color: #1b1c5a;
+    background: #11112d;
+    color: #7B61FF;
+}
+
+.mylist-info-card-icon.android {
+    border-color: #45551c;
+    background: #1b2619;
+    color: #6a842a;
+}
+
+.mylist-info-card-icon.default-parental-pin {
+    border-color: #552121;
+    background: #2B1111;
+    color: #D55353;
+}
+
+.mylist-info-card-title {
+    font-size: 12px;
+    padding-bottom: 2px;
+}
+
+.mylist-info-card-subtitle {
+    font-size: 14px;
+}
+
+.my-list-form-card {
+    border: 1px solid transparent;
+
+    background-image: linear-gradient(#0C1018, #0C1018),
+    linear-gradient(152deg, #0C1018 13.66%, rgba(142, 109, 239, 0.49) 32.82%, #1C2332 51.65%);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+
+    border-radius: 10px;
+    padding: 30px 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+    overflow: hidden;
+    position: relative;
+}
+
+.my-list-form-card::before {
+    content: '';
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle at top, rgba(75, 69, 255, 0.1), transparent 30%);
+    background-repeat: no-repeat;
+    background-position: 0 -40px;
+    border-radius: 10px;
+
+    pointer-events: none;
+}
+.my-list-form-card h1 {
+    font-size: 26px;
+}
+label {
+    width: 120px;
+    color: #C1C7D1;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.url-input-container {
+    gap: 10px;
+}
+.btn-delete {
+    padding: 0.429rem;
+    border-radius: 8px;
+background: #BD235E;
+}
+
+.btn-add {
+    padding: 0.429rem;
+    border-radius: 8px;
+    background: #4B45FF;
+}
+
+@media screen and (min-width: 768px) {
+    input.url-input {
+        width: calc(100% - 50px);
     }
 }
 
-@media screen and (min-width:768px){
-    label.youtube-url-label{
-        width:120px;
+@media screen and (min-width: 768px) {
+    label.youtube-url-label {
+        width: 120px;
     }
-    input.youtube-url-input{
-        width:calc(100% - 120px);
+
+    input.youtube-url-input {
+        width: calc(100% - 120px);
     }
 }
 
-#vue{
-    padding-left:20px;
-    padding-right:60px;
-}
-#youtube-vue{
-    padding-right:60px;
-}
-.delete-playlist-button-container{
+.delete-playlist-button-container {
     text-align: center;
 }
-.delete-playlist-button-container .btn{
+
+.delete-playlist-button-container .btn {
     width: 270px;
     border-radius: 10px;
     font-size: 25px;
@@ -56,8 +155,9 @@ input.form-control{
     background: #fff;
     box-shadow: 0 0 5px #000;
     text-align: center;
-    cursor:pointer;
+    cursor: pointer;
 }
+
 .delete-url-icon {
     position: absolute;
     right: 0px;
@@ -65,37 +165,53 @@ input.form-control{
     color: #ce2206;
     cursor: pointer;
 }
+
 #youtube-vue .add-url-btn {
-    right:-5px;
+    right: -5px;
 }
+
 .youtube-list-item-container .delete-url-icon {
-    right:-20px;
-    top:5px;
+    right: -20px;
+    top: 5px;
 }
+
 #delete-form-container label {
     width: fit-content;
     margin-right: 10px;
 }
-@media screen and (max-width:767px){
-    #vue{
-        padding-right:0;
-        padding-bottom:50px;
+
+@media screen and (max-width: 767px) {
+    #vue {
+        padding-right: 0;
+        padding-bottom: 50px;
     }
+
     .add-url-btn {
-        top:unset;
-        bottom:0px;
+        top: unset;
+        bottom: 0px;
     }
-    #delete-form-container label{
+
+    #delete-form-container label {
         width: 103px;
     }
-    #change-pin-label{
-        margin-top:80px;
+
+    #change-pin-label {
+        margin-top: 80px;
     }
 }
-#send-url-btn{
-    width: 270px;
-    border-radius: 10px;
-    font-size: 25px;
+
+.btn-submit {
+    border: none;
+    background: #4B45FF;
+    width: 255px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+@media screen and (max-width: 767px) {
+    .btn-submit {
+        width: 100%;
+    }
 }
 
 #change-pin-label {

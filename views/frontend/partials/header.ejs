@@ -1,25 +1,36 @@
-<div class="header">
-    <div class="header-items-container">
-        <div class="header-item-wrapper <%=menu=='news' ? 'active' : ''%>">
-            <a href="/news">News</a>
-        </div>
-        <div class="header-item-wrapper <%=menu=='faq' ? 'active' : ''%>">
-            <a href="/faq">Support</a>
-        </div>
-        <div class="header-item-wrapper <%=menu=='instruction' ? 'active' : ''%>">
-            <a href="/instruction">Instruction</a>
-        </div>
-        <div class="header-item-wrapper <%=menu=='mylist' ? 'active' : ''%>">
-            <a href="/mylist">My List</a>
-        </div>
-        <div class="header-item-wrapper <%=menu=='youtube-list' ? 'active' : ''%>">
-            <a href="/youtube-list">Youtube PlayList</a>
-        </div>
-        <div class="header-item-wrapper <%=menu=='activation' ? 'active' : ''%>">
-            <a href="/activation">Activation</a>
-        </div>
-<!--        <div class="header-item-wrapper <%=menu=='activation' ? 'active' : ''%>">-->
-<!--            <a href="/reseller/login">Reseller Login</a>-->
-<!--        </div>-->
+<nav class="navbar mt-0 navbar-expand-lg navbar-dark header">
+    <a href="/" class="header-logo text-white">
+        <span class="font-weight-bold">FLIX</span><span class="font-weight-300">TV</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#header-navbar"
+            aria-controls="header-navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="header-navbar">
+        <ul class="navbar-nav mt-2 mt-lg-0 mb-2 mb-lg-0 d-flex flex-column flex-lg-row">
+            <li class="nav-item header-item-wrapper <%= menu === 'home' ? 'active' : '' %>">
+                <a aria-current="page" href="/">Home</a>
+            </li>
+            <li class="nav-item header-item-wrapper <%= menu === 'news' ? 'active' : '' %>">
+                <a aria-current="page" href="/news">News</a>
+            </li>
+            <li class="nav-item header-item-wrapper <%= menu === 'faq' ? 'active' : '' %>">
+                <a href="/faq">FAQ</a>
+            </li>
+            <li class="nav-item header-item-wrapper <%= menu === 'instruction' ? 'active' : '' %>">
+                <a href="/instructions">Instruction</a>
+            </li>
+            <li class="nav-item header-item-wrapper <%= menu === 'mylist' ? 'active' : '' %>">
+                <a href="/mylist">My List</a>
+            </li>
+            <li class="nav-item header-item-wrapper <%= menu === 'youtube-list' ? 'active' : '' %>">
+                <a href="/youtube-list">Youtube PlayList</a>
+            </li>
+            <li class="nav-item header-item-wrapper <%= menu === 'activation' ? 'active' : '' %>">
+                <a href="/activation">Activation</a>
+            </li>
+        </ul>
     </div>
-</div>
+</nav>

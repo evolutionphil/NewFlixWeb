@@ -1,5 +1,21 @@
-<% contents.map(section=>{section %>
-<div class="news-section-container">
-    <%- section.contents %>
-</div>
-<% })%>
+<link rel="stylesheet" href="frontend/faq.css">
+<link rel="stylesheet" href="frontend/terms.css">
+
+<section style="--background-color: #0C1018; --border-color: #473590; --angle: 112deg"
+         class="news-container fancy-card">
+    <div class="pb-4 news-section-header">
+        <h1 class="text-white news-section-title">Frequently Asked Questions</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10 m-auto">
+            <% contents.map(section=>{section %>
+            <div class="p-0 faq-card">
+                <div class="p-3 p-md-5 faq-card-body text-white">
+                    <%- section.contents %>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+    </div>
+</section>

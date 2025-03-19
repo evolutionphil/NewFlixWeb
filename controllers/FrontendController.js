@@ -13,7 +13,8 @@ let Instruction=require('../models/Instruction.model');
 let MyListContent=require('../models/MyListContent.model');
 let YoutubeListContent=require('../models/YoutubeListContent.model');
 let YoutubeList=require('../models/YoutubeList.model');
-
+const fs = require('node:fs');
+const process = require('node:process');
 
 
 const axios = require('axios');
@@ -22,6 +23,8 @@ let moment=require('moment');
 let Coinpayments =require('coinpayments');
 const { createMollieClient } = require('@mollie/api-client');
 let stripe = require('stripe');
+const {convert} = require("html-to-text");
+const path = require("path");
 
 exports.news=(req,res)=>{
     let keys=['news_meta_title','news_meta_keyword','news_meta_content']
@@ -29,15 +32,44 @@ exports.news=(req,res)=>{
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
-    News.find().sort({_id:-1}).then(news=>{
+    News.find()
+        .sort({_id:-1})
+        .exec()
+        .then(news=>{
         let title=data.news_meta_title;
         let keyword=data.news_meta_keyword;
         let description=data.news_meta_content;
-        res.render('frontend/pages/news',
-            {menu:'news',title:title, keyword:keyword,description:description,news:news}
+
+        res.render('frontend/pages/news/index',
+            {
+                menu: 'news',
+                title: title,
+                keyword: keyword,
+                description: description,
+                news: news.map(item=>({_id: item._id, title: item.title, content: convert(item.content).substring(0, 80)})),
+            }
         );
     })
 }
+
+exports.showNewsDetail = (req, res) => {
+    News.findOne({_id: req.params.id})
+        .exec()
+        .then(news => {
+            let title = news.title;
+            let description = news.content;
+
+            res.render('frontend/pages/news/show',
+                {
+                    menu: 'news/show',
+                    title: title,
+                    description: description,
+                    news: news
+                }
+            );
+        })
+}
+
 exports.faq=(req,res)=>{
     let keys=['faq_meta_title','faq_meta_keyword','faq_meta_content']
     let data={}
@@ -53,29 +85,66 @@ exports.faq=(req,res)=>{
         );
     })
 }
-exports.instruction=async (req,res)=>{
-    let keys=['instruction_meta_title','instruction_meta_keyword','instruction_meta_content']
-    let data={}
+
+exports.instructions = async (req, res) => {
+    let keys = ['instruction_meta_title', 'instruction_meta_keyword', 'instruction_meta_content']
+
+    let data = {}
+
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
-    var kind=req.params.kind;
-    if(!kind)
-        kind='summary';
-    kind=kind.toLocaleLowerCase();
-    let promises=[];
-    let instruction= await Instruction.findOne({kind:kind})
-    Promise.all(promises).then(values=>{
-        let title=data.instruction_meta_title;
-        let keyword=data.instruction_meta_keyword;
-        let description=data.instruction_meta_content;
 
-        let meta_data={
-            title:title, keyword:keyword,description:description
+    let instructions = await Instruction.find({
+        kind: {
+            $ne: 'summary'
         }
-        res.render('frontend/pages/instruction',{menu:'instruction',instruction:instruction,...meta_data});
+    }).sort({kind: 1})
+
+    let title = data.instruction_meta_title;
+    let keyword = data.instruction_meta_keyword;
+    let description = data.instruction_meta_content;
+
+
+    let meta_data = {
+        title: title, keyword: keyword, description: description
+    }
+    instructions = instructions.map((instruction) => {
+        let imagePath = path.resolve(__dirname, `../public/images/devices/${instruction.kind}.png`);
+        return {
+            ...instruction._doc,
+            image: fs.existsSync(imagePath) ? `/images/devices/${instruction.kind}.png` : null
+        }
     })
+
+    res.render('frontend/pages/instructions/index', {menu: 'instruction', instructions: instructions, ...meta_data});
 }
+
+exports.showInstructionDetail = async (req, res) => {
+    let keys = ['instruction_meta_title', 'instruction_meta_keyword', 'instruction_meta_content']
+    let data = {}
+
+    keys.map(key => {
+        data[key] = settings[key] ? settings[key] : ''
+    })
+
+    var kind = req.params.kind;
+
+    kind = kind.toLocaleLowerCase();
+
+    let instruction = await Instruction.findOne({kind: kind})
+
+    let title = data.instruction_meta_title;
+    let keyword = data.instruction_meta_keyword;
+    let description = data.instruction_meta_content;
+
+    let meta_data = {
+        title: title, keyword: keyword, description: description
+    }
+
+    res.render('frontend/pages/instructions/show', {menu: 'instruction', instruction: instruction, ...meta_data});
+}
+
 exports.activation=(req,res)=>{
     let promises=[];
     let keys=[
@@ -116,6 +185,29 @@ exports.activation=(req,res)=>{
         res.render('frontend/pages/activation', {menu: 'activation',...data});
     });
 }
+
+exports.home=async(req,res)=>{
+    let keys=['mylist_meta_title','mylist_meta_keyword','mylist_meta_content']
+
+    let data={}
+
+    keys.map(key => {
+        data[key] = settings[key] ? settings[key] : ''
+    })
+
+    let recaptcha_site_key=process.env.RECAPTCHA_SITE_KEY;
+    let title = data.mylist_meta_title;
+    let keyword = data.mylist_meta_keyword;
+    let description = data.mylist_meta_content;
+    let meta_data = {
+        title: title, keyword: keyword, description: description
+    }
+
+    let mylist_content=await MyListContent.findOne();
+
+    res.render('frontend/pages/home', {menu: 'home',...meta_data,mylist_content:mylist_content,recaptcha_site_key:recaptcha_site_key});
+}
+
 exports.mylist=async(req,res)=>{
     let keys=['mylist_meta_title','mylist_meta_keyword','mylist_meta_content']
     let data={}
@@ -520,7 +612,9 @@ exports.saveActivation=async (req,res)=>{
                         break;
                     case 'stripe':
                         let stripe_secret_key=settings.stripe_secret_key;
-                        let stripe1=stripe(stripe_secret_key);
+                        let stripe1=stripe(stripe_secret_key, {
+                            apiVersion: '2020-08-27',
+                        });
                         stripe1.checkout.sessions.create({
                             success_url: 'https://'+host_name+'/stripe/success?transaction_id='+transaction._id+'&session_id={CHECKOUT_SESSION_ID}',
                             cancel_url: 'https://'+host_name+'/stripe/cancel?transaction_id='+transaction._id,
@@ -579,7 +673,9 @@ exports.stripeSuccess=async(req,res)=>{
     let session_id=req.query.session_id;
     if(session_id){
         let stripe_secret_key=settings.stripe_secret_key;
-        let stripe1 =stripe(stripe_secret_key);
+        let stripe1 =stripe(stripe_secret_key, {
+            apiVersion: '2020-08-27',
+        });
         const session = await stripe1.checkout.sessions.retrieve(session_id);
         if(session.status==='complete') {
             let transaction_id = req.query.transaction_id;

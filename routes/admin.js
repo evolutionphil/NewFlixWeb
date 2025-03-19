@@ -125,6 +125,13 @@ router.post('/updateProfile',adminController.updateProfile);
 
 router.get('/playlists',adminController.showPlayLists);
 router.post('/playlist/getPlaylists',adminController.getPlaylists);
+
+router.get('/ip-summary',adminController.showIpSummary);
+router.post('/get-ip-summary',adminController.getIpSummary);
+
+router.get('/playlist-summary',adminController.showPlaylistSummary);
+router.post('/get-playlist-summary',adminController.getPlaylistSummary);
+
 router.post('/playlist/activate',adminController.activatePlaylist);
 router.get('/playlist/:id',adminController.showDeviceDetail);
 router.post('/logout', (req, res) => {
