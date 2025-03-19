@@ -1607,11 +1607,17 @@ exports.saveAndroidUpdate=(req,res)=>{
 }
 
 exports.showPlayLists=(req,res)=>{
-    res.render('admin/pages/playlist',{menu:'playlists',layout: './admin/partials/layout' })
+    res.render('admin/pages/playlist',{menu:'devices',layout: './admin/partials/layout' })
 }
-exports.showIpSummary=(req,res)=>{
-    res.render('admin/pages/ip-summary',{menu:'ip-summary',layout: './admin/partials/layout' })
+
+exports.showIpSummary = (req, res) => {
+    res.render('admin/pages/ip-summary', {menu: 'devices-ip-summary', layout: './admin/partials/layout'})
 }
+
+exports.showPlaylistSummary = (req, res) => {
+    res.render('admin/pages/playlist-summary', {menu: 'devices-playlist-summary', layout: './admin/partials/layout'})
+}
+
 function combineFilterCondition(prev_condition, new_condition){
     prev_condition=JSON.parse(JSON.stringify(prev_condition));
     let result={};
@@ -1896,6 +1902,111 @@ exports.getIpSummary = async (req, res) => {
         iTotalRecords: countResult?[0].total_rows || 0:0
     });
 }
+
+exports.getPlaylistSummary = async (req, res) => {
+    let {
+        draw,
+        length,
+        start,
+        order,
+        columns,
+        search,
+    } = req.body;
+
+    start = parseInt(start);
+    length = parseInt(length);
+
+    let columnIndex = order[0].column;
+    let columnName = columns[columnIndex].data;
+    let columnSortOrder = order[0].dir;
+    let searchValue = search.value; // Search value
+    let filter_condition = {};
+
+    if (searchValue != null && searchValue !== '') {
+        const device = await Device.findOne({
+            mac_address: searchValue
+        })
+
+        filter_condition = combineFilterCondition(filter_condition,
+            {device_id: device ? device._id.toString() : null},
+        );
+    }
+
+    let sort_filter = {};
+
+    if (columnName === 'total_urls') {
+        sort_filter = {total_urls: columnSortOrder === 'asc' ? 1 : -1}
+    }
+
+    const pipeline = [
+        {
+            $group: {
+                _id: "$device_id",
+                total_urls: {
+                    $sum: 1
+                }
+            }
+        },
+        {
+            $sort: sort_filter
+        },
+        {
+            $limit: length
+        },
+        {
+            $skip: start
+        },
+        {
+            $addFields: {
+                convertedId: {
+                    $toObjectId: "$_id"
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: "devices",
+                localField: "convertedId",
+                foreignField: "_id",
+                as: "device"
+            }
+        },
+        {
+            $unwind: {
+                path: "$device"
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                mac_address: "$device.mac_address",
+                total_urls: 1
+            }
+        }
+    ]
+
+    if (Object.keys(filter_condition).length > 0) {
+        pipeline.unshift({
+            $match: filter_condition
+        })
+    }
+
+    let countResult = await PlayList.aggregate([
+        ...pipeline,
+        {
+            $count: 'total_rows'
+        }
+    ]);
+
+    const devices = await PlayList.aggregate([
+        ...pipeline
+    ]);
+
+    const total_rows = countResult ? [0].total_rows || 0 : 0;
+
+    res.json({data: devices, draw: draw, iTotalDisplayRecords: total_rows, iTotalRecords: total_rows});
+}
+
 
 // exports.uploadFlixData=async (req,res)=>{
 //     console.clear();
