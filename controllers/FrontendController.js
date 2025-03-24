@@ -221,9 +221,14 @@ exports.mylist=async(req,res)=>{
     let meta_data = {
         title: title, keyword: keyword, description: description
     }
+    
     let mylist_content=await MyListContent.findOne();
-    res.render('frontend/pages/mylist', {menu: 'mylist',...meta_data,mylist_content:mylist_content,recaptcha_site_key:recaptcha_site_key});
+
+    let host_name = req.hostname;
+
+    res.render('frontend/pages/mylist', {menu: 'mylist',...meta_data,mylist_content:mylist_content, host_name, recaptcha_site_key:recaptcha_site_key});
 }
+
 exports.savePlaylists=(req,res)=>{
     let {
         urls,
