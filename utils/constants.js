@@ -1,0 +1,3 @@
+export const DEVICE_STATUS_IN_TRIAL = 1;
+export const DEVICE_STATUS_EXPIRED = 0;
+export const DEVICE_STATUS_ACTIVATED = 2;
