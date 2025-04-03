@@ -6,6 +6,10 @@ body {
     font-family: "Plus Jakarta Sans", sans-serif;
     position: relative;
     overflow-x: hidden;
+
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 body:before {
@@ -29,6 +33,10 @@ body:after {
     height: 400px;
     background: radial-gradient(circle at top, #33868326 0%, transparent 40%);
     z-index: -1;
+}
+
+main {
+    flex: 1;
 }
 
 @media screen and (max-width: 768px) {
