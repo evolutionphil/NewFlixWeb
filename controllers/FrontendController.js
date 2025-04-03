@@ -186,6 +186,10 @@ exports.activation=(req,res)=>{
     });
 }
 
+exports.contact=(req,res)=>{
+    res.render('frontend/pages/contact', {menu: 'contact'});
+}
+
 exports.home=async(req,res)=>{
     let keys=['mylist_meta_title','mylist_meta_keyword','mylist_meta_content']
 
@@ -221,7 +225,7 @@ exports.mylist=async(req,res)=>{
     let meta_data = {
         title: title, keyword: keyword, description: description
     }
-    
+
     let mylist_content=await MyListContent.findOne();
 
     let host_name = req.hostname;
