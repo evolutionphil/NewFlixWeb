@@ -1,4 +1,4 @@
-<section class="hero-section py-5">
+<section class="hero-section py-md-5">
     <div class="text-white d-flex flex-column justify-content-center align-items-center">
         <div class="mb-4">
             <img src="/images/icons/keyboard-open.png" alt="">
@@ -7,7 +7,9 @@
         <p class="hero-subtitle text-white mb-2">On your fingertip</p>
         <p class="mb-4 text-center hero-description text-muted">We are working on our app to continuously provide better functionality</p>
 
-        <h3 class="text-center text-white">The apps on official stores are coming soon.</h3>
+        <%- include('./download-buttons'); %>
+
+        <p class="text-center text-secondary mb-1 mt-3">The apps on other official stores are coming soon.</p>
         <div style="height: 2px; width: 100px; background-color: rgb(102, 52, 167);"></div>
     </div>
 </section>
