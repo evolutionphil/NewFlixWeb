@@ -235,7 +235,7 @@ async function sendApiResponse(req, res, decrypted_req, from_encrypted=false) {
     addMacAddressToIP(req, mac_address);
 
     let android_prev_version='', samsung_prev_version='1.1.1', lg_prev_version='1.1.2', android_tv_prev_version='';
-    let android_test=false, samsung_test=true, lg_test=true, android_tv_test=true;
+    let android_test=false, samsung_test=false, lg_test=false, android_tv_test=false;
     let device_id;
     let promises=[];
 
