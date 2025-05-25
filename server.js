@@ -466,7 +466,7 @@ global.sendBlockReqToCloudFlare=async(ip, description)=>{
     if(!description)
         description="Blocked from flixapp.tv server automatically"
     return new Promise((resolve, reject)=>{
-        axios.post("https://api.cloudflare.com/client/v4/user/firewall/access_rules/rules",
+        axios.post(`https://api.cloudflare.com/client/v4/zones/${process.env.CLOUDFLARE_ZONE_ID}/firewall/access_rules/rules`,
             {
                 "mode":"block",
                 "configuration":{
@@ -477,8 +477,7 @@ global.sendBlockReqToCloudFlare=async(ip, description)=>{
             },
             {
                 headers:{
-                    "X-Auth-Email":"info@flixiptv.eu",
-                    "X-Auth-Key":"baf2ba8b406a999f9234bb78b8fa7b606108a",
+                "Authorization":`Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
                     "Content-Type":"application/json"
                 }
             }
