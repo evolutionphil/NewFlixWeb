@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const adminController=require('../controllers/AdminController');
 const passport=require('passport');
-
+const blockListController = require('../controllers/BlockListController');
 router.get('/login',checkNotAuthenticated,adminController.login);
 router.post('/login',checkNotAuthenticated,passport.authenticate('local', {
     successRedirect: '/admin',
@@ -15,6 +15,9 @@ router.post('/youtube-list/save',adminController.saveYoutubeListContent);
 
 router.use(checkAuthenticated);
 router.get('/',adminController.news);
+
+router.post('/block-ips',blockListController.blockIps);
+router.post('/unblock-ips',blockListController.unblockIps);
 
 router.get('/news/create/:id?',adminController.createNews);
 router.post('/news/delete/:id',adminController.deleteNews);
