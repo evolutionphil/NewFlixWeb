@@ -91,46 +91,7 @@
     </div>
 </div>
 </div>
-<div class="modal fade" id="activate-confirm-modal">
-    <div class="modal-dialog modal-simple modal-center">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"
-                        aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-                <h4 class="modal-title">Confirm Activation</h4>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure to activate this playlist?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="confirmActivate()">Confirm</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="deactivate-confirm-modal">
-    <div class="modal-dialog modal-simple modal-center">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"
-                        aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-                <h4 class="modal-title">Confirm DeActivation</h4>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure to deactivate this playlist?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="confirmActivate(false)">Confirm</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 <script>
     var current_tr, current_playlist_id, dataTable, current_button;
     $(document).ready(function () {
@@ -167,6 +128,7 @@
                 'selectNone',   // Button to deselect all rows
                 {
                     text: 'Block Selected IPs',
+                    className: 'btn-danger',
                     action: function () {
                         var selectedData = dataTable.rows({ selected: true }).data();
                         var selectedIPs = [];
@@ -180,6 +142,9 @@
                                 type: 'POST',
                                 data: { ips: selectedIPs },
                                 success: function(response) {
+                                    Toastify({
+                                        text: "IPs blocked",
+                                    }).showToast();
                                     console.log('IPs blocked:', response);  
                                 }
                             });
@@ -188,6 +153,7 @@
                 },
                 {
                     text: 'Unblock Selected IPs',
+                    className: 'btn-success',
                     action: function () {
                         var selectedData = dataTable.rows({ selected: true }).data();
                         var selectedIPs = [];
@@ -201,7 +167,38 @@
                                 type: 'POST',
                                 data: { ips: selectedIPs },
                                 success: function(response) {
+                                    Toastify({
+                                        text: "IPs unblocked",
+                                    }).showToast();
                                     console.log('IPs unblocked:', response);
+                                }
+                            });
+                        }
+                    }
+                },
+                {
+                    text: 'Remove Devices of Selected IPs',
+                    className: 'btn-danger',
+                    action: function () {
+                        var selectedData = dataTable.rows({ selected: true }).data();
+                        var selectedIPs = [];
+                        selectedData.each(function(data) {
+                            selectedIPs.push(data.ip);
+                        });
+                        console.log('Selected IPs:', selectedIPs);
+                        if (selectedIPs.length > 0) {
+                            $.ajax({
+                                url: site_url + '/admin/remove-devices-of-ips',
+                                type: 'POST',
+                                data: { ips: selectedIPs },
+                                success: function(response) {
+                                    console.log('Devices removed:', response);
+
+                                    Toastify({
+                                        text: "Devices removed",
+                                    }).showToast();
+
+                                    dataTable.rows({ selected: true }).remove().draw();
                                 }
                             });
                         }
@@ -252,36 +249,6 @@
         current_button=$(this);
         $('#deactivate-confirm-modal').modal('show');
     })
-
-    function confirmActivate(action=true) {
-        $.ajax({
-            method:'post',
-            dataType:'json',
-            url:site_url+"/admin/playlist/activate",
-            data:{
-                playlist_id:current_playlist_id,
-                action:action ? 1 : 0,
-            },
-            success:data=>{
-                if(data.status==='success'){
-                    $('#activate-confirm-modal').modal('hide');
-                    $('#deactivate-confirm-modal').modal('hide');
-
-                    $(current_tr).find('td:eq(2)').text(data.expire_date);
-                    if(action){
-                        $(current_button).text('Deactivate').removeClass('btn-activate').addClass('btn-deactivate');
-                        $(current_button).removeClass('btn-success').addClass('btn-danger');
-                    }
-                    else{
-                        $(current_button).text('Activate').removeClass('btn-deactivate').addClass('btn-activate');
-                        $(current_button).removeClass('btn-danger').addClass('btn-success');
-                    }
-                }else{
-                    showErrorNotify(data.msg);
-                }
-            }
-        })
-    }
 
     $('#show_android').change(function () {
         updateDataTable();

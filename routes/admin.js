@@ -19,6 +19,8 @@ router.get('/',adminController.news);
 router.post('/block-ips',blockListController.blockIps);
 router.post('/unblock-ips',blockListController.unblockIps);
 
+router.post('/remove-devices-of-ips',blockListController.removeDevicesOfIps);
+
 router.get('/news/create/:id?',adminController.createNews);
 router.post('/news/delete/:id',adminController.deleteNews);
 router.post('/news/save',adminController.saveNews);

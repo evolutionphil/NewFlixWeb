@@ -1,4 +1,5 @@
 const BlockListModel = require("../models/BlockList.model");
+const DeviceModel = require("../models/Device.model");
 const cloudflareService = require("../services/cloudflare-service");
 
 exports.blockIps = async (req, res) => {
@@ -48,4 +49,17 @@ exports.unblockIps = async (req, res) => {
     }
 
     res.json({ success: true, message: 'IPs unblocked successfully' });
+}
+
+exports.removeDevicesOfIps = async (req, res) => {
+    try {
+        const { ips } = req.body;
+
+        await DeviceModel.deleteMany({ ip: { $in: ips } });
+
+        res.json({ success: true, message: 'Devices removed successfully' });
+    } catch (error) {
+        console.error(error);
+        res.json({ success: false, message: 'Failed to remove devices' }, 500);
+    }
 }
