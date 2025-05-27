@@ -11,6 +11,10 @@ let DeviceModel = new Schema({
         type:Number,
         default:0, // 0=> Trial, 1=>Activated
     },
+    registered_from_domain:{
+        type:String,
+        default: null
+    },
     app_type:String,
     version:String,
     parent_pin:String,

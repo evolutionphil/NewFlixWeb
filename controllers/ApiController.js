@@ -43,6 +43,7 @@ exports.getPlaylistInformation=(req,res)=>{
             device=new Device;
             device.mac_address=mac_address;
             device.app_type=app_type;
+            device.registered_from_domain=req.headers.host || null;
             device.is_trial=1;
             device.ip=getClientIPAddress(req);
             device.created_time=moment().format('Y-MM-DD HH:mm');
@@ -249,6 +250,7 @@ async function sendApiResponse(req, res, decrypted_req, from_encrypted=false) {
                 device.ip=getClientIPAddress(req);
                 device.version=version;
                 device.created_time=moment().utc().format('Y-MM-DD HH:mm:ss');
+                device.registered_from_domain=req.headers.host || null;
 
                 let expire_date=new moment().add(7,'d').format('Y-MM-DD');
                 device.expire_date=expire_date;
