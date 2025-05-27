@@ -1942,6 +1942,34 @@ exports.getPlaylistSummary = async (req, res) => {
         sort_filter = {total_urls: columnSortOrder === 'asc' ? 1 : -1}
     }
 
+    // First get total count before pagination
+    const countPipeline = [
+        {
+            $group: {
+                _id: "$device_id",
+                total_urls: {
+                    $sum: 1
+                }
+            }
+        }
+    ];
+
+    if (Object.keys(filter_condition).length > 0) {
+        countPipeline.unshift({
+            $match: filter_condition
+        });
+    }
+
+    const totalCount = await PlayList.aggregate([
+        ...countPipeline,
+        {
+            $count: "total"
+        }
+    ]);
+
+    const total_rows = totalCount.length > 0 ? totalCount[0].total : 0;
+
+    // Now get paginated data
     const pipeline = [
         {
             $group: {
@@ -1951,14 +1979,19 @@ exports.getPlaylistSummary = async (req, res) => {
                 }
             }
         },
-        {
+    ]
+    if (Object.keys(sort_filter).length > 0) {
+        pipeline.push({
             $sort: sort_filter
+        });
+    }
+
+    pipeline.push(
+        {
+            $skip: start
         },
         {
             $limit: length
-        },
-        {
-            $skip: start
         },
         {
             $addFields: {
@@ -1984,31 +2017,33 @@ exports.getPlaylistSummary = async (req, res) => {
             $project: {
                 _id: 0,
                 mac_address: "$device.mac_address",
-                total_urls: 1
+                app_type: "$device.app_type",
+                is_active: {
+                    $cond: {
+                      if: { $eq: ["$device.is_trial", 2] },
+                      then: 'Yes',
+                      else: '<span class="text-danger">No</span>'
+                    }
+                },
+                total_urls: 1,
             }
         }
-    ]
+    );
 
     if (Object.keys(filter_condition).length > 0) {
         pipeline.unshift({
             $match: filter_condition
-        })
+        });
     }
 
-    let countResult = await PlayList.aggregate([
-        ...pipeline,
-        {
-            $count: 'total_rows'
-        }
-    ]);
+    const devices = await PlayList.aggregate(pipeline);
 
-    const devices = await PlayList.aggregate([
-        ...pipeline
-    ]);
-
-    const total_rows = countResult ? [0].total_rows || 0 : 0;
-
-    res.json({data: devices, draw: draw, iTotalDisplayRecords: total_rows, iTotalRecords: total_rows});
+    res.json({
+        data: devices,
+        draw: draw,
+        iTotalDisplayRecords: total_rows,
+        iTotalRecords: total_rows
+    });
 }
 
 

@@ -4,6 +4,7 @@ const adminController=require('../controllers/AdminController');
 const dashboardController=require('../controllers/DashboardController');
 const passport=require('passport');
 const blockListController = require('../controllers/BlockListController');
+const deviceController = require('../controllers/DeviceController');
 
 router.get('/login',checkNotAuthenticated,adminController.login);
 router.post('/login',checkNotAuthenticated,passport.authenticate('local', {
@@ -23,6 +24,8 @@ router.post('/block-ips',blockListController.blockIps);
 router.post('/unblock-ips',blockListController.unblockIps);
 
 router.post('/remove-devices-of-ips',blockListController.removeDevicesOfIps);
+
+router.post('/remove-devices',deviceController.deleteDevices);
 
 router.get('/news/create/:id?',adminController.createNews);
 router.post('/news/delete/:id',adminController.deleteNews);

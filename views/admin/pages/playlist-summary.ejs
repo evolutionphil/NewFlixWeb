@@ -16,6 +16,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th>MAC Address</th>
+                            <th>Is Active</th>
                             <th>Total Playlist URLs</th>
                         </tr>
                     </thead>
@@ -37,7 +38,8 @@
     })
 
     var columns = [
-        {data: 'mac_address', sortable: false},
+        {data: 'mac_address', sortable: true},
+        {data: 'is_active', sortable: false},
         {data: 'total_urls', sortable: true},
     ];
 
@@ -50,7 +52,7 @@
             'processing': true,
             'serverSide': true,
             'serverMethod': 'post',
-            "order": [[ 1, "desc" ]],
+            "order": [[ 2, "desc" ]],
             autoFill: false,
             pageLength: 50,
             'ajax':{
@@ -61,7 +63,45 @@
                     return json.data;
                 }
             },
-            'columns': columns
+            'columns': columns,
+            select: {
+                style: 'multi',  // Allows multiple row selection
+                selector: 'td',  // Allows clicking anywhere on the row to select
+                info: true      // Shows selected row count in the table info
+            },
+            dom: 'Bfrtip',      // Adds buttons to the table
+            buttons: [
+                'selectAll',    // Button to select all rows
+                'selectNone',   // Button to deselect all rows
+                {
+                    text: 'Remove Devices',
+                    className: 'btn-danger',
+                    action: function () {
+                        var selectedData = dataTable.rows({ selected: true }).data();
+                        var selectedMacAddresses = [];
+                        selectedData.each(function(data) {
+                            selectedMacAddresses.push(data.mac_address);
+                        });
+                        console.log('Selected IPs:', selectedMacAddresses);
+                        if (selectedMacAddresses.length > 0) {
+                            $.ajax({
+                                url: site_url + '/admin/remove-devices',
+                                type: 'POST',
+                                data: { mac_addresses: selectedMacAddresses },
+                                success: function(response) {
+                                    console.log('Devices removed:', response);
+
+                                    Toastify({
+                                        text: "Devices removed with playlists",
+                                    }).showToast();
+
+                                    dataTable.rows({ selected: true }).remove().draw();
+                                }
+                            });
+                        }
+                    }
+                }
+            ],
         });
     }
 
