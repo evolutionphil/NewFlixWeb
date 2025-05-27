@@ -1,0 +1,77 @@
+<div class="page-content">
+    <!-- All Time Stats -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="card-title text-white">All Time Earnings</h5>
+                            <h1 class="display-4 mb-0 text-white"><%= stats.allTime %></h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title text-white">Today's Earnings</h5>
+                    <h2 class="text-white"><%= stats.today %></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title text-white">Yesterday's Earnings</h5>
+                    <h2 class="text-white"><%= stats.yesterday %></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title text-white">This Week</h5>
+                    <h2 class="text-white"><%= stats.thisWeek %></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title text-white">This Month</h5>
+                    <h2 class="text-white"><%= stats.thisMonth %></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    border: none;
+}
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+}
+.bg-dark {
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+}
+.table > :not(caption) > * > * {
+    padding: 1rem;
+}
+.display-4 {
+    font-weight: 300;
+    line-height: 1.2;
+}
+.text-end {
+    text-align: right;
+}
+</style>
