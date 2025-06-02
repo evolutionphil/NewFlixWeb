@@ -2,7 +2,7 @@
     .filter-wrapper label{
         color:#fff !important;
     }
-    
+
     /* DataTables Select Styles */
     table.dataTable tbody tr.selected {
         background-color: #b0bed9 !important;
@@ -80,6 +80,7 @@
                         <tr>
                             <th>IP Address</th>
                             <th>Total Registered Devices</th>
+                            <th>Is Blocked</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -103,6 +104,7 @@
     var columns = [
         {data: 'ip', sortable: true},
         {data: 'total_registered_devices'},
+        {data: 'is_blocked'},
     ];
 
     $(document).ready(function () {
@@ -145,7 +147,7 @@
                                     Toastify({
                                         text: "IPs blocked",
                                     }).showToast();
-                                    console.log('IPs blocked:', response);  
+                                    console.log('IPs blocked:', response);
                                 }
                             });
                         }

@@ -6,11 +6,13 @@ let BlockList = new Schema({
     type: {
         type: String,
         enum: ['mac_address', 'ip_address'],
-        required: true
+        required: true,
     },
     value: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
+        index: true
     },
     cloudflare_id: {
         type: String,

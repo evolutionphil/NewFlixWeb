@@ -1830,16 +1830,13 @@ exports.getIpSummary = async (req, res) => {
         },
         {
             $group: {
-                _id: '$ip',
-                total_registered_devices: {
-                    $sum: 1
-                }
+                _id: '$ip'
             },
         },
         {
             $count: 'total_rows'
         }
-    ]);
+    ], { allowDiskUse: true });
 
     let playlists, sort_filter = {};
 
@@ -1856,12 +1853,17 @@ exports.getIpSummary = async (req, res) => {
             $match: filter_condition
         },
         {
+            $project: {
+                ip: 1
+            }
+        },
+        {
             $group: {
                 _id: '$ip',
                 total_registered_devices: {
                     $sum: 1
                 }
-            },
+            }
         },
         {
             $sort: sort_filter
@@ -1871,8 +1873,31 @@ exports.getIpSummary = async (req, res) => {
         },
         {
             $limit: length
-        }
-    ]);
+        },
+        {
+            $lookup: {
+                from: "blocklists",
+                localField: "_id",
+                foreignField: "value",
+                as: "blocklist",
+                pipeline: [
+                    {
+                        $match: {
+                            type: 'ip_address'
+                        }
+                    },
+                    {$limit: 1}, {$project: {_id: 1}}
+                ]
+            }
+        },
+        {
+            $addFields: {
+                is_blocked: {
+                    $toBool: { $size: "$blocklist" }
+                }
+            }
+        },
+    ], { allowDiskUse: true });
 
     let result_data = [];
 
@@ -1885,6 +1910,7 @@ exports.getIpSummary = async (req, res) => {
 
         let temp = {
             ip: item._id,
+            is_blocked: item.is_blocked ? 'Yes' : 'No',
             total_registered_devices: item.total_registered_devices || 0,
             action: action
         }
