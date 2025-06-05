@@ -251,6 +251,19 @@ exports.savePlaylists=(req,res)=>{
                         req.flash('error','Sorry, Device Not Found');
                         return res.redirect('/mylist');
                     }
+
+                    // If device is locked then don't allow to add playlists
+                    if(device.lock==1){
+                        req.flash('error','Sorry, your device is locked now. <br> Please contact support to unlock your device');
+                        return res.redirect('/mylist');
+                    }
+
+                    // If device trial period is expired then don't allow to add playlists
+                    if(device.is_trial==1 && device.expire_date<moment().format('YYYY-MM-DD')){
+                        req.flash('error','Sorry, your device trial period is expired. Please activate your device to continue.');
+                        return res.redirect('/mylist');
+                    }
+
                     let device_id=device._id;
                     PlayList.deleteMany({device_id:device_id}).then(()=>{
                         let insert_records=[];
