@@ -41,6 +41,10 @@ app.use(express.json(
 
 app.use(useragent.express());
 app.use(express.static('public'))
+
+app.set('trust proxy', 2)
+app.get('/ip', (request, response) => response.send(request.ip))
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use('/static', express.static(path.join(__dirname, 'public')))
