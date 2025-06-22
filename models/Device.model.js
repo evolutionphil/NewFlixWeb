@@ -23,6 +23,10 @@ let DeviceModel = new Schema({
         default:0
     },
     created_time:String,
+    last_used_at: {
+        type: Date,
+        default: null
+    },
     ip:String
 });
 module.exports = mongoose.model('Device', DeviceModel);

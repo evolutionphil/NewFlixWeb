@@ -254,6 +254,8 @@ async function sendApiResponse(req, res, decrypted_req, from_encrypted=false) {
 
                 let expire_date=new moment().add(7,'d').format('Y-MM-DD');
                 device.expire_date=expire_date;
+                device.last_used_at = new Date();
+
                 result.mac_registered=false;
                 result.pin_code=device.parent_pin;
                 result.is_trial=0;
@@ -280,6 +282,10 @@ async function sendApiResponse(req, res, decrypted_req, from_encrypted=false) {
             result.expire_date=device.expire_date;
             result.pin_code=device.pin_code;
             result.lock=device.lock;
+
+            device.last_used_at = new Date();
+            await device.save();
+
             if(device.version!=version){
                 device.version=version;
                 await device.save();
