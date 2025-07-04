@@ -587,6 +587,12 @@ exports.saveActivation=async (req,res)=>{
     }))
     let host_name=req.headers.host;
     Promise.all(promises).then(values=>{
+        if (values.length === 0) {
+            req.flash('error', 'Failed to find your device. Make sure you entered the exact mac address.')
+
+            return res.redirect('/activation');
+        }
+
         let device=values[0];
         let transaction=new Transaction({
             device_id:device._id,
