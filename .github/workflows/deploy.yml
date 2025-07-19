@@ -1,0 +1,28 @@
+name: Deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{secrets.SERVER_HOST}}
+          username: ${{secrets.SERVER_USERNAME}}
+          key: ${{secrets.SERVER_KEY}}
+          script: |
+            cd /root/apps/NewFlixWeb
+            
+            git add .
+            git commit -m "chore: commit from server auto deployment"
+            git pull --rebase
+
+            eval "$(/root/.local/share/fnm/fnm env --use-on-cd --shell bash)"
+
+            npm install
+
+            pm2 restart all

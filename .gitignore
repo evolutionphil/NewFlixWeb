@@ -3,3 +3,4 @@ node_modules
 *.apk
 public/receipts/*
 .idea/*
+.DS_Store
