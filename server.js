@@ -5,6 +5,9 @@ const cors=require('cors');
 const fileUpload = require("express-fileupload");
 const mongoose = require('mongoose');
 const expressLayouts = require('express-ejs-layouts');
+
+// Set strictQuery to suppress deprecation warning
+mongoose.set('strictQuery', false);
 const useragent = require('express-useragent');
 const sendgridClient = require('@sendgrid/client');
 const handlebars = require('handlebars');
