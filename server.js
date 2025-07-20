@@ -107,7 +107,27 @@ connection.once('open', async function() {
 connection.on('error', (error) => {
     console.log('MongoDB connection error:', error.message);
 });
-app.listen(PORT,function () {
+const server = require('http').createServer(app);
+const io = require('socket.io')(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+// Make io globally available for monitoring
+global.io = io;
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+    console.log('Client connected to monitoring dashboard');
+    
+    socket.on('disconnect', () => {
+        console.log('Client disconnected from monitoring dashboard');
+    });
+});
+
+server.listen(PORT, '0.0.0.0', function () {
     console.log('Server is running on Port: '+PORT);
 })
 
@@ -421,8 +441,13 @@ const api_route=require('./routes/api');
 const reseller_route=require('./routes/reseller')
 app.use('/',frontend_route);
 app.use('/admin/',admin_route)
-app.use('/api',api_route);
+// Apply monitoring middleware to API routes
+app.use('/api', global.trackRequest, api_route);
 app.use('/reseller/',reseller_route);
+
+// Add monitoring routes
+const monitoring_route=require('./routes/monitoring');
+app.use('/admin/monitoring/',monitoring_route);
 
 async function removePendingTransactions(){
     let day=moment().subtract('5','days').format('Y-MM-DD');

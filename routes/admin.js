@@ -173,4 +173,3 @@ function checkNotAuthenticated(req, res, next) {
     next()
 }
 module.exports = router;
-
