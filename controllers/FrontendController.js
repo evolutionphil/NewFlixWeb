@@ -616,18 +616,27 @@ exports.saveActivation=async (req,res)=>{
                 switch (payment_type) {
                     case "crypto":
                         transaction_record.coin_type=coin_type;
-                        transaction_record.save();
+                        await transaction_record.save();
+                        
                         let crypto_public_key=settings.crypto_public_key;
                         let crypto_private_key=settings.crypto_private_key;
+                        let crypto_merchant_id=settings.crypto_merchant_id;
+                        
+                        if (!crypto_public_key || !crypto_private_key || !crypto_merchant_id) {
+                            console.log('Coinpayments API credentials not configured');
+                            req.flash('error', 'Payment system is not properly configured. Please contact support.');
+                            return res.redirect('/activation');
+                        }
+                        
                         let CoinpaymentsCredentials= {
                             key: crypto_public_key,
                             secret: crypto_private_key
                         }
-                        const client = new Coinpayments( CoinpaymentsCredentials);
+                        const client = new Coinpayments(CoinpaymentsCredentials);
                         let success_url="https://"+host_name+"/activation/crypto/redirect?transaction_id="+transaction_record._id;
                         let cancel_url="https://"+host_name+"/activation/crypto/cancel?transaction_id="+transaction_record._id;
                         let CoinpaymentsCreateTransactionOpts={
-                            currency1: 'EUR',
+                            currency1: 'USD',
                             currency2: coin_type,
                             amount: parseFloat(price),
                             buyer_email: email,
@@ -635,14 +644,39 @@ exports.saveActivation=async (req,res)=>{
                             success_url: success_url,
                             cancel_url: cancel_url,
                             ipn_url:"https://"+host_name+'/api/crypto-ipn-url/'+transaction_record._id
+                        buyer_email: email,
+                            item_name: 'Flix IPTV Activation - Mac Address: ' + mac_address,
+                            success_url: success_url,
+                            cancel_url: cancel_url,
+                            ipn_url: "https://"+host_name+'/api/crypto-ipn-url/'+transaction_record._id
                         }
-                        client.createTransaction(CoinpaymentsCreateTransactionOpts).then(crypto_result=>{
-                            transaction.payment_id=crypto_result['txn_id'];
-                            transaction.status_url=crypto_result['status_url'];
-                            transaction.save().then(()=>{
-                                return res.redirect(crypto_result.checkout_url);
-                            });
-                        })
+                        
+                        try {
+                            console.log('Creating Coinpayments transaction:', CoinpaymentsCreateTransactionOpts);
+                            let crypto_result = await client.createTransaction(CoinpaymentsCreateTransactionOpts);
+                            console.log('Coinpayments transaction created:', crypto_result);
+                            
+                            if (crypto_result && crypto_result.txn_id) {
+                                transaction_record.payment_id = crypto_result.txn_id;
+                                transaction_record.status_url = crypto_result.status_url || '';
+                                await transaction_record.save();
+                                
+                                if (crypto_result.checkout_url) {
+                                    return res.redirect(crypto_result.checkout_url);
+                                } else {
+                                    req.flash('error', 'Payment checkout URL not provided. Please try again.');
+                                    return res.redirect('/activation');
+                                }
+                            } else {
+                                console.log('Coinpayments transaction creation failed:', crypto_result);
+                                req.flash('error', 'Failed to create payment. Please try again.');
+                                return res.redirect('/activation');
+                            }
+                        } catch (error) {
+                            console.log('Coinpayments API error:', error);
+                            req.flash('error', 'Payment system error. Please try again or contact support.');
+                            return res.redirect('/activation');
+                        }
 
                         break;
                     case 'stripe':
