@@ -19,11 +19,12 @@ dotenv.config();
 let axios=require('axios');
 app.use(expressLayouts);
 
-const OS = require('opensubtitles.com')
-const os = new OS({
-    apikey: process.env.OPENSUBTITLES_API_KEY,
-    useragent: 'Flixapp v1.0.0'
-})
+// Remove the old opensubtitles.com package - we'll use direct API calls
+// const OS = require('opensubtitles.com')
+// const os = new OS({
+//     apikey: process.env.OPENSUBTITLES_API_KEY,
+//     useragent: 'Flixapp v1.0.0'
+// })
 
 const fs = require('fs');
 const path=require('path');
@@ -539,86 +540,114 @@ app.get('/test-block-ip/:ip',(req, res)=>{
     })
 })
 
-global.os_token='';
-app.get('/subtitle-test/:movie_name1?',async (req, res)=>{
+// OpenSubtitles API implementation using direct HTTP calls
+app.get('/subtitle-test/:movie_name1?', async (req, res) => {
     try {
-        if(!os_token){
-            console.log('Attempting OpenSubtitles login...');
-            let login_response=await os.login({
-                username: 'BaiMaoLi',
-                password: '2gRr2PuikBJ#bcd'
-            })
-            os_token=login_response.token;
-            console.log('OpenSubtitles login successful');
-        }
-        let movie_name="20th Century Girl (2022)";
-        let movie_name1=req.query.movie_name1;
-        if(movie_name1)
-            movie_name=movie_name1;
+        const movie_name = req.params.movie_name1 || "20th Century Girl (2022)";
         console.log('Searching subtitles for:', movie_name);
-        let subtitle_response=await os.subtitles({
+        
+        // Search for subtitles using the new API
+        const searchResponse = await axios.get('https://api.opensubtitles.com/api/v1/subtitles', {
+            params: {
+                query: movie_name,
+                languages: 'en,es,fr,de,it', // specify languages you want
+            },
+            headers: {
+                'Api-Key': process.env.OPENSUBTITLES_API_KEY,
+                'User-Agent': 'Flixapp v1.0.0',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const subtitles = searchResponse.data.data || [];
+        console.log(`Found ${subtitles.length} subtitles`);
+
+        if (subtitles.length === 0) {
+            return res.json({
+                message: 'No subtitles found',
+                query: movie_name,
+                count: 0
+            });
+        }
+
+        // Group by language and get the first subtitle for each language
+        const languageMap = {};
+        subtitles.forEach(subtitle => {
+            const lang = subtitle.attributes.language;
+            if (!languageMap[lang] && subtitle.attributes.files && subtitle.attributes.files.length > 0) {
+                languageMap[lang] = {
+                    language: lang,
+                    file_id: subtitle.attributes.files[0].file_id,
+                    subtitle_id: subtitle.id,
+                    movie_name: subtitle.attributes.feature_details?.movie_name || movie_name,
+                    year: subtitle.attributes.feature_details?.year,
+                    download_count: subtitle.attributes.download_count
+                };
+            }
+        });
+
+        const availableLanguages = Object.keys(languageMap);
+        console.log('Available languages:', availableLanguages);
+
+        // For the test, let's download a few subtitle files (limit to 3 to avoid rate limits)
+        const downloadPromises = [];
+        const languagesToDownload = availableLanguages.slice(0, 3);
+
+        for (const lang of languagesToDownload) {
+            const subtitleInfo = languageMap[lang];
+            downloadPromises.push(
+                axios.post('https://api.opensubtitles.com/api/v1/download', {
+                    file_id: subtitleInfo.file_id
+                }, {
+                    headers: {
+                        'Api-Key': process.env.OPENSUBTITLES_API_KEY,
+                        'User-Agent': 'Flixapp v1.0.0',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => ({
+                    language: lang,
+                    success: true,
+                    download_url: response.data.link,
+                    file_name: response.data.file_name,
+                    subtitle_info: subtitleInfo
+                })).catch(error => ({
+                    language: lang,
+                    success: false,
+                    error: error.response?.data || error.message,
+                    subtitle_info: subtitleInfo
+                }))
+            );
+        }
+
+        // Wait for downloads (with rate limiting)
+        const downloadResults = await Promise.all(downloadPromises);
+
+        return res.json({
             query: movie_name,
-        })
+            total_found: subtitles.length,
+            available_languages: availableLanguages,
+            language_details: languageMap,
+            download_results: downloadResults,
+            api_status: 'success'
+        });
+
     } catch (error) {
         console.error('OpenSubtitles API Error:', error.message);
-        if (error.response) {
-            console.error('Response status:', error.response.statusCode);
-            console.error('Response body:', error.response.body);
-        }
-        // Reset token on authentication errors
-        if (error.response && error.response.statusCode === 403) {
-            os_token = '';
-            console.log('Token reset due to 403 error');
-        }
-        return res.status(500).json({
+        
+        let errorResponse = {
             error: 'OpenSubtitles API Error',
             message: error.message,
-            status: error.response ? error.response.statusCode : 'Unknown'
-        });
-    }
-    let files_lists=[],language_lists=[];
-    if(subtitle_response.data.length>0){  // if have subtitles
-        for(let i=0;i<subtitle_response.data.length;i++){
-            let item=subtitle_response.data[i];
-            let attributes=item.attributes, language=attributes.language;
-            if(!language_lists.includes(language)){
-                files_lists.push({
-                    language:language,
-                    file_id:attributes.files[0].file_id
-                })
-                language_lists.push(language)
-            }
-        }
-    }
+            query: req.params.movie_name1 || "20th Century Girl (2022)"
+        };
 
-    if(files_lists.length>0){
-        let downloaded_responses=[];
-        let promises=[]
-        for(let i=0;i<files_lists.length; i++) {
-            let item=files_lists[i];
-            promises.push(new Promise((resolve)=>{
-                os.download({
-                    file_id: item.file_id
-                }).then(value=>resolve(value)).catch(error=>{
-                    console.error('Download error for file_id:', item.file_id, error.message);
-                    resolve({error: error.message, file_id: item.file_id});
-                });
-            }))
-            if(i % 5==4){
-                await new Promise(resolve => setTimeout(resolve, 6000)); // wait 6 seconds
-                let values=await Promise.all(promises);
-                downloaded_responses=downloaded_responses.concat(values);
-                promises=[];
-            }
+        if (error.response) {
+            console.error('Response status:', error.response.status);
+            console.error('Response data:', error.response.data);
+            errorResponse.status = error.response.status;
+            errorResponse.api_response = error.response.data;
         }
-        return res.json({
-            // file_lists:files_lists,
-            // language_lists:language_lists,
-            downloaded_responses:downloaded_responses,
-            // subtitle_response:subtitle_response
-        });
-    }else {
-        return res.json(subtitle_response);
+
+        return res.status(500).json(errorResponse);
     }
 })
 
