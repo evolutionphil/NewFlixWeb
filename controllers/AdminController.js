@@ -875,11 +875,12 @@ exports.showPaypalSetting=(req,res)=>{
 }
 exports.savePaypalSetting=(req,res)=>{
     let input=req.body;
-    let {paypal_client_id, paypal_secret, paypal_mode}=input;
+    let {paypal_client_id, paypal_secret, paypal_mode, paypal_webhook_id}=input;
     settings.paypal_client_id=paypal_client_id;
     settings.paypal_secret=paypal_secret;
     settings.paypal_mode=paypal_mode;
-    Setting.deleteMany({key:{$in:['paypal_client_id','paypal_secret','paypal_mode']}}).then(()=>{
+    settings.paypal_webhook_id=paypal_webhook_id;
+    Setting.deleteMany({key:{$in:['paypal_client_id','paypal_secret','paypal_mode','paypal_webhook_id']}}).then(()=>{
         Setting.insertMany([
             {
                 key:'paypal_client_id',
@@ -892,6 +893,10 @@ exports.savePaypalSetting=(req,res)=>{
             {
                 key:'paypal_mode',
                 value:paypal_mode
+            },
+            {
+                key:'paypal_webhook_id',
+                value:paypal_webhook_id
             }
         ]).then(()=>{
             return res.redirect('/admin/showPaypalSetting');

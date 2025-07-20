@@ -595,6 +595,13 @@ exports.paypalWebhook=async(req, res)=>{
     try {
         console.log('PayPal Webhook received:', req.body);
         
+        // Verify webhook signature (optional but recommended)
+        let webhook_id = settings.paypal_webhook_id;
+        if (!webhook_id) {
+            console.log('PayPal webhook ID not configured');
+            return res.status(400).json({status: 'error', msg: 'Webhook ID not configured'});
+        }
+        
         let event_type = req.body.event_type;
         let resource = req.body.resource;
         
