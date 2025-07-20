@@ -443,12 +443,12 @@ const reseller_route=require('./routes/reseller')
 // Import monitoring middleware
 require('./middlewares/monitoring');
 
-// Apply monitoring middleware to all routes
-app.use(global.trackRequest);
-
 app.use('/',frontend_route);
 app.use('/admin/',admin_route)
-app.use('/api', api_route);
+
+// Apply monitoring middleware specifically to API routes
+app.use('/api', global.trackRequest, api_route);
+
 app.use('/reseller/',reseller_route);
 
 // Add monitoring routes

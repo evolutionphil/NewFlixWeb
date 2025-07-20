@@ -170,9 +170,24 @@
                     <div class="monitoring-card">
                         <h4>Live API Requests <span class="badge" id="logCount">0</span></h4>
                         <div class="live-logs" id="liveLogs">
-                            <div class="text-center p-3 text-muted">
-                                Waiting for API requests...
-                            </div>
+                            <table class="table table-striped" id="realtime-logs">
+                                <thead>
+                                            <tr>
+                                                <th>Time</th>
+                                                <th>MAC Address</th>
+                                                <th>API Endpoint</th>
+                                                <th>IP Address</th>
+                                                <th>App Type</th>
+                                                <th>Method</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" class="text-center">Waiting for API requests...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -408,4 +423,50 @@ $(document).ready(function() {
             // Update counters
             updateCounters(data);
         });
+
+        // Add new log entry to the table
+            function addToRealtimeLogs(data) {
+                const logsTable = document.getElementById('realtime-logs');
+                const tbody = logsTable.querySelector('tbody');
+
+                // Create new row
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${data.timestamp}</td>
+                    <td>${data.macAddress || 'No MAC'}</td>
+                    <td><code>${data.endpoint}</code></td>
+                    <td>${data.ip}</td>
+                    <td><span class="badge badge-${getPlatformBadgeColor(data.platform)}">${data.appType || data.platform}</span></td>
+                    <td><span class="badge badge-info">${data.method || 'GET'}</span></td>
+                    <td><span class="badge badge-warning">Processing</span></td>
+                `;
+
+                // Add to top of table
+                tbody.insertBefore(row, tbody.firstChild);
+
+                // Remove old rows (keep only 50)
+                while (tbody.children.length > 50) {
+                    tbody.removeChild(tbody.lastChild);
+                }
+            }
+
+            // Update log status when request completes
+            function updateLogStatus(data) {
+                const logsTable = document.getElementById('realtime-logs');
+                const tbody = logsTable.querySelector('tbody');
+
+                // Find the row with matching timestamp and endpoint
+                for (let row of tbody.children) {
+                    const timestamp = row.children[0].textContent;
+                    const endpoint = row.children[2].textContent;
+
+                    if (timestamp === data.timestamp && endpoint === data.endpoint) {
+                        const statusCell = row.children[row.children.length - 1];
+                        const statusColor = data.status >= 200 && data.status < 300 ? 'success' : 
+                                          data.status >= 400 ? 'danger' : 'warning';
+                        statusCell.innerHTML = `<span class="badge badge-${statusColor}">${data.status}</span>`;
+                        break;
+                    }
+                }
+            }
 </script>
