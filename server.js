@@ -20,7 +20,10 @@ let axios=require('axios');
 app.use(expressLayouts);
 
 const OS = require('opensubtitles.com')
-const os = new OS({apikey: process.env.OPENSUBTITLES_API_KEY})
+const os = new OS({
+    apikey: process.env.OPENSUBTITLES_API_KEY,
+    useragent: 'Flixapp v1.0.0'
+})
 
 const fs = require('fs');
 const path=require('path');
