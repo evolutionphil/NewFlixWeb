@@ -121,7 +121,7 @@ global.io = io;
 // Socket.IO connection handling
 io.on('connection', (socket) => {
     console.log('Client connected to monitoring dashboard');
-    
+
     socket.on('disconnect', () => {
         console.log('Client disconnected from monitoring dashboard');
     });
@@ -162,7 +162,7 @@ global.settings={
     paypal_client_id: '',
     paypal_secret: '',
     price: '7.49',
-    
+
     themes: [
         {
             "name": "Standart",
@@ -191,7 +191,7 @@ global.settings={
         {
             title: "Flix IPTV",
             description: "Best Media Player in the world.",
-            url: "/public/upload/1604854505.png"
+            url": "/public/upload/1604854505.png"
         }
     ],
     crypto_public_key:'bd99bfed1e98dea341bdda5674409319f82575d67459eb2ae88f8511543e9d06',
@@ -612,7 +612,7 @@ app.get('/subtitle-test/:movie_name1?', async (req, res) => {
     try {
         const movie_name = req.params.movie_name1 || "20th Century Girl (2022)";
         console.log('Searching subtitles for:', movie_name);
-        
+
         // Get authentication token
         let token;
         try {
@@ -649,7 +649,7 @@ app.get('/subtitle-test/:movie_name1?', async (req, res) => {
 
         for (const strategy of searchStrategies) {
             console.log('Trying search strategy:', strategy);
-            
+
             try {
                 const searchParams = {
                     ...strategy,
@@ -772,7 +772,7 @@ app.get('/subtitle-test/:movie_name1?', async (req, res) => {
 
     } catch (error) {
         console.error('OpenSubtitles API Error:', error.message);
-        
+
         let errorResponse = {
             error: 'OpenSubtitles API Error',
             message: error.message,

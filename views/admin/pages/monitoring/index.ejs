@@ -1,1066 +1,324 @@
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Monitoring Dashboard - Flix IPTV</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f1419;
-            color: #fff;
-            overflow-x: hidden;
-        }
-
-        .dashboard-header {
-            background: linear-gradient(135deg, #1a1f36 0%, #2d3748 100%);
-            padding: 2rem;
-            border-bottom: 1px solid #2d3748;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .dashboard-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-        }
-
-        .dashboard-subtitle {
-            color: #a0aec0;
-            font-size: 1.1rem;
-        }
-
-        .live-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(72, 187, 120, 0.1);
-            padding: 0.75rem 1.5rem;
-            border-radius: 50px;
-            border: 1px solid #48bb78;
-        }
-
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: #48bb78;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            padding: 2rem;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid #4a5568;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #a0aec0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .stat-value {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(45deg, #fff 0%, #e2e8f0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-change {
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .positive { color: #48bb78; }
-        .negative { color: #f56565; }
-
-        .charts-section {
-            padding: 0 2rem 2rem;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .chart-card {
-            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid #4a5568;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .chart-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            color: #e2e8f0;
-        }
-
-        .tables-section {
-            padding: 0 2rem 2rem;
-        }
-
-        .table-card {
-            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-            border-radius: 16px;
-            border: 1px solid #4a5568;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-
-        .table-header {
-            padding: 2rem 2rem 1rem;
-            border-bottom: 1px solid #4a5568;
-        }
-
-        .table-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #e2e8f0;
-            margin-bottom: 0.5rem;
-        }
-
-        .table-subtitle {
-            color: #a0aec0;
-            font-size: 0.9rem;
-        }
-
-        .table-container {
-            max-height: 500px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #4a5568 #2d3748;
-        }
-
-        .table-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .table-container::-webkit-scrollbar-track {
-            background: #2d3748;
-        }
-
-        .table-container::-webkit-scrollbar-thumb {
-            background: #4a5568;
-            border-radius: 4px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 1rem 2rem;
-            text-align: left;
-            border-bottom: 1px solid #4a5568;
-        }
-
-        th {
-            background: #2d3748;
-            font-weight: 600;
-            color: #e2e8f0;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        td {
-            color: #cbd5e0;
-            font-size: 0.9rem;
-        }
-
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-success { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
-        .status-error { background: rgba(245, 101, 101, 0.2); color: #f56565; }
-        .status-warning { background: rgba(237, 137, 54, 0.2); color: #ed8936; }
-
-        .mac-address {
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-            background: rgba(99, 102, 241, 0.1);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            color: #818cf8;
-        }
-
-        .ip-address {
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-            color: #fbb6ce;
-        }
-
-        .endpoint {
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            color: #9ae6b4;
-        }
-
-        .actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .action-btn {
-            padding: 0.25rem 0.5rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .action-btn.view {
-            background: rgba(66, 153, 225, 0.2);
-            color: #4299e1;
-        }
-
-        .action-btn.block {
-            background: rgba(245, 101, 101, 0.2);
-            color: #f56565;
-        }
-
-        .action-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #a0aec0;
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-                padding: 1rem;
-            }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .dashboard-title {
-                font-size: 2rem;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="dashboard-header">
-        <div class="header-content">
-            <div>
-                <h1 class="dashboard-title">Live Monitoring Dashboard</h1>
-                <p class="dashboard-subtitle">Real-time system monitoring and analytics</p>
-            </div>
-            <div class="live-indicator">
-                <div class="live-dot"></div>
-                <span>Live</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-title">Total Requests</span>
-                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.2); color: #6366f1;">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-            </div>
-            <div class="stat-value" id="totalRequests">0</div>
-            <div class="stat-change positive" id="requestsChange">+0% from yesterday</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-title">Total Devices</span>
-                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.2); color: #10b981;">
-                    <i class="fas fa-mobile-alt"></i>
-                </div>
-            </div>
-            <div class="stat-value" id="totalDevices">0</div>
-            <div class="stat-change positive" id="devicesChange">+0% from yesterday</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-title">Activated Devices</span>
-                <div class="stat-icon" style="background: rgba(34, 197, 94, 0.2); color: #22c55e;">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-            </div>
-            <div class="stat-value" id="activatedDevices">0</div>
-            <div class="stat-change positive" id="activatedChange">+0% from yesterday</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-header">
-                <span class="stat-title">24h Transactions</span>
-                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">
-                    <i class="fas fa-credit-card"></i>
-                </div>
-            </div>
-            <div class="stat-value" id="dailyTransactions">0</div>
-            <div class="stat-change positive" id="transactionsChange">+0% from yesterday</div>
-        </div>
-    </div>
-
-    <!-- Charts Section -->
-    <div class="charts-section">
-        <div class="charts-grid">
-            <div class="chart-card">
-                <h3 class="chart-title">Monthly Revenue (Last 6 Months)</h3>
-                <canvas id="revenueChart"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3 class="chart-title">Daily Registrations (Last 7 Days)</h3>
-                <canvas id="registrationsChart"></canvas>
-            </div>
-        </div>
-        
-        <div class="chart-card">
-            <h3 class="chart-title">Platform Distribution</h3>
-            <canvas id="platformChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Tables Section -->
-    <div class="tables-section">
-        <!-- MAC Address API Statistics -->
-        <div class="table-card">
-            <div class="table-header">
-                <h3 class="table-title">MAC Address API Statistics</h3>
-                <p class="table-subtitle">Real-time API usage by MAC address</p>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>MAC Address</th>
-                            <th>Total Requests</th>
-                            <th>IP Addresses</th>
-                            <th>First Request</th>
-                            <th>Last Request</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="macStatsTable">
-                        <tr>
-                            <td colspan="6" class="loading">
-                                <i class="fas fa-spinner fa-spin"></i> Loading data...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Monitoring Logs -->
-        <div class="table-card">
-            <div class="table-header">
-                <h3 class="table-title">Live Monitoring Logs</h3>
-                <p class="table-subtitle">Real-time API requests and responses</p>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>MAC Address</th>
-                            <th>Endpoint</th>
-                            <th>IP Address</th>
-                            <th>User Agent</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logsTable">
-                        <tr>
-                            <td colspan="6" class="loading">
-                                <i class="fas fa-spinner fa-spin"></i> Waiting for requests...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Initialize Socket.IO connection
-        const socket = io();
-
-        // Initialize charts
-        let revenueChart, registrationsChart, platformChart;
-
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCharts();
-            loadInitialData();
-            setupSocketListeners();
-        });
-
-        function initializeCharts() {
-            // Revenue Chart
-            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            revenueChart = new Chart(revenueCtx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Revenue ($)',
-                        data: [],
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#e2e8f0' }
-                        }
-                    },
-                    scales: {
-                        x: { ticks: { color: '#a0aec0' }, grid: { color: '#4a5568' } },
-                        y: { ticks: { color: '#a0aec0' }, grid: { color: '#4a5568' } }
-                    }
-                }
-            });
-
-            // Registrations Chart
-            const registrationsCtx = document.getElementById('registrationsChart').getContext('2d');
-            registrationsChart = new Chart(registrationsCtx, {
-                type: 'bar',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'New Registrations',
-                        data: [],
-                        backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                        borderColor: '#10b981',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#e2e8f0' }
-                        }
-                    },
-                    scales: {
-                        x: { ticks: { color: '#a0aec0' }, grid: { color: '#4a5568' } },
-                        y: { ticks: { color: '#a0aec0' }, grid: { color: '#4a5568' } }
-                    }
-                }
-            });
-
-            // Platform Chart
-            const platformCtx = document.getElementById('platformChart').getContext('2d');
-            platformChart = new Chart(platformCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        data: [],
-                        backgroundColor: [
-                            '#6366f1',
-                            '#10b981',
-                            '#f59e0b',
-                            '#ef4444',
-                            '#8b5cf6'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#e2e8f0' }
-                        }
-                    }
-                }
-            });
-        }
-
-        function loadInitialData() {
-            fetch('/admin/monitoring/stats')
-                .then(response => response.json())
-                .then(data => {
-                    updateStats(data);
-                    updateCharts(data);
-                    updateMacStats(data.macStats);
-                })
-                .catch(error => console.error('Error loading initial data:', error));
-        }
-
-        function setupSocketListeners() {
-            // Listen for real-time updates
-            socket.on('stats-update', (data) => {
-                updateStats(data);
-            });
-
-            socket.on('new-request', (logEntry) => {
-                addLogEntry(logEntry);
-            });
-
-            socket.on('mac-stats-update', (macStats) => {
-                updateMacStats(macStats);
-            });
-
-            socket.on('charts-update', (data) => {
-                updateCharts(data);
-            });
-        }
-
-        function updateStats(data) {
-            document.getElementById('totalRequests').textContent = formatNumber(data.totalRequests || 0);
-            document.getElementById('totalDevices').textContent = formatNumber(data.totalDevices || 0);
-            document.getElementById('activatedDevices').textContent = formatNumber(data.activatedDevices || 0);
-            document.getElementById('dailyTransactions').textContent = formatNumber(data.dailyTransactions || 0);
-
-            // Update change percentages
-            document.getElementById('requestsChange').textContent = `${data.requestsChange || '+0'}% from yesterday`;
-            document.getElementById('devicesChange').textContent = `${data.devicesChange || '+0'}% from yesterday`;
-            document.getElementById('activatedChange').textContent = `${data.activatedChange || '+0'}% from yesterday`;
-            document.getElementById('transactionsChange').textContent = `${data.transactionsChange || '+0'}% from yesterday`;
-        }
-
-        function updateCharts(data) {
-            if (data.revenue) {
-                revenueChart.data.labels = data.revenue.labels;
-                revenueChart.data.datasets[0].data = data.revenue.data;
-                revenueChart.update();
-            }
-
-            if (data.registrations) {
-                registrationsChart.data.labels = data.registrations.labels;
-                registrationsChart.data.datasets[0].data = data.registrations.data;
-                registrationsChart.update();
-            }
-
-            if (data.platforms) {
-                platformChart.data.labels = data.platforms.labels;
-                platformChart.data.datasets[0].data = data.platforms.data;
-                platformChart.update();
-            }
-        }
-
-        function updateMacStats(macStats) {
-            const tbody = document.getElementById('macStatsTable');
-            tbody.innerHTML = '';
-
-            if (!macStats || macStats.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="loading">No data available</td></tr>';
-                return;
-            }
-
-            macStats.forEach(stat => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><span class="mac-address">${stat.macAddress}</span></td>
-                    <td>${formatNumber(stat.totalRequests)}</td>
-                    <td>${stat.ipCount}</td>
-                    <td>${formatDateTime(stat.firstRequest)}</td>
-                    <td>${formatDateTime(stat.lastRequest)}</td>
-                    <td class="actions">
-                        <button class="action-btn view" onclick="viewDetails('${stat.macAddress}')">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                        <button class="action-btn block" onclick="blockMac('${stat.macAddress}')">
-                            <i class="fas fa-ban"></i> Block
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function addLogEntry(logEntry) {
-            const tbody = document.getElementById('logsTable');
-            
-            // Remove loading message if exists
-            if (tbody.children.length === 1 && tbody.children[0].cells[0].colSpan === 6) {
-                tbody.innerHTML = '';
-            }
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${formatDateTime(logEntry.timestamp)}</td>
-                <td><span class="mac-address">${logEntry.macAddress || 'N/A'}</span></td>
-                <td><span class="endpoint">${logEntry.endpoint}</span></td>
-                <td><span class="ip-address">${logEntry.ip}</span></td>
-                <td>${truncateText(logEntry.userAgent, 50)}</td>
-                <td><span class="status-badge ${getStatusClass(logEntry.status)}">${logEntry.status}</span></td>
-            `;
-
-            // Insert at the beginning
-            tbody.insertBefore(row, tbody.firstChild);
-
-            // Keep only last 100 entries
-            while (tbody.children.length > 100) {
-                tbody.removeChild(tbody.lastChild);
-            }
-        }
-
-        function formatNumber(num) {
-            return new Intl.NumberFormat().format(num);
-        }
-
-        function formatDateTime(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString);
-            return date.toLocaleString();
-        }
-
-        function truncateText(text, maxLength) {
-            if (!text) return 'N/A';
-            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-        }
-
-        function getStatusClass(status) {
-            if (status >= 200 && status < 300) return 'status-success';
-            if (status >= 400 && status < 500) return 'status-warning';
-            if (status >= 500) return 'status-error';
-            return 'status-success';
-        }
-
-        function viewDetails(macAddress) {
-            // Open details modal or navigate to details page
-            window.open(`/admin/monitoring/mac/${macAddress}`, '_blank');
-        }
-
-        function blockMac(macAddress) {
-            if (confirm(`Are you sure you want to block MAC address ${macAddress}?`)) {
-                fetch('/admin/monitoring/block-mac', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ macAddress })
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        alert('MAC address blocked successfully');
-                        loadInitialData(); // Refresh data
-                    } else {
-                        alert('Failed to block MAC address');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error blocking MAC:', error);
-                    alert('Failed to block MAC address');
-                });
-            }
-        }
-
-        // Refresh data every 10 seconds
-        setInterval(loadInitialData, 10000);
-    </script>
-</body>
-</html>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="/admin/template/css/site.css">
+<link rel="stylesheet" href="/admin/template/css/bootstrap.css">
+<link rel="stylesheet" href="/admin/template/fonts/font-awesome/font-awesome.css">
+<script src="/admin/template/vendor/jquery/jquery.js"></script>
+<script src="/admin/template/vendor/bootstrap/bootstrap.js"></script>
+<script src="/admin/template/vendor/chart-js/Chart.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 
 <style>
-.monitoring-dashboard {
-    padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-}
-
-.stats-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
+.monitoring-card {
+    background: #fff;
+    border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.stats-card:hover {
-    transform: translateY(-5px);
-}
-
-.stat-item {
+.stat-card {
     text-align: center;
     padding: 15px;
 }
 
 .stat-number {
-    font-size: 2.5rem;
+    font-size: 2em;
     font-weight: bold;
-    color: #333;
-    display: block;
+    color: #2c3e50;
 }
 
 .stat-label {
-    color: #666;
-    font-size: 0.9rem;
-    margin-top: 5px;
+    color: #7f8c8d;
+    margin-bottom: 5px;
 }
+
+.stat-change {
+    font-size: 0.9em;
+}
+
+.stat-change.positive {
+    color: #27ae60;
+}
+
+.stat-change.negative {
+    color: #e74c3c;
+}
+
+.log-entry {
+    padding: 8px 12px;
+    border-bottom: 1px solid #ecf0f1;
+    font-size: 0.9em;
+}
+
+.log-entry:hover {
+    background: #f8f9fa;
+}
+
+.log-timestamp {
+    color: #7f8c8d;
+    font-weight: bold;
+}
+
+.log-mac {
+    color: #3498db;
+    font-weight: bold;
+}
+
+.log-endpoint {
+    color: #2c3e50;
+}
+
+.log-ip {
+    color: #e67e22;
+}
+
+.status-200 { color: #27ae60; }
+.status-400 { color: #f39c12; }
+.status-404 { color: #e74c3c; }
+.status-500 { color: #8e44ad; }
 
 .chart-container {
     position: relative;
     height: 300px;
-    margin-bottom: 20px;
+    margin: 20px 0;
 }
 
-.logs-container {
+.mac-stats-table {
     max-height: 400px;
     overflow-y: auto;
-    background: white;
-    border-radius: 10px;
-    padding: 15px;
 }
 
-.log-item {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    font-family: monospace;
-    font-size: 0.85rem;
+.live-logs {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
-.log-item:last-child {
-    border-bottom: none;
-}
-
-.mac-table {
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.table {
-    margin: 0;
-}
-
-.table th {
-    background: #f8f9fa;
-    border: none;
-    font-weight: 600;
-}
-
-.status-indicator {
+.online-indicator {
+    display: inline-block;
     width: 10px;
     height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 5px;
-}
-
-.status-online { background: #28a745; }
-.status-offline { background: #dc3545; }
-.status-warning { background: #ffc107; }
-
-.platform-badge {
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.badge-android { background: #a4c639; color: white; }
-.badge-ios { background: #007aff; color: white; }
-.badge-smarttv { background: #6f42c1; color: white; }
-.badge-web { background: #17a2b8; color: white; }
-.badge-other { background: #6c757d; color: white; }
-
-.refresh-btn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 1000;
-}
-
-.real-time-indicator {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    display: flex;
-    align-items: center;
-}
-
-.pulse {
-    width: 8px;
-    height: 8px;
-    background: #28a745;
+    background: #27ae60;
     border-radius: 50%;
     margin-right: 5px;
-    animation: pulse 1.5s infinite;
+    animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-    0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.1); }
-    100% { opacity: 1; transform: scale(1); }
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 </style>
 
-<div class="monitoring-dashboard">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="text-white mb-0">
-                <i class="fas fa-chart-line me-2"></i>
-                Real-time Monitoring Dashboard
-                <div class="real-time-indicator">
-                    <div class="pulse"></div>
-                    <small style="color: rgba(255,255,255,0.8);">Live</small>
-                </div>
-            </h1>
+<div class="page-content">
+    <div class="panel">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <span class="online-indicator"></span>
+                Live Monitoring Dashboard
+            </h3>
         </div>
-    </div>
+        <div class="panel-body">
+            <!-- Statistics Cards -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="monitoring-card stat-card">
+                        <div class="stat-label">Total Requests</div>
+                        <div class="stat-number" id="totalRequests">0</div>
+                        <div class="stat-change" id="requestsChange">+0%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="monitoring-card stat-card">
+                        <div class="stat-label">Total Devices</div>
+                        <div class="stat-number" id="totalDevices">0</div>
+                        <div class="stat-change" id="devicesChange">+0%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="monitoring-card stat-card">
+                        <div class="stat-label">Activated Devices</div>
+                        <div class="stat-number" id="activatedDevices">0</div>
+                        <div class="stat-change" id="activatedChange">+0%</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="monitoring-card stat-card">
+                        <div class="stat-label">Daily Transactions</div>
+                        <div class="stat-number" id="dailyTransactions">0</div>
+                        <div class="stat-change" id="transactionsChange">+0%</div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Stats Cards -->
-    <div class="row">
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stat-item">
-                    <span class="stat-number" id="totalDevices">0</span>
-                    <div class="stat-label">Total Devices</div>
+            <!-- Charts Row -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="monitoring-card">
+                        <h4>Device Registrations (Last 7 Days)</h4>
+                        <div class="chart-container">
+                            <canvas id="registrationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="monitoring-card">
+                        <h4>Platform Distribution</h4>
+                        <div class="chart-container">
+                            <canvas id="platformChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stat-item">
-                    <span class="stat-number" id="activatedDevices">0</span>
-                    <div class="stat-label">Activated Devices</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stat-item">
-                    <span class="stat-number" id="last24hTransactions">0</span>
-                    <div class="stat-label">24h Transactions</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stat-item">
-                    <span class="stat-number" id="totalRequests">0</span>
-                    <div class="stat-label">Total Requests</div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Charts -->
-    <div class="row">
-        <div class="col-md-6">
-            <div class="stats-card">
-                <h5>Platform Distribution</h5>
-                <div class="chart-container">
-                    <canvas id="platformChart"></canvas>
+            <!-- Live Logs and MAC Stats -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="monitoring-card">
+                        <h4>Live API Requests <span class="badge" id="logCount">0</span></h4>
+                        <div class="live-logs" id="liveLogs">
+                            <div class="text-center p-3 text-muted">
+                                Waiting for API requests...
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="stats-card">
-                <h5>Monthly Revenue (Last 6 Months)</h5>
-                <div class="chart-container">
-                    <canvas id="revenueChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <div class="stats-card">
-                <h5>Daily Registrations (Last 7 Days)</h5>
-                <div class="chart-container">
-                    <canvas id="registrationChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAC Address Statistics -->
-    <div class="row">
-        <div class="col-12">
-            <div class="stats-card">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5>MAC Address API Statistics</h5>
-                    <button class="btn btn-outline-primary btn-sm" onclick="refreshMacStats()">
-                        <i class="fas fa-sync"></i> Refresh
-                    </button>
-                </div>
-                <div class="mac-table">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>MAC Address</th>
-                                <th>Total Requests</th>
-                                <th>IP Addresses</th>
-                                <th>First Request</th>
-                                <th>Last Request</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="macStatsTable">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Live Logs -->
-    <div class="row">
-        <div class="col-12">
-            <div class="stats-card">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5>Monitoring Logs</h5>
-                    <button class="btn btn-outline-danger btn-sm" onclick="clearLogs()">
-                        <i class="fas fa-trash"></i> Clear Logs
-                    </button>
-                </div>
-                <div class="logs-container" id="logsContainer">
+                <div class="col-md-4">
+                    <div class="monitoring-card">
+                        <h4>Top MAC Addresses</h4>
+                        <div class="mac-stats-table" id="macStats">
+                            <div class="text-center p-3 text-muted">
+                                Loading MAC statistics...
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Refresh Button -->
-<button class="btn btn-primary btn-lg refresh-btn" onclick="refreshAll()">
-    <i class="fas fa-sync fa-spin" id="refreshIcon"></i>
-</button>
-
 <script>
 let socket;
-let charts = {};
+let registrationChart, platformChart;
+let stats = {};
 
 // Initialize Socket.IO connection
 function initSocket() {
     socket = io();
-    
+
     socket.on('connect', function() {
-        console.log('Connected to monitoring socket');
+        console.log('Connected to monitoring dashboard');
+        $('.online-indicator').css('background', '#27ae60');
     });
-    
+
+    socket.on('disconnect', function() {
+        console.log('Disconnected from monitoring dashboard');
+        $('.online-indicator').css('background', '#e74c3c');
+    });
+
+    socket.on('new-request', function(logEntry) {
+        addLogEntry(logEntry);
+    });
+
     socket.on('newRequest', function(data) {
-        updateRealtimeStats(data);
         addLogEntry(data);
+        updateRealTimeStats(data);
     });
 }
 
-// Initialize charts
-function initCharts() {
-    // Platform Distribution Chart
-    const platformCtx = document.getElementById('platformChart').getContext('2d');
-    charts.platform = new Chart(platformCtx, {
+// Load initial statistics
+function loadStats() {
+    $.ajax({
+        url: '/admin/monitoring/stats',
+        method: 'GET',
+        success: function(data) {
+            console.log('Loaded stats:', data);
+            stats = data;
+            updateStatCards(data);
+            updateCharts(data);
+            updateMacStats(data.macStats);
+            displayRealtimeLogs(data.realtimeLogs);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading stats:', error);
+        }
+    });
+}
+
+// Update statistic cards
+function updateStatCards(data) {
+    $('#totalRequests').text(data.totalRequests || 0);
+    $('#totalDevices').text(data.totalDevices || 0);
+    $('#activatedDevices').text(data.activatedDevices || 0);
+    $('#dailyTransactions').text(data.dailyTransactions || 0);
+
+    updateChangeIndicator('#requestsChange', data.requestsChange);
+    updateChangeIndicator('#devicesChange', data.devicesChange);
+    updateChangeIndicator('#activatedChange', data.activatedChange);
+    updateChangeIndicator('#transactionsChange', data.transactionsChange);
+}
+
+// Update change indicators
+function updateChangeIndicator(selector, change) {
+    const element = $(selector);
+    const value = change || 0;
+    element.text((value >= 0 ? '+' : '') + value + '%');
+    element.removeClass('positive negative');
+    element.addClass(value >= 0 ? 'positive' : 'negative');
+}
+
+// Update charts
+function updateCharts(data) {
+    // Registration Chart
+    if (registrationChart) {
+        registrationChart.destroy();
+    }
+
+    const regCtx = document.getElementById('registrationChart').getContext('2d');
+    registrationChart = new Chart(regCtx, {
+        type: 'line',
+        data: {
+            labels: data.registrations?.labels || [],
+            datasets: [{
+                label: 'Device Registrations',
+                data: data.registrations?.data || [],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Platform Chart
+    if (platformChart) {
+        platformChart.destroy();
+    }
+
+    const platCtx = document.getElementById('platformChart').getContext('2d');
+    platformChart = new Chart(platCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Android', 'iOS', 'Smart TV', 'Web', 'Other'],
+            labels: data.platforms?.labels || [],
             datasets: [{
-                data: [0, 0, 0, 0, 0],
-                backgroundColor: ['#a4c639', '#007aff', '#6f42c1', '#17a2b8', '#6c757d']
+                data: data.platforms?.data || [],
+                backgroundColor: [
+                    '#3498db',
+                    '#e74c3c',
+                    '#f39c12',
+                    '#27ae60',
+                    '#9b59b6'
+                ]
             }]
         },
         options: {
@@ -1068,254 +326,101 @@ function initCharts() {
             maintainAspectRatio: false
         }
     });
-    
-    // Revenue Chart
-    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    charts.revenue = new Chart(revenueCtx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Revenue ($)',
-                data: [],
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-    
-    // Registration Chart
-    const registrationCtx = document.getElementById('registrationChart').getContext('2d');
-    charts.registration = new Chart(registrationCtx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Registrations',
-                data: [],
-                backgroundColor: '#764ba2'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
 }
 
-// Load and update all data
-async function loadData() {
-    try {
-        const response = await fetch('/admin/monitoring/stats');
-        const data = await response.json();
-        
-        updateStats(data);
-        updateCharts(data);
-        updateMacTable(data.macStats);
-        updateLogs(data.recentLogs);
-        
-    } catch (error) {
-        console.error('Error loading data:', error);
+// Add new log entry
+function addLogEntry(logEntry) {
+    const logsContainer = $('#liveLogs');
+
+    // Remove "waiting" message if it exists
+    if (logsContainer.find('.text-muted').length > 0) {
+        logsContainer.empty();
     }
-}
 
-// Update basic stats
-function updateStats(data) {
-    document.getElementById('totalDevices').textContent = data.totalDevices.toLocaleString();
-    document.getElementById('activatedDevices').textContent = data.activatedDevices.toLocaleString();
-    document.getElementById('last24hTransactions').textContent = data.last24hTransactions.toLocaleString();
-    document.getElementById('totalRequests').textContent = data.totalRequests.toLocaleString();
-}
+    const timestamp = new Date(logEntry.timestamp || Date.now()).toLocaleTimeString();
+    const statusClass = `status-${Math.floor((logEntry.status || 200) / 100) * 100}`;
 
-// Update charts
-function updateCharts(data) {
-    // Platform chart
-    const platformData = [
-        data.platformDistribution.android,
-        data.platformDistribution.ios,
-        data.platformDistribution.smarttv,
-        data.platformDistribution.web,
-        data.platformDistribution.other
-    ];
-    charts.platform.data.datasets[0].data = platformData;
-    charts.platform.update();
-    
-    // Revenue chart
-    charts.revenue.data.labels = data.monthlyRevenue.map(item => item.month);
-    charts.revenue.data.datasets[0].data = data.monthlyRevenue.map(item => item.revenue);
-    charts.revenue.update();
-    
-    // Registration chart
-    charts.registration.data.labels = data.dailyRegistrations.map(item => item.date);
-    charts.registration.data.datasets[0].data = data.dailyRegistrations.map(item => item.count);
-    charts.registration.update();
-}
-
-// Update MAC address table
-function updateMacTable(macStats) {
-    const tbody = document.getElementById('macStatsTable');
-    tbody.innerHTML = '';
-    
-    macStats.slice(0, 50).forEach(mac => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><code>${mac.macAddress}</code></td>
-            <td>${mac.totalRequests}</td>
-            <td>${mac.ipAddresses.length}</td>
-            <td>${mac.firstRequest}</td>
-            <td>${mac.lastRequest}</td>
-            <td>
-                <button class="btn btn-info btn-sm" onclick="viewMacDetails('${mac.macAddress}')">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn btn-warning btn-sm" onclick="blockMac('${mac.macAddress}')">
-                    <i class="fas fa-ban"></i>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
-// Update logs
-function updateLogs(logs) {
-    const container = document.getElementById('logsContainer');
-    container.innerHTML = '';
-    
-    logs.forEach(log => {
-        const logElement = document.createElement('div');
-        logElement.className = 'log-item';
-        logElement.innerHTML = `
-            <span class="text-muted">${log.timestamp}</span>
-            <strong>${log.macAddress}</strong>
-            <code>${log.endpoint}</code>
-            <span class="text-info">${log.ip}</span>
-            <span class="badge badge-secondary">${log.status}</span>
-        `;
-        container.appendChild(logElement);
-    });
-}
-
-// Real-time updates
-function updateRealtimeStats(data) {
-    document.getElementById('totalRequests').textContent = data.totalRequests.toLocaleString();
-}
-
-function addLogEntry(data) {
-    const container = document.getElementById('logsContainer');
-    const logElement = document.createElement('div');
-    logElement.className = 'log-item';
-    logElement.innerHTML = `
-        <span class="text-muted">${data.timestamp}</span>
-        <strong>${data.macAddress || 'N/A'}</strong>
-        <code>${data.endpoint}</code>
-        <span class="text-info">${data.ip}</span>
-        <span class="platform-badge badge-${data.platform}">${data.platform}</span>
+    const logHtml = `
+        <div class="log-entry">
+            <span class="log-timestamp">${timestamp}</span>
+            <span class="log-mac">${logEntry.macAddress || 'N/A'}</span>
+            <span class="log-endpoint">${logEntry.endpoint || logEntry.url || 'N/A'}</span>
+            <span class="log-ip">${logEntry.ip || 'N/A'}</span>
+            <span class="badge ${statusClass}">${logEntry.status || 200}</span>
+        </div>
     `;
-    container.insertBefore(logElement, container.firstChild);
-    
-    // Keep only last 100 entries
-    while (container.children.length > 100) {
-        container.removeChild(container.lastChild);
+
+    logsContainer.prepend(logHtml);
+
+    // Keep only last 50 entries
+    const entries = logsContainer.find('.log-entry');
+    if (entries.length > 50) {
+        entries.slice(50).remove();
     }
+
+    // Update log count
+    $('#logCount').text(entries.length);
 }
 
-// Action functions
-async function blockMac(macAddress) {
-    if (!confirm(`Are you sure you want to block MAC address ${macAddress}?`)) {
-        return;
-    }
-    
-    try {
-        const response = await fetch('/admin/monitoring/block-mac', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                macAddress: macAddress,
-                reason: 'Blocked via monitoring dashboard'
-            })
+// Display realtime logs
+function displayRealtimeLogs(logs) {
+    const logsContainer = $('#liveLogs');
+    logsContainer.empty();
+
+    if (logs && logs.length > 0) {
+        logs.forEach(function(log) {
+            addLogEntry(log);
         });
-        
-        const result = await response.json();
-        if (result.success) {
-            alert('MAC address blocked successfully');
-            loadData(); // Refresh data
-        } else {
-            alert('Error: ' + result.error);
-        }
-    } catch (error) {
-        console.error('Block MAC error:', error);
-        alert('Error blocking MAC address');
+    } else {
+        logsContainer.html('<div class="text-center p-3 text-muted">No recent API requests</div>');
     }
 }
 
-async function viewMacDetails(macAddress) {
-    try {
-        const response = await fetch(`/admin/monitoring/mac/${macAddress}`);
-        const data = await response.json();
-        
-        // Create modal or new window with detailed info
-        const details = `
-            MAC Address: ${data.macAddress}
-            Total Requests: ${data.stats.totalRequests}
-            IP Addresses: ${data.stats.ipAddresses.join(', ')}
-            First Request: ${data.stats.firstRequest}
-            Last Request: ${data.stats.lastRequest}
-            Device Status: ${data.device ? data.device.is_active ? 'Active' : 'Inactive' : 'Not Found'}
-        `;
-        
-        alert(details);
-    } catch (error) {
-        console.error('View MAC details error:', error);
-        alert('Error fetching MAC details');
+// Update MAC address statistics
+function updateMacStats(macStats) {
+    const container = $('#macStats');
+    container.empty();
+
+    if (macStats && macStats.length > 0) {
+        macStats.slice(0, 10).forEach(function(mac) {
+            const macHtml = `
+                <div class="p-2 border-bottom">
+                    <div class="font-weight-bold text-primary">${mac.macAddress || 'Unknown'}</div>
+                    <small class="text-muted">
+                        Requests: ${mac.totalRequests || 0} | 
+                        IPs: ${mac.ipCount || 0}
+                    </small>
+                </div>
+            `;
+            container.append(macHtml);
+        });
+    } else {
+        container.html('<div class="text-center p-3 text-muted">No MAC statistics available</div>');
     }
 }
 
-function refreshAll() {
-    const icon = document.getElementById('refreshIcon');
-    icon.classList.add('fa-spin');
-    
-    loadData().finally(() => {
-        setTimeout(() => {
-            icon.classList.remove('fa-spin');
-        }, 1000);
-    });
-}
-
-function refreshMacStats() {
-    loadData();
-}
-
-function clearLogs() {
-    if (confirm('Are you sure you want to clear all logs?')) {
-        document.getElementById('logsContainer').innerHTML = '';
+// Update real-time stats
+function updateRealTimeStats(data) {
+    if (data.totalRequests) {
+        $('#totalRequests').text(data.totalRequests);
+    }
+    if (data.activeDevices) {
+        $('#totalDevices').text(data.activeDevices);
     }
 }
 
-// Initialize everything when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    initCharts();
+// Auto-refresh data every 30 seconds
+function startAutoRefresh() {
+    setInterval(function() {
+        loadStats();
+    }, 30000);
+}
+
+// Initialize dashboard
+$(document).ready(function() {
+    console.log('Initializing monitoring dashboard...');
     initSocket();
-    loadData();
-    
-    // Auto-refresh every 30 seconds
-    setInterval(loadData, 30000);
+    loadStats();
+    startAutoRefresh();
 });
 </script>
