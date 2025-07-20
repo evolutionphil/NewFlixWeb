@@ -3,17 +3,34 @@ const moment = require('moment');
 const Device = require('../models/Device.model');
 const Transaction = require('../models/Transaction.model');
 
+// Helper functions
+function getClientIPAddress(req) {
+    return req.headers['x-forwarded-for'] || 
+           req.headers['x-real-ip'] || 
+           req.connection.remoteAddress || 
+           req.socket.remoteAddress ||
+           (req.connection.socket ? req.connection.socket.remoteAddress : null) ||
+           req.ip ||
+           '0.0.0.0';
+}
+
+function getUserAgent(req) {
+    return req.headers['user-agent'] || 'Unknown';
+}
+
 // In-memory storage for real-time monitoring data
-global.monitoringData = {
-    realtimeLogs: [],
-    macStats: new Map(),
-    requestCounts: {
-        total: 0,
-        today: 0,
-        yesterday: 0
-    },
-    dailyStats: new Map()
-};
+if (!global.monitoringData) {
+    global.monitoringData = {
+        realtimeLogs: [],
+        macStats: new Map(),
+        requestCounts: {
+            total: 0,
+            today: 0,
+            yesterday: 0
+        },
+        dailyStats: new Map()
+    };
+}
 
 class MonitoringController {
     // Get main monitoring dashboard
@@ -80,16 +97,16 @@ class MonitoringController {
                 : 0;
 
             // Get revenue data for last 6 months
-            const revenueData = await this.getRevenueData();
+            const revenueData = await MonitoringController.getRevenueData();
             
             // Get registration data for last 7 days
-            const registrationData = await this.getRegistrationData();
+            const registrationData = await MonitoringController.getRegistrationData();
             
             // Get platform distribution
-            const platformData = await this.getPlatformData();
+            const platformData = await MonitoringController.getPlatformData();
 
             // Get MAC address statistics
-            const macStats = this.getMacStats();
+            const macStats = MonitoringController.getMacStats();
 
             const stats = {
                 totalRequests: global.monitoringData.requestCounts.total,
@@ -103,7 +120,8 @@ class MonitoringController {
                 revenue: revenueData,
                 registrations: registrationData,
                 platforms: platformData,
-                macStats
+                macStats,
+                realtimeLogs: global.monitoringData.realtimeLogs.slice(0, 50)
             };
 
             res.json(stats);
@@ -359,7 +377,5 @@ global.trackRequest = function(req, res, next) {
 
     next();
 };
-
-module.exports = MonitoringController;
 
 module.exports = MonitoringController;

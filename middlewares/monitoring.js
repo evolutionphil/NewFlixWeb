@@ -1,23 +1,43 @@
-
 const moment = require('moment');
 
 // Global variables to store live monitoring data
-global.monitoringStats = {
-    totalRequests: 0,
-    activeDevices: new Set(),
-    last24hTransactions: 0,
-    platformDistribution: {
-        android: 0,
-        ios: 0,
-        smarttv: 0,
-        web: 0,
-        other: 0
-    },
-    monthlyRevenue: Array(6).fill(0), // Last 6 months
-    dailyRegistrations: Array(7).fill(0), // Last 7 days
-    macStats: new Map(),
-    logs: []
-};
+if (!global.monitoringStats) {
+    global.monitoringStats = {
+        totalRequests: 0,
+        activeDevices: new Set(),
+        last24hTransactions: 0,
+        platformDistribution: {
+            android: 0,
+            ios: 0,
+            smarttv: 0,
+            web: 0,
+            other: 0
+        },
+        monthlyRevenue: Array(6).fill(0), // Last 6 months
+        dailyRegistrations: Array(7).fill(0), // Last 7 days
+        macStats: new Map(),
+        logs: []
+    };
+}
+
+// Ensure blocked MAC addresses global is initialized
+if (!global.blocked_mac_address) {
+    global.blocked_mac_address = {};
+}
+
+// Initialize monitoring data if not exists
+if (!global.monitoringData) {
+    global.monitoringData = {
+        realtimeLogs: [],
+        macStats: new Map(),
+        requestCounts: {
+            total: 0,
+            today: 0,
+            yesterday: 0
+        },
+        dailyStats: new Map()
+    };
+}
 
 // Track requests middleware
 global.trackRequest = (req, res, next) => {
