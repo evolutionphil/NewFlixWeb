@@ -536,96 +536,58 @@ async function updateParentAccountOperation(req, res, decrypted_req, is_encrypte
 }
 
 exports.cryptoIpnCallBack=async(req, res)=>{
-    console.log("Coinpayments IPN Callback received");
+    // console.log("Here Ipn CallBack");
     let transaction_id=req.params.transaction_id;
     const { verify } = require('coinpayments-ipn');
     let headers=req.headers;
     let input=req.body;
-    
-    console.log('IPN Headers:', headers);
-    console.log('IPN Body:', input);
-    
+    // console.log(headers, input);
     let hmac=headers.hmac;
     let ipnSecret=settings.crypto_ipn_secret;
     let merchant_id=settings.crypto_merchant_id;
-    
-    if (!ipnSecret || !merchant_id) {
-        console.log('Coinpayments IPN secret or merchant ID not configured');
-        return res.status(500).json({status:'error', msg: 'IPN not configured'});
-    }
-    
     let isValid;
     try {
         isValid = verify(hmac, ipnSecret, input);
-        console.log('IPN Signature valid:', isValid);
-        
-        if(input.merchant != merchant_id) {
-            console.log('Invalid merchant ID:', input.merchant, 'expected:', merchant_id);
-            return res.status(500).json({status:'error', msg: 'Invalid merchant'});
-        }
-        
-        if(!isValid) {
-            console.log('Invalid IPN signature');
-            return res.status(500).json({status:'error', msg: 'Invalid signature'});
-        }
-        
-        console.log('Payment status:', input.status);
-        
-        // Status >= 100 means payment is complete or confirmed
-        if(input.status >= 100) {
-            let transaction = await Transaction.findById(transaction_id);
-            if(transaction) {
-                console.log('Processing successful payment for transaction:', transaction_id);
-                
-                let device_id = transaction.device_id;
-                let today = moment();
-                let expire_date = today.add(5000,'M').format('Y-MM-DD');
-                let update_data = {
-                    expire_date: expire_date,
-                    is_trial: 2
+        if(input.merchant!=merchant_id)
+            return res.json({status:'error'}).status(500);
+        if(!isValid)
+            return res.json({status:'error'}).status(500);
+        if(input.status>=100){
+            let transaction=await Transaction.findById(transaction_id);
+            if(transaction){
+                let device_id=transaction.device_id;
+                let today=moment();
+                let expire_date=today.add(5000,'M').format('Y-MM-DD');
+                let update_data={
+                    expire_date:expire_date,
+                    is_trial:2
                 }
-                
-                transaction.status = 'success';
-                transaction.payment_id = input.txn_id || transaction.payment_id;
+                transaction.status='success';
                 await transaction.save();
-                await Device.findByIdAndUpdate(device_id, update_data);
+                await Device.findByIdAndUpdate(device_id,update_data);
 
-                let transaction_time = moment().utc().format('MMMM DD, YYYY hh:mm A');
-                let json_body = {
-                    mac_address: transaction.mac_address,
-                    transaction_id: transaction._id,
-                    email: transaction.email,
-                    price: transaction.amount,
-                    transaction_time: transaction_time,
-                    expire_date: expire_date,
-                    payment_type: 'crypto'
+                let transaction_time=moment().utc().format('MMMM DD, YYYY hh:mm A');
+                let json_body={
+                    mac_address:transaction.mac_address,
+                    transaction_id:transaction._id,
+                    email:transaction.email,
+                    price:transaction.amount,
+                    transaction_time:transaction_time,
+                    expire_date:expire_date,
+                    payment_type:'crypto'
                 }
-                
                 try {
                     await sendEmail(json_body);
-                    console.log('Payment confirmation email sent');
-                } catch (e) {
-                    console.log("Crypto payment receipt email issue", e);
+                }catch (e) {
+                    console.log("paypal send receipt email issue", e);
                 }
 
                 return res.json({status:'ok'});
-            } else {
-                console.log('Transaction not found:', transaction_id);
-            }
-        } else if(input.status < 0) {
-            // Payment failed or cancelled
-            console.log('Payment failed or cancelled, status:', input.status);
-            let transaction = await Transaction.findById(transaction_id);
-            if(transaction) {
-                transaction.status = 'failed';
-                await transaction.save();
             }
         }
     } catch (e) {
-        console.log('Coinpayments IPN verification error:', e);
-        return res.status(500).json({status:'error', msg: 'Verification failed'});
+        console.log('hmac error', hmac)
     }
-    
     return res.json({status:'ok'});
 }
 

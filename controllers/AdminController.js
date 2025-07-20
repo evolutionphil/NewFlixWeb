@@ -995,40 +995,32 @@ exports.showCryptoApiKey=(req,res)=>{
 exports.saveCryptoApiKey=(req,res)=>{
     let input=req.body;
     let {crypto_public_key, crypto_private_key,crypto_merchant_id,crypto_ipn_secret}=input;
-    
-    // Basic validation
-    if (!crypto_public_key || !crypto_private_key || !crypto_merchant_id || !crypto_ipn_secret) {
-        req.flash('error', 'All Coinpayments API fields are required');
-        return res.redirect('/admin/showCryptoApiKey');
-    }
-    
     settings={
         ...settings,
-        crypto_public_key:crypto_public_key.trim(),
-        crypto_private_key:crypto_private_key.trim(),
-        crypto_merchant_id:crypto_merchant_id.trim(),
-        crypto_ipn_secret:crypto_ipn_secret.trim()
+        crypto_public_key:crypto_public_key,
+        crypto_private_key:crypto_private_key,
+        crypto_merchant_id:crypto_merchant_id,
+        crypto_ipn_secret:crypto_ipn_secret
     }
     Setting.deleteMany({key:{$in:['crypto_public_key','crypto_private_key','crypto_merchant_id','crypto_ipn_secret']}}).then(()=>{
         Setting.insertMany([
             {
                 key:'crypto_public_key',
-                value:crypto_public_key.trim()
+                value:crypto_public_key
             },
             {
                 key:'crypto_private_key',
-                value:crypto_private_key.trim()
+                value:crypto_private_key
             },
             {
                 key:'crypto_merchant_id',
-                value:crypto_merchant_id.trim()
+                value:crypto_merchant_id
             },
             {
                 key:'crypto_ipn_secret',
-                value:crypto_ipn_secret.trim()
+                value:crypto_ipn_secret
             }
         ]).then(()=>{
-            req.flash('success', 'Coinpayments API settings saved successfully');
             return res.redirect('/admin/showCryptoApiKey');
         })
     })
