@@ -341,7 +341,14 @@ exports.updatePinCode=async (req,res)=>{
                     req.flash('error','Sorry, your device is locked now. <br> Please unlock your device in app settings');
                     return res.redirect('/mylist');
                 }
-                device.parent_pin=pin_code;
+
+                // Check if device is in trial mode and redirect to activation page
+                if(device.is_trial==1){
+                    req.flash('success','This MAC address (' + mac_address + ') is in trial mode. You can activate it before the trial ends on ' + device.expire_date + '.');
+                    return res.redirect('/activation');
+                }
+
+                device.parent_pin=pin_code || '0000';
                 await device.save();
                 req.flash('success','Parent pin code updated successfully');
                 return res.redirect('/mylist');
