@@ -361,9 +361,6 @@ global.trackRequest = function(req, res, next) {
 };
 
 module.exports = MonitoringController;
-const moment = require('moment');
-const Transaction = require('../models/Transaction.model');
-const Device = require('../models/Device.model');
 
 class MonitoringController {
     // Main monitoring dashboard
