@@ -73,6 +73,15 @@ class MonitoringController {
                 status: 'success'
             });
 
+            // Get devices for today and yesterday to calculate change
+            const todayDevices = await Device.countDocuments({
+                created_time: today.format('YYYY-MM-DD')
+            });
+
+            const yesterdayDevices = await Device.countDocuments({
+                created_time: yesterday.format('YYYY-MM-DD')
+            });
+
             // Get activated devices for yesterday to calculate change
             const yesterdayActivatedDevices = await Device.countDocuments({
                 is_trial: 2,
