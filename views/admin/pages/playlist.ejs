@@ -49,6 +49,31 @@
                             <input type="checkbox" id="show_trial" checked>
                             <label for="show_trial">Show Trial</label>
                         </div>
+                        <h4 class="example-title"
+                            style="color:#fff;margin-top:20px"
+                        >
+                            Filter by creation date
+                        </h4>
+                        <div class="form-group">
+                            <select id="date_filter" class="form-control" style="background-color:#1e293b;color:#fff;border:1px solid #3e4651;">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="last_week">Last 7 Days</option>
+                                <option value="last_month">Last 30 Days</option>
+                                <option value="custom">Custom Date Range</option>
+                            </select>
+                        </div>
+                        <div id="custom_date_range" style="display:none;">
+                            <div class="form-group">
+                                <label style="color:#fff;">From Date:</label>
+                                <input type="date" id="date_from" class="form-control" style="background-color:#1e293b;color:#fff;border:1px solid #3e4651;">
+                            </div>
+                            <div class="form-group">
+                                <label style="color:#fff;">To Date:</label>
+                                <input type="date" id="date_to" class="form-control" style="background-color:#1e293b;color:#fff;border:1px solid #3e4651;">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="list-wrapper">
@@ -152,7 +177,10 @@
                     show_macos:$('#show_macOS').prop('checked'),
                     show_tvos:$('#show_tvOS').prop('checked'),
                     show_activated:$('#show_activated').prop('checked'),
-                    show_trial:$('#show_trial').prop('checked')
+                    show_trial:$('#show_trial').prop('checked'),
+                    date_filter:$('#date_filter').val(),
+                    date_from:$('#date_from').val(),
+                    date_to:$('#date_to').val()
                 },
                 "dataSrc": function ( json ) {
                     return json.data;
@@ -232,5 +260,20 @@
     })
     $('#show_macOS').change(function () {
         updateDataTable();
+    })
+
+    $('#date_filter').change(function () {
+        if($(this).val() === 'custom') {
+            $('#custom_date_range').show();
+        } else {
+            $('#custom_date_range').hide();
+        }
+        updateDataTable();
+    })
+
+    $('#date_from, #date_to').change(function () {
+        if($('#date_filter').val() === 'custom') {
+            updateDataTable();
+        }
     })
 </script>

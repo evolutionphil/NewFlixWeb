@@ -1644,6 +1644,9 @@ exports.getPlaylists=async (req,res)=>{
         show_macos,
         show_activated,
         show_trial,
+        date_filter,
+        date_from,
+        date_to,
         draw,
         length,
         start,
@@ -1695,6 +1698,74 @@ exports.getPlaylists=async (req,res)=>{
                 ]
             }
         );
+    }
+
+    // Date filtering
+    if(date_filter && date_filter !== 'all') {
+        let dateCondition = {};
+        const today = moment().format('YYYY-MM-DD');
+        const yesterday = moment().subtract(1, 'day').format('YYYY-MM-DD');
+        const lastWeek = moment().subtract(7, 'days').format('YYYY-MM-DD');
+        const lastMonth = moment().subtract(30, 'days').format('YYYY-MM-DD');
+
+        switch(date_filter) {
+            case 'today':
+                dateCondition = {
+                    created_time: {
+                        $gte: today + ' 00:00',
+                        $lte: today + ' 23:59'
+                    }
+                };
+                break;
+            case 'yesterday':
+                dateCondition = {
+                    created_time: {
+                        $gte: yesterday + ' 00:00',
+                        $lte: yesterday + ' 23:59'
+                    }
+                };
+                break;
+            case 'last_week':
+                dateCondition = {
+                    created_time: {
+                        $gte: lastWeek + ' 00:00'
+                    }
+                };
+                break;
+            case 'last_month':
+                dateCondition = {
+                    created_time: {
+                        $gte: lastMonth + ' 00:00'
+                    }
+                };
+                break;
+            case 'custom':
+                if(date_from && date_to) {
+                    dateCondition = {
+                        created_time: {
+                            $gte: date_from + ' 00:00',
+                            $lte: date_to + ' 23:59'
+                        }
+                    };
+                } else if(date_from) {
+                    dateCondition = {
+                        created_time: {
+                            $gte: date_from + ' 00:00'
+                        }
+                    };
+                } else if(date_to) {
+                    dateCondition = {
+                        created_time: {
+                            $lte: date_to + ' 23:59'
+                        }
+                    };
+                }
+                break;
+        }
+
+        if(Object.keys(dateCondition).length > 0) {
+            filter_condition = combineFilterCondition(filter_condition, dateCondition);
+        }
     }
     let select_field={_id:1,mac_address:1,app_type:1,is_trial:1,created_time:1,expire_date:1, ip: 1};
     let totalRecords=await Device.countDocuments(filter_condition);
