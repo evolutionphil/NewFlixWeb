@@ -1,0 +1,120 @@
+{
+  "query": "titanic",
+  "strategy_used": {
+    "query": "titanic"
+  },
+  "total_found": 50,
+  "available_languages": [
+    "ja",
+    "ko",
+    "de",
+    "it",
+    "fr",
+    "es",
+    "ar"
+  ],
+  "language_details": {
+    "ja": {
+      "language": "ja",
+      "subtitle_id": "1150073",
+      "file_id": 1241539,
+      "movie_name": "2018 - The Titan",
+      "year": 2018,
+      "download_count": 4602,
+      "uploader": "suadnovic_",
+      "release": "The.Titan.2018.WEBRip.x264-FGT",
+      "url": "https://www.opensubtitles.com/ja/subtitles/7309848-the-titan-2018-webrip-x264-fgt"
+    },
+    "ko": {
+      "language": "ko",
+      "subtitle_id": "1150921",
+      "file_id": 1242401,
+      "movie_name": "2018 - The Titan",
+      "year": 2018,
+      "download_count": 2415,
+      "uploader": "os-auto",
+      "release": "[1920x808] The Titan (2018)",
+      "url": "https://www.opensubtitles.com/ko/subtitles/1920x808-the-titan-2018"
+    },
+    "de": {
+      "language": "de",
+      "subtitle_id": "5625133",
+      "file_id": 6659449,
+      "movie_name": "1953 - Titanic",
+      "year": 1953,
+      "download_count": 295,
+      "uploader": "sci-fi-fan",
+      "release": "Der.Untergang.der.Titanic.1953.German.720p.BluRay.x264-DETAiLS",
+      "url": "https://www.opensubtitles.com/de/subtitles/der-untergang-der-titanic-1953-german-720p-bluray-x264-details"
+    },
+    "it": {
+      "language": "it",
+      "subtitle_id": "696983",
+      "file_id": 768485,
+      "movie_name": "2010 - Titanic 2",
+      "year": 2010,
+      "download_count": 4323,
+      "uploader": "hywel",
+      "release": "(2010)TitanicII[ITA]",
+      "url": "https://www.opensubtitles.com/it/subtitles/2010-titanicii-ita"
+    },
+    "fr": {
+      "language": "fr",
+      "subtitle_id": "1150047",
+      "file_id": 1241514,
+      "movie_name": "2018 - The Titan",
+      "year": 2018,
+      "download_count": 9848,
+      "uploader": "suadnovic_",
+      "release": "The.Titan.2018.WEBRip.x264-FGT",
+      "url": "https://www.opensubtitles.com/fr/subtitles/7309846-the-titan-2018-webrip-x264-fgt"
+    },
+    "es": {
+      "language": "es",
+      "subtitle_id": "1150105",
+      "file_id": 1241572,
+      "movie_name": "2018 - The Titan",
+      "year": 2018,
+      "download_count": 18476,
+      "uploader": "suadnovic_",
+      "release": "The.Titan.2018.WEBRip.x264-FGT",
+      "url": "https://www.opensubtitles.com/es/subtitles/7309851-the-titan-2018-webrip-x264-fgt"
+    },
+    "ar": {
+      "language": "ar",
+      "subtitle_id": "695529",
+      "file_id": 766955,
+      "movie_name": "2010 - Titanic 2",
+      "year": 2010,
+      "download_count": 11505,
+      "uploader": "os-auto",
+      "release": "Titanic.II.2010.DvDRip.XviD-ECSTASY-DvD4AraB-BooGeY_2",
+      "url": "https://www.opensubtitles.com/ar/subtitles/titanic-ii-2010-dvdrip-xvid-ecstasy-dvd4arab-boogey_2"
+    }
+  },
+  "api_status": "success",
+  "authenticated": false,
+  "sample_results": [
+    {
+      "movie": "2021 - Titane",
+      "year": 2021,
+      "language": "ja",
+      "downloads": 1497,
+      "release": "Titane_JP"
+    },
+    {
+      "movie": "2021 - Titane",
+      "year": 2021,
+      "language": "ja",
+      "downloads": 1771,
+      "release": "Titane.bdrip-no1_Mp4_Titane_JP_sorasora2.srt"
+    },
+    {
+      "movie": "2021 - Titane",
+      "year": 2021,
+      "language": "ko",
+      "downloads": 544,
+      "release": "Titane.2021.FRENCH.1080p.BluRay.x265-VXT"
+    }
+  ]
+}
