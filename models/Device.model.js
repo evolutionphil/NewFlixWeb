@@ -17,10 +17,7 @@ let DeviceModel = new Schema({
     },
     app_type:String,
     version:String,
-    parent_pin:{
-        type:String,
-        default:'0000'
-    },
+    parent_pin:String,
     lock:{
         type:Number,
         default:0
