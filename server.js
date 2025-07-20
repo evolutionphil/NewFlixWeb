@@ -76,6 +76,9 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
+console.log('DATABASE_DSN value:', process.env.DATABASE_DSN ? 'Set (length: ' + process.env.DATABASE_DSN.length + ')' : 'Not set');
+console.log('DATABASE_DSN starts with:', process.env.DATABASE_DSN ? process.env.DATABASE_DSN.substring(0, 20) + '...' : 'N/A');
+
 mongoose.connect(process.env.DATABASE_DSN, { useNewUrlParser: true,useUnifiedTopology: true});
 const connection = mongoose.connection;
 connection.once('open', async function() {
@@ -83,6 +86,10 @@ connection.once('open', async function() {
     getSettings();
     await removePendingTransactions();
 })
+
+connection.on('error', (error) => {
+    console.log('MongoDB connection error:', error.message);
+});
 app.listen(PORT,function () {
     console.log('Server is running on Port: '+PORT);
 })
