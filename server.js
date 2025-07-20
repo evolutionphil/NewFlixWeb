@@ -239,7 +239,7 @@ global.getSettings=function(){
             temps1.map(item=>{
                 temps2[item.key]=item.value
             })
-            console.log(temps1.sendgrid_api_key);
+            console.log('SendGrid API Key:', temps2.sendgrid_api_key);
             temps2.themes=JSON.parse(temps2.themes);
             temps2.adverts=JSON.parse(temps2.adverts);
             temps2.languages=language_result;
