@@ -591,6 +591,116 @@ exports.cryptoIpnCallBack=async(req, res)=>{
     return res.json({status:'ok'});
 }
 
+exports.paypalWebhook=async(req, res)=>{
+    try {
+        console.log('PayPal Webhook received:', req.body);
+        
+        let event_type = req.body.event_type;
+        let resource = req.body.resource;
+        
+        if (!event_type || !resource) {
+            return res.status(400).json({status: 'error', msg: 'Invalid webhook data'});
+        }
+
+        // Handle different PayPal webhook events
+        switch(event_type) {
+            case 'PAYMENT.CAPTURE.REFUNDED':
+                await handlePaymentRefund(resource);
+                break;
+            case 'PAYMENT.CAPTURE.DENIED':
+            case 'PAYMENT.CAPTURE.PENDING':
+                await handlePaymentDenied(resource);
+                break;
+            case 'BILLING.SUBSCRIPTION.CANCELLED':
+                await handleSubscriptionCancelled(resource);
+                break;
+            default:
+                console.log('Unhandled PayPal webhook event:', event_type);
+                break;
+        }
+
+        return res.status(200).json({status: 'success'});
+    } catch (error) {
+        console.log('PayPal webhook error:', error);
+        return res.status(500).json({status: 'error', msg: 'Webhook processing failed'});
+    }
+}
+
+async function handlePaymentRefund(resource) {
+    try {
+        // Get the original payment ID from the refund
+        let payment_id = resource.links?.find(link => link.rel === 'up')?.href?.split('/').pop();
+        
+        if (!payment_id) {
+            console.log('Could not find payment ID from refund');
+            return;
+        }
+
+        // Find transaction by payment_id
+        let transaction = await Transaction.findOne({payment_id: payment_id});
+        if (!transaction) {
+            console.log('Transaction not found for payment ID:', payment_id);
+            return;
+        }
+
+        // Update transaction status
+        transaction.status = 'refunded';
+        await transaction.save();
+
+        // Disable the device
+        let device = await Device.findById(transaction.device_id);
+        if (device) {
+            device.is_trial = 0; // Set back to trial
+            device.expire_date = moment().format('Y-MM-DD'); // Expire immediately
+            await device.save();
+            console.log('Device disabled due to refund:', device.mac_address);
+        }
+
+        console.log('PayPal refund processed successfully for payment:', payment_id);
+    } catch (error) {
+        console.log('Error handling PayPal refund:', error);
+    }
+}
+
+async function handlePaymentDenied(resource) {
+    try {
+        let payment_id = resource.id;
+        
+        // Find transaction by payment_id
+        let transaction = await Transaction.findOne({payment_id: payment_id});
+        if (!transaction) {
+            console.log('Transaction not found for payment ID:', payment_id);
+            return;
+        }
+
+        // Update transaction status
+        transaction.status = 'denied';
+        await transaction.save();
+
+        // Disable the device
+        let device = await Device.findById(transaction.device_id);
+        if (device) {
+            device.is_trial = 0; // Set back to trial
+            device.expire_date = moment().format('Y-MM-DD'); // Expire immediately
+            await device.save();
+            console.log('Device disabled due to payment denial:', device.mac_address);
+        }
+
+        console.log('PayPal payment denial processed for payment:', payment_id);
+    } catch (error) {
+        console.log('Error handling PayPal payment denial:', error);
+    }
+}
+
+async function handleSubscriptionCancelled(resource) {
+    try {
+        // Handle subscription cancellation if you have recurring payments
+        console.log('PayPal subscription cancelled:', resource.id);
+    } catch (error) {
+        console.log('Error handling PayPal subscription cancellation:', error);
+    }
+}
+
 exports.activateFromExternal=async(req, res)=>{
     let ip=getClientIPAddress(req);
     let user_agent=getUserAgent(req);

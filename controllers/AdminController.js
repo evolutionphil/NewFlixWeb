@@ -854,18 +854,20 @@ exports.showPaypalSetting=(req,res)=>{
     promises.push(helpers.getSetting('paypal_client_id'));
     promises.push(helpers.getSetting('paypal_secret'));
     promises.push(helpers.getSetting('paypal_mode'));
-
+    promises.push(helpers.getSetting('paypal_webhook_id'));
     Promise.all(promises).then(
         values=> {
             let paypal_client_id = values[0] != null ? values[0].value : '';
             let paypal_secret = values[1] != null ? values[1].value : '';
             let paypal_mode = values[2] != null ? values[2].value : '';
+            let paypal_webhook_id = values[3] != null ? values[3].value : 'SB-WEBHOOK-ID';
             res.render('admin/pages/paypal_setting',
                 {
                     menu:'paypal-setting',layout: './admin/partials/layout',
                     paypal_client_id:paypal_client_id,
                     paypal_secret:paypal_secret,
-                    paypal_mode:paypal_mode
+                    paypal_mode:paypal_mode,
+                    paypal_webhook_id:paypal_webhook_id
                 }
             )
         }
@@ -2584,5 +2586,3 @@ exports.downloadCoinList=(req,res)=>{
         })
     })
 }
-
-

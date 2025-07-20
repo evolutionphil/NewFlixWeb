@@ -138,6 +138,7 @@ global.settings={
     paypal_client_id: '',
     paypal_secret: '',
     price: '7.49',
+    paypal_webhook_id":"WH-2WR32451HC0233532-67D414094X123456",
     themes: [
         {
             "name": "Standart",
