@@ -33,7 +33,7 @@ exports.news=(req,res)=>{
         data[key] = settings[key] ? settings[key] : ''
     })
     News.find()
-        .sort({_id:-1})
+.sort({_id:-1})
         .exec()
         .then(news=>{
         let title=data.news_meta_title;
@@ -458,7 +458,7 @@ exports.createPaypalOrder=(req,res)=>{
     let paypal_url=data.paypal_mode=="sandbox" ? "https://api.sandbox.paypal.com" : "https://api.paypal.com";
     paypal_url+='/v2/checkout/orders';
     let authorization=data.paypal_client_id+":"+data.paypal_secret;
-    let buff = new Buffer(authorization);
+    let buff = Buffer.from(authorization);
     authorization = buff.toString('base64');
     authorization="Basic "+authorization;
     let price=data.price ? data.price : 7.49;
@@ -506,7 +506,7 @@ exports.capturePaypalOrder=(req,res)=>{
     let paypal_url=data_keys.paypal_mode=="sandbox" ? "https://api.sandbox.paypal.com" : "https://api.paypal.com";
     paypal_url+='/v2/checkout/orders/'+order_id+'/capture';
     let authorization=data_keys.paypal_client_id+":"+data_keys.paypal_secret;
-    let buff = new Buffer(authorization);
+    let buff = Buffer.from(authorization);
     authorization = buff.toString('base64');
     authorization="Basic "+authorization;
     let price=data_keys.price ? data_keys.price : 7.49;
