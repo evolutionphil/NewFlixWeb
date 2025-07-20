@@ -79,7 +79,20 @@ app.use(methodOverride('_method'))
 console.log('DATABASE_DSN value:', process.env.DATABASE_DSN ? 'Set (length: ' + process.env.DATABASE_DSN.length + ')' : 'Not set');
 console.log('DATABASE_DSN starts with:', process.env.DATABASE_DSN ? process.env.DATABASE_DSN.substring(0, 20) + '...' : 'N/A');
 
-mongoose.connect(process.env.DATABASE_DSN, { useNewUrlParser: true,useUnifiedTopology: true});
+// Clean the connection string of any potential whitespace or invisible characters
+const cleanConnectionString = process.env.DATABASE_DSN ? process.env.DATABASE_DSN.trim() : '';
+console.log('Cleaned DATABASE_DSN starts with:', cleanConnectionString.substring(0, 20) + '...');
+console.log('CONNECTION STRING VALIDATION:', {
+  hasMongoPrefix: cleanConnectionString.startsWith('mongodb://') || cleanConnectionString.startsWith('mongodb+srv://'),
+  actualPrefix: cleanConnectionString.substring(0, 15)
+});
+
+mongoose.connect(cleanConnectionString, { 
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 10000
+});
 const connection = mongoose.connection;
 connection.once('open', async function() {
     console.log("MongoDB database connection established successfully");
