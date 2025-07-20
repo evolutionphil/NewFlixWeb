@@ -439,13 +439,16 @@ const frontend_route=require('./routes/frontend');
 const admin_route=require('./routes/admin')
 const api_route=require('./routes/api');
 const reseller_route=require('./routes/reseller')
-app.use('/',frontend_route);
-app.use('/admin/',admin_route)
+
 // Import monitoring middleware
 require('./middlewares/monitoring');
 
-// Apply monitoring middleware to API routes
-app.use('/api', global.trackRequest, api_route);
+// Apply monitoring middleware to all routes
+app.use(global.trackRequest);
+
+app.use('/',frontend_route);
+app.use('/admin/',admin_route)
+app.use('/api', api_route);
 app.use('/reseller/',reseller_route);
 
 // Add monitoring routes
@@ -803,6 +806,15 @@ app.get('/test-email',async(req, res)=>{
         res.send('ok')}
     );
 })
+
+// Test endpoint for monitoring
+app.get('/test-monitoring', (req, res) => {
+    res.json({ 
+        message: 'Monitoring test successful', 
+        timestamp: new Date().toISOString(),
+        totalRequests: global.monitoringStats ? global.monitoringStats.totalRequests : 0
+    });
+});
 
 app.get('/test-email-content',async (req,res)=>{
     const puppeteer = require('puppeteer');

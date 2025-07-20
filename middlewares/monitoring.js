@@ -70,6 +70,13 @@ global.trackRequest = (req, res, next) => {
     global.monitoringStats.totalRequests++;
     global.monitoringStats.platformDistribution[platform]++;
     
+    console.log('Request tracked:', {
+        totalRequests: global.monitoringStats.totalRequests,
+        endpoint,
+        macAddress,
+        platform
+    });
+    
     if (macAddress) {
         global.monitoringStats.activeDevices.add(macAddress);
         

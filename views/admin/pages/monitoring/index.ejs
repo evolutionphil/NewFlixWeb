@@ -424,3 +424,25 @@ $(document).ready(function() {
     startAutoRefresh();
 });
 </script>
+
+<script>
+// Connect to Socket.IO for real-time updates
+        const socket = io();
+
+        socket.on('connect', function() {
+            console.log('Socket connected:', socket.id);
+        });
+
+        socket.on('disconnect', function() {
+            console.log('Socket disconnected');
+        });
+
+        socket.on('newRequest', function(data) {
+            console.log('New request received:', data);
+            // Add to real-time logs
+            addToRealtimeLogs(data);
+
+            // Update counters
+            updateCounters(data);
+        });
+</script>
