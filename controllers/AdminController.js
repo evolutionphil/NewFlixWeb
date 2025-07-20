@@ -321,7 +321,10 @@ exports.getTransactions=async (req,res)=>{
         transaction_date,
         ip,
         user_agent,
-        payment_type
+        payment_type,
+        date_filter,
+        date_from,
+        date_to
     } = req.body;
     start = parseInt(start);
     length = parseInt(length);
@@ -358,6 +361,74 @@ exports.getTransactions=async (req,res)=>{
         filter_condition=combineFilterCondition(filter_condition,{user_agent:{$regex: user_agent,$options: "i"}});
     if(payment_type!='all')
         filter_condition=combineFilterCondition(filter_condition,{payment_type:payment_type});
+
+    // Date filtering
+    if(date_filter && date_filter !== 'all') {
+        let dateCondition = {};
+        const today = moment().format('YYYY-MM-DD');
+        const yesterday = moment().subtract(1, 'day').format('YYYY-MM-DD');
+        const lastWeek = moment().subtract(7, 'days').format('YYYY-MM-DD');
+        const lastMonth = moment().subtract(30, 'days').format('YYYY-MM-DD');
+
+        switch(date_filter) {
+            case 'today':
+                dateCondition = {
+                    pay_time: {
+                        $gte: today + ' 00:00',
+                        $lte: today + ' 23:59'
+                    }
+                };
+                break;
+            case 'yesterday':
+                dateCondition = {
+                    pay_time: {
+                        $gte: yesterday + ' 00:00',
+                        $lte: yesterday + ' 23:59'
+                    }
+                };
+                break;
+            case 'last_week':
+                dateCondition = {
+                    pay_time: {
+                        $gte: lastWeek + ' 00:00'
+                    }
+                };
+                break;
+            case 'last_month':
+                dateCondition = {
+                    pay_time: {
+                        $gte: lastMonth + ' 00:00'
+                    }
+                };
+                break;
+            case 'custom':
+                if(date_from && date_to) {
+                    dateCondition = {
+                        pay_time: {
+                            $gte: date_from + ' 00:00',
+                            $lte: date_to + ' 23:59'
+                        }
+                    };
+                } else if(date_from) {
+                    dateCondition = {
+                        pay_time: {
+                            $gte: date_from + ' 00:00'
+                        }
+                    };
+                } else if(date_to) {
+                    dateCondition = {
+                        pay_time: {
+                            $lte: date_to + ' 23:59'
+                        }
+                    };
+                }
+                break;
+        }
+
+        if(Object.keys(dateCondition).length > 0) {
+            filter_condition = combineFilterCondition(filter_condition, dateCondition);
+        }
+    }
 
     let sort_filter={}
     if(columnName=='mac_address')

@@ -77,6 +77,23 @@
                                    onchange="updateTableWithTimer()"
                             >
                         </div>
+                        <div class="form-group">
+                            <div class="search-filter-label">Date Filter</div>
+                            <select class="form-control" id="date-filter" onchange="updateTableWithTimer()">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="last_week">Last Week</option>
+                                <option value="last_month">Last Month</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="custom-date-range" style="display: none;">
+                            <div class="search-filter-label">From Date</div>
+                            <input class="form-control" type="date" id="date-from" onchange="updateTableWithTimer()">
+                            <div class="search-filter-label" style="margin-top: 10px;">To Date</div>
+                            <input class="form-control" type="date" id="date-to" onchange="updateTableWithTimer()">
+                        </div>
 
                     </div>
                 </div>
@@ -154,7 +171,10 @@
                     mac_address:$('#mac-address').val(),
                     ip:$('#ip').val(),
                     transaction_date:$('#transaction_date').val(),
-                    user_agent:$('#user_agent').val()
+                    user_agent:$('#user_agent').val(),
+                    date_filter:$('#date-filter').val(),
+                    date_from:$('#date-from').val(),
+                    date_to:$('#date-to').val()
                 },
                 "dataSrc": function ( json ) {
                     let data=json.data;
@@ -183,6 +203,14 @@
         updateTableWithTimer();
     })
     $('#payment-type').change(function () {
+        updateTableWithTimer();
+    })
+    $('#date-filter').change(function () {
+        if($(this).val() === 'custom') {
+            $('#custom-date-range').show();
+        } else {
+            $('#custom-date-range').hide();
+        }
         updateTableWithTimer();
     })
     function updateTableWithTimer(){
