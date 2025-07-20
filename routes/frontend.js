@@ -4,7 +4,7 @@ const frontendController=require('../controllers/FrontendController');
 
 
 router.get('/',(req,res)=>{
-    res.redirect('/home');
+    res.redirect('/mylist');
 });
 router.get('/home',frontendController.home);
 router.get('/news',frontendController.news);
