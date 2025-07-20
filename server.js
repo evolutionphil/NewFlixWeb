@@ -538,20 +538,41 @@ app.get('/test-block-ip/:ip',(req, res)=>{
 
 global.os_token='';
 app.get('/subtitle-test/:movie_name1?',async (req, res)=>{
-    if(!os_token){
-        let login_response=await os.login({
-            username: 'BaiMaoLi',
-            password: '2gRr2PuikBJ#bcd'
+    try {
+        if(!os_token){
+            console.log('Attempting OpenSubtitles login...');
+            let login_response=await os.login({
+                username: 'BaiMaoLi',
+                password: '2gRr2PuikBJ#bcd'
+            })
+            os_token=login_response.token;
+            console.log('OpenSubtitles login successful');
+        }
+        let movie_name="20th Century Girl (2022)";
+        let movie_name1=req.query.movie_name1;
+        if(movie_name1)
+            movie_name=movie_name1;
+        console.log('Searching subtitles for:', movie_name);
+        let subtitle_response=await os.subtitles({
+            query: movie_name,
         })
-        os_token=login_response.token;
+    } catch (error) {
+        console.error('OpenSubtitles API Error:', error.message);
+        if (error.response) {
+            console.error('Response status:', error.response.statusCode);
+            console.error('Response body:', error.response.body);
+        }
+        // Reset token on authentication errors
+        if (error.response && error.response.statusCode === 403) {
+            os_token = '';
+            console.log('Token reset due to 403 error');
+        }
+        return res.status(500).json({
+            error: 'OpenSubtitles API Error',
+            message: error.message,
+            status: error.response ? error.response.statusCode : 'Unknown'
+        });
     }
-    let movie_name="20th Century Girl (2022)";
-    let movie_name1=req.query.movie_name1;
-    if(movie_name1)
-        movie_name=movie_name1;
-    let subtitle_response=await os.subtitles({
-        query: movie_name,
-    })
     let files_lists=[],language_lists=[];
     if(subtitle_response.data.length>0){  // if have subtitles
         for(let i=0;i<subtitle_response.data.length;i++){
@@ -575,10 +596,13 @@ app.get('/subtitle-test/:movie_name1?',async (req, res)=>{
             promises.push(new Promise((resolve)=>{
                 os.download({
                     file_id: item.file_id
-                }).then(value=>resolve(value));
+                }).then(value=>resolve(value)).catch(error=>{
+                    console.error('Download error for file_id:', item.file_id, error.message);
+                    resolve({error: error.message, file_id: item.file_id});
+                });
             }))
             if(i % 5==4){
-                await new Promise(resolve => setTimeout(resolve, 6000)); // wait 5 seconds
+                await new Promise(resolve => setTimeout(resolve, 6000)); // wait 6 seconds
                 let values=await Promise.all(promises);
                 downloaded_responses=downloaded_responses.concat(values);
                 promises=[];
