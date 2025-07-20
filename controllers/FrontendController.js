@@ -341,7 +341,7 @@ exports.updatePinCode=async (req,res)=>{
                     req.flash('error','Sorry, your device is locked now. <br> Please unlock your device in app settings');
                     return res.redirect('/mylist');
                 }
-                device.parent_pin=pin_code;
+                device.parent_pin=pin_code || '0000';
                 await device.save();
                 req.flash('success','Parent pin code updated successfully');
                 return res.redirect('/mylist');
