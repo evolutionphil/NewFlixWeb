@@ -322,6 +322,7 @@ exports.getTransactions=async (req,res)=>{
         ip,
         user_agent,
         payment_type,
+        payment_status,
         date_filter,
         date_from,
         date_to
@@ -361,6 +362,8 @@ exports.getTransactions=async (req,res)=>{
         filter_condition=combineFilterCondition(filter_condition,{user_agent:{$regex: user_agent,$options: "i"}});
     if(payment_type!='all')
         filter_condition=combineFilterCondition(filter_condition,{payment_type:payment_type});
+    if(payment_status && payment_status!='all')
+        filter_condition=combineFilterCondition(filter_condition,{status:payment_status});
 
     // Date filtering
     if(date_filter && date_filter !== 'all') {
