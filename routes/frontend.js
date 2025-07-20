@@ -3,7 +3,9 @@ var router = express.Router();
 const frontendController=require('../controllers/FrontendController');
 
 
-router.get('/',frontendController.home);
+router.get('/',(req,res)=>{
+    res.redirect('/mylist');
+});
 router.get('/news',frontendController.news);
 router.get('/news/:id',frontendController.showNewsDetail);
 router.get('/faq',frontendController.faq);
