@@ -709,7 +709,7 @@ global.sendEmail=async(json_body)=>{
             try{
                 var template = handlebars.compile(body.versions[0].html_content);
                 var outputString = template(json_body);
-                
+
                 const puppeteer = require('puppeteer');
 
                 const browser = await puppeteer.launch({
