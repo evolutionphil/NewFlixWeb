@@ -1,4 +1,3 @@
-
 const moment = require('moment');
 const Device = require('../models/Device.model');
 const Transaction = require('../models/Transaction.model');
@@ -56,20 +55,7 @@ class MonitoringController {
             // Get device statistics
             const totalDevices = await Device.countDocuments();
             const activatedDevices = await Device.countDocuments({ is_trial: 2 });
-            
-            // Get device registrations for today and yesterday
-            const todayDevices = await Device.countDocuments({
-                created_time: {
-                    $gte: today.format('YYYY-MM-DD')
-                }
-            });
-            
-            const yesterdayDevices = await Device.countDocuments({
-                created_time: {
-                    $gte: yesterday.format('YYYY-MM-DD'),
-                    $lt: today.format('YYYY-MM-DD')
-                }
-            });
+
 
             // Get transaction statistics
             const dailyTransactions = await Transaction.countDocuments({
@@ -111,10 +97,10 @@ class MonitoringController {
 
             // Get revenue data for last 6 months
             const revenueData = await MonitoringController.getRevenueData();
-            
+
             // Get registration data for last 7 days
             const registrationData = await MonitoringController.getRegistrationData();
-            
+
             // Get platform distribution
             const platformData = await MonitoringController.getPlatformData();
 
@@ -149,11 +135,11 @@ class MonitoringController {
         try {
             const months = [];
             const data = [];
-            
+
             for (let i = 5; i >= 0; i--) {
                 const monthStart = moment().subtract(i, 'months').startOf('month');
                 const monthEnd = moment().subtract(i, 'months').endOf('month');
-                
+
                 const revenue = await Transaction.aggregate([
                     {
                         $match: {
@@ -192,7 +178,7 @@ class MonitoringController {
             for (let i = 6; i >= 0; i--) {
                 const day = moment().subtract(i, 'days');
                 const dayStart = day.startOf('day').format('YYYY-MM-DD');
-                
+
                 const registrations = await Device.countDocuments({
                     created_time: dayStart
                 });
@@ -241,7 +227,7 @@ class MonitoringController {
     // Get MAC address statistics from in-memory data
     static getMacStats() {
         const stats = [];
-        
+
         for (const [macAddress, data] of global.monitoringData.macStats.entries()) {
             stats.push({
                 macAddress,
@@ -260,7 +246,7 @@ class MonitoringController {
     static async blockMac(req, res) {
         try {
             const { macAddress } = req.body;
-            
+
             if (!macAddress) {
                 return res.status(400).json({ success: false, error: 'MAC address is required' });
             }
@@ -269,7 +255,7 @@ class MonitoringController {
             if (!global.blocked_mac_address) {
                 global.blocked_mac_address = {};
             }
-            
+
             global.blocked_mac_address[macAddress] = {
                 reason: 'Blocked from monitoring dashboard',
                 blocked_at: moment().utc().format('Y-MM-DD HH:mm:ss')
@@ -286,16 +272,16 @@ class MonitoringController {
     static async getMacDetails(req, res) {
         try {
             const { macAddress } = req.params;
-            
+
             const macData = global.monitoringData.macStats.get(macAddress);
-            
+
             if (!macData) {
                 return res.status(404).json({ error: 'MAC address not found' });
             }
 
             // Get device information from database
             const device = await Device.findOne({ mac_address: macAddress });
-            
+
             // Get transaction history
             const transactions = await Transaction.find({ mac_address: macAddress })
                 .sort({ pay_time: -1 })
@@ -326,10 +312,10 @@ global.trackRequest = function(req, res, next) {
     const userAgent = getUserAgent(req);
     const endpoint = req.originalUrl;
     const macAddress = req.body.mac_address || req.query.mac_address || req.headers['x-mac-address'];
-    
+
     // Update global request counter
     global.monitoringData.requestCounts.total++;
-    
+
     // Track today's requests
     const today = moment().format('YYYY-MM-DD');
     if (!global.monitoringData.dailyStats.has(today)) {
@@ -348,7 +334,7 @@ global.trackRequest = function(req, res, next) {
                 lastRequest: new Date().toISOString()
             });
         }
-        
+
         const macData = global.monitoringData.macStats.get(macAddress);
         macData.requests++;
         macData.ips.add(ip);
@@ -373,7 +359,7 @@ global.trackRequest = function(req, res, next) {
     const originalEnd = res.end;
     res.end = function(chunk, encoding) {
         logEntry.status = res.statusCode;
-        
+
         // Add to real-time logs (keep only last 1000 entries)
         global.monitoringData.realtimeLogs.unshift(logEntry);
         if (global.monitoringData.realtimeLogs.length > 1000) {

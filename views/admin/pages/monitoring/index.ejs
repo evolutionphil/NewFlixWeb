@@ -154,15 +154,7 @@
 
             <!-- Charts Row -->
             <div class="row">
-                <div class="col-md-6">
-                    <div class="monitoring-card">
-                        <h4>Device Registrations (Last 7 Days)</h4>
-                        <div class="chart-container">
-                            <canvas id="registrationChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="monitoring-card">
                         <h4>Platform Distribution</h4>
                         <div class="chart-container">
@@ -201,7 +193,7 @@
 
 <script>
 let socket;
-let registrationChart, platformChart;
+let platformChart;
 let stats = {};
 
 // Initialize Socket.IO connection
@@ -271,35 +263,6 @@ function updateChangeIndicator(selector, change) {
 
 // Update charts
 function updateCharts(data) {
-    // Registration Chart
-    if (registrationChart) {
-        registrationChart.destroy();
-    }
-
-    const regCtx = document.getElementById('registrationChart').getContext('2d');
-    registrationChart = new Chart(regCtx, {
-        type: 'line',
-        data: {
-            labels: data.registrations?.labels || [],
-            datasets: [{
-                label: 'Device Registrations',
-                data: data.registrations?.data || [],
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
     // Platform Chart
     if (platformChart) {
         platformChart.destroy();
