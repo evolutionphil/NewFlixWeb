@@ -191,7 +191,7 @@ global.settings={
         {
             title: "Flix IPTV",
             description: "Best Media Player in the world.",
-            url": "/public/upload/1604854505.png"
+            url: "/public/upload/1604854505.png"
         }
     ],
     crypto_public_key:'bd99bfed1e98dea341bdda5674409319f82575d67459eb2ae88f8511543e9d06',
