@@ -595,7 +595,7 @@ exports.paypalWebhook=async(req, res)=>{
     try {
         console.log('PayPal Webhook received:', req.body);
         
-        // Verify webhook signature (optional but recommended)
+        // Verify webhook configuration
         let webhook_id = settings.paypal_webhook_id;
         if (!webhook_id) {
             console.log('PayPal webhook ID not configured');
@@ -606,30 +606,47 @@ exports.paypalWebhook=async(req, res)=>{
         let resource = req.body.resource;
         
         if (!event_type || !resource) {
+            console.log('Invalid webhook data received:', {event_type, hasResource: !!resource});
             return res.status(400).json({status: 'error', msg: 'Invalid webhook data'});
         }
 
+        console.log(`Processing PayPal webhook event: ${event_type}`);
+
         // Handle different PayPal webhook events
         switch(event_type) {
+            case 'PAYMENT.CAPTURE.COMPLETED':
+                console.log('Payment capture completed:', resource.id);
+                // Payment was successful - no action needed as it's already handled in capture endpoint
+                break;
             case 'PAYMENT.CAPTURE.REFUNDED':
+                console.log('Processing payment refund:', resource.id);
                 await handlePaymentRefund(resource);
                 break;
             case 'PAYMENT.CAPTURE.DENIED':
+                console.log('Processing payment denial:', resource.id);
+                await handlePaymentDenied(resource);
+                break;
             case 'PAYMENT.CAPTURE.PENDING':
+                console.log('Processing pending payment:', resource.id);
                 await handlePaymentDenied(resource);
                 break;
             case 'BILLING.SUBSCRIPTION.CANCELLED':
+                console.log('Processing subscription cancellation:', resource.id);
                 await handleSubscriptionCancelled(resource);
+                break;
+            case 'CHECKOUT.ORDER.APPROVED':
+                console.log('Order approved:', resource.id);
+                // Order approved but not yet captured - no action needed
                 break;
             default:
                 console.log('Unhandled PayPal webhook event:', event_type);
                 break;
         }
 
-        return res.status(200).json({status: 'success'});
+        return res.status(200).json({status: 'success', event_type: event_type});
     } catch (error) {
         console.log('PayPal webhook error:', error);
-        return res.status(500).json({status: 'error', msg: 'Webhook processing failed'});
+        return res.status(500).json({status: 'error', msg: 'Webhook processing failed', error: error.message});
     }
 }
 
@@ -639,33 +656,54 @@ async function handlePaymentRefund(resource) {
         let payment_id = resource.links?.find(link => link.rel === 'up')?.href?.split('/').pop();
         
         if (!payment_id) {
-            console.log('Could not find payment ID from refund');
-            return;
+            // Try alternative method to get payment ID
+            payment_id = resource.invoice_id || resource.custom_id;
+            if (!payment_id) {
+                console.log('Could not find payment ID from refund resource:', resource);
+                return;
+            }
         }
+
+        console.log('Processing refund for payment ID:', payment_id);
 
         // Find transaction by payment_id
         let transaction = await Transaction.findOne({payment_id: payment_id});
         if (!transaction) {
             console.log('Transaction not found for payment ID:', payment_id);
+            // Try to find by transaction ID if payment_id doesn't work
+            transaction = await Transaction.findOne({_id: payment_id});
+            if (!transaction) {
+                console.log('Transaction not found by ID either:', payment_id);
+                return;
+            }
+        }
+
+        // Check if already processed
+        if (transaction.status === 'refunded') {
+            console.log('Refund already processed for transaction:', transaction._id);
             return;
         }
 
         // Update transaction status
         transaction.status = 'refunded';
+        transaction.refund_date = moment().utc().format('Y-MM-DD HH:mm:ss');
         await transaction.save();
 
         // Disable the device
         let device = await Device.findById(transaction.device_id);
         if (device) {
+            let previousExpireDate = device.expire_date;
             device.is_trial = 0; // Set back to trial
             device.expire_date = moment().format('Y-MM-DD'); // Expire immediately
             await device.save();
-            console.log('Device disabled due to refund:', device.mac_address);
+            console.log(`Device disabled due to refund: ${device.mac_address}, previous expire: ${previousExpireDate}`);
+        } else {
+            console.log('Device not found for transaction:', transaction.device_id);
         }
 
-        console.log('PayPal refund processed successfully for payment:', payment_id);
+        console.log('PayPal refund processed successfully for payment:', payment_id, 'amount:', resource.amount?.total);
     } catch (error) {
-        console.log('Error handling PayPal refund:', error);
+        console.log('Error handling PayPal refund:', error.message, error.stack);
     }
 }
 
