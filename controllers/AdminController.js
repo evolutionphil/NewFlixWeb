@@ -814,15 +814,18 @@ exports.showStripeSetting=(req,res)=>{
     let promises=[];
     promises.push(helpers.getSetting('stripe_public_key'));
     promises.push(helpers.getSetting('stripe_secret_key'));
+    promises.push(helpers.getSetting('stripe_webhook_id'));
     Promise.all(promises).then(
         values=> {
             let stripe_public_key = values[0] != null ? values[0].value : '';
             let stripe_secret_key = values[1] != null ? values[1].value : '';
+            let stripe_webhook_id = values[2] != null ? values[2].value : '';
             res.render('admin/pages/stripe_setting',
                 {
                     menu:'stripe-setting',layout: './admin/partials/layout',
                     stripe_public_key:stripe_public_key,
                     stripe_secret_key:stripe_secret_key,
+                    stripe_webhook_id:stripe_webhook_id
                 }
             )
         }
@@ -830,8 +833,8 @@ exports.showStripeSetting=(req,res)=>{
 }
 exports.saveStripeSetting=(req,res)=>{
     let input=req.body;
-    let {public_key, secret_key}=input;
-    Setting.deleteMany({key:{$in:['stripe_public_key','stripe_secret_key']}}).then(()=>{
+    let {public_key, secret_key, stripe_webhook_id}=input;
+    Setting.deleteMany({key:{$in:['stripe_public_key','stripe_secret_key','stripe_webhook_id']}}).then(()=>{
         Setting.insertMany([
             {
                 key:'stripe_public_key',
@@ -841,9 +844,14 @@ exports.saveStripeSetting=(req,res)=>{
                 key:'stripe_secret_key',
                 value:secret_key
             },
+            {
+                key:'stripe_webhook_id',
+                value:stripe_webhook_id
+            }
         ]).then(()=>{
             settings.stripe_public_key=public_key;
             settings.stripe_secret_key=secret_key;
+            settings.stripe_webhook_id=stripe_webhook_id;
             return res.redirect('/admin/showStripeSetting');
         })
     })

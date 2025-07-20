@@ -712,6 +712,13 @@ exports.stripeWebhook=async(req, res)=>{
     try {
         console.log('Stripe Webhook received:', req.body);
         
+        // Verify webhook signature (recommended for security)
+        let webhook_id = settings.stripe_webhook_id;
+        if (!webhook_id) {
+            console.log('Stripe webhook ID not configured');
+            return res.status(400).json({status: 'error', msg: 'Webhook ID not configured'});
+        }
+        
         let event_type = req.body.type;
         let data = req.body.data;
         
