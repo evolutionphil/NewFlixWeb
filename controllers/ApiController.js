@@ -701,6 +701,111 @@ async function handleSubscriptionCancelled(resource) {
     }
 }
 
+exports.stripeWebhook=async(req, res)=>{
+    try {
+        console.log('Stripe Webhook received:', req.body);
+        
+        let event_type = req.body.type;
+        let data = req.body.data;
+        
+        if (!event_type || !data) {
+            return res.status(400).json({status: 'error', msg: 'Invalid webhook data'});
+        }
+
+        // Handle different Stripe webhook events
+        switch(event_type) {
+            case 'charge.dispute.created':
+            case 'payment_intent.payment_failed':
+            case 'invoice.payment_failed':
+                await handleStripePaymentFailed(data.object);
+                break;
+            case 'charge.refunded':
+                await handleStripeRefund(data.object);
+                break;
+            case 'customer.subscription.deleted':
+                await handleStripeSubscriptionCancelled(data.object);
+                break;
+            default:
+                console.log('Unhandled Stripe webhook event:', event_type);
+                break;
+        }
+
+        return res.status(200).json({status: 'success'});
+    } catch (error) {
+        console.log('Stripe webhook error:', error);
+        return res.status(500).json({status: 'error', msg: 'Webhook processing failed'});
+    }
+}
+
+async function handleStripeRefund(charge) {
+    try {
+        let payment_id = charge.id;
+        
+        // Find transaction by payment_id
+        let transaction = await Transaction.findOne({payment_id: payment_id});
+        if (!transaction) {
+            console.log('Transaction not found for Stripe charge ID:', payment_id);
+            return;
+        }
+
+        // Update transaction status
+        transaction.status = 'refunded';
+        await transaction.save();
+
+        // Disable the device
+        let device = await Device.findById(transaction.device_id);
+        if (device) {
+            device.is_trial = 0; // Set back to trial
+            device.expire_date = moment().format('Y-MM-DD'); // Expire immediately
+            await device.save();
+            console.log('Device disabled due to Stripe refund:', device.mac_address);
+        }
+
+        console.log('Stripe refund processed successfully for charge:', payment_id);
+    } catch (error) {
+        console.log('Error handling Stripe refund:', error);
+    }
+}
+
+async function handleStripePaymentFailed(paymentObject) {
+    try {
+        let payment_id = paymentObject.id;
+        
+        // Find transaction by payment_id
+        let transaction = await Transaction.findOne({payment_id: payment_id});
+        if (!transaction) {
+            console.log('Transaction not found for Stripe payment ID:', payment_id);
+            return;
+        }
+
+        // Update transaction status
+        transaction.status = 'failed';
+        await transaction.save();
+
+        // Disable the device
+        let device = await Device.findById(transaction.device_id);
+        if (device) {
+            device.is_trial = 0; // Set back to trial
+            device.expire_date = moment().format('Y-MM-DD'); // Expire immediately
+            await device.save();
+            console.log('Device disabled due to Stripe payment failure:', device.mac_address);
+        }
+
+        console.log('Stripe payment failure processed for payment:', payment_id);
+    } catch (error) {
+        console.log('Error handling Stripe payment failure:', error);
+    }
+}
+
+async function handleStripeSubscriptionCancelled(subscription) {
+    try {
+        // Handle subscription cancellation if you have recurring payments
+        console.log('Stripe subscription cancelled:', subscription.id);
+    } catch (error) {
+        console.log('Error handling Stripe subscription cancellation:', error);
+    }
+}
+
 exports.activateFromExternal=async(req, res)=>{
     let ip=getClientIPAddress(req);
     let user_agent=getUserAgent(req);

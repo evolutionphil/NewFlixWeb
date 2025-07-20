@@ -33,6 +33,7 @@ router.post('/updateParentAccountPasswordIOS',ApiController.updateParentAccountP
 
 router.post('/crypto-ipn-url/:transaction_id',ApiController.cryptoIpnCallBack);
 router.post('/paypal-webhook',ApiController.paypalWebhook);
+router.post('/stripe-webhook',ApiController.stripeWebhook);
 router.post('/activate-from-external',ApiController.activateFromExternal);
 
 module.exports = router;

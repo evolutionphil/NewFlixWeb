@@ -727,6 +727,7 @@ exports.stripeSuccess=async(req,res)=>{
                 }))
                 promises.push(new Promise((resolve, reject) => {
                     transaction.status = 'success';
+                    transaction.payment_id = session.payment_intent; // Store Stripe payment intent ID
                     transaction.ip = getClientIPAddress(req);
                     transaction.user_agent = getUserAgent(req.useragent);
                     transaction.save()
