@@ -55,7 +55,7 @@ class MonitoringController {
 
             // Get device statistics
             const totalDevices = await Device.countDocuments();
-            const activatedDevices = await Device.countDocuments({ is_trial: 1 });
+            const activatedDevices = await Device.countDocuments({ is_trial: 2 });
             
             // Get device registrations for today and yesterday
             const todayDevices = await Device.countDocuments({
@@ -87,10 +87,23 @@ class MonitoringController {
                 status: 'success'
             });
 
+            // Get activated devices for yesterday to calculate change
+            const yesterdayActivatedDevices = await Device.countDocuments({
+                is_trial: 2,
+                created_time: {
+                    $gte: yesterday.format('YYYY-MM-DD'),
+                    $lt: today.format('YYYY-MM-DD')
+                }
+            });
+
             // Calculate percentage changes
             const devicesChange = yesterdayDevices > 0 
                 ? Math.round(((todayDevices - yesterdayDevices) / yesterdayDevices) * 100)
                 : 0;
+
+            const activatedChange = yesterdayActivatedDevices > 0
+                ? Math.round(((activatedDevices - yesterdayActivatedDevices) / yesterdayActivatedDevices) * 100)
+                : activatedDevices > 0 ? 100 : 0;
 
             const transactionsChange = yesterdayTransactions > 0
                 ? Math.round(((dailyTransactions - yesterdayTransactions) / yesterdayTransactions) * 100)
@@ -115,7 +128,7 @@ class MonitoringController {
                 dailyTransactions,
                 requestsChange: 0, // Will be calculated based on stored data
                 devicesChange,
-                activatedChange: Math.round(((activatedDevices / totalDevices) * 100)) || 0,
+                activatedChange,
                 transactionsChange,
                 revenue: revenueData,
                 registrations: registrationData,
