@@ -361,3 +361,178 @@ global.trackRequest = function(req, res, next) {
 };
 
 module.exports = MonitoringController;
+const moment = require('moment');
+const Transaction = require('../models/Transaction.model');
+const Device = require('../models/Device.model');
+
+class MonitoringController {
+    // Main monitoring dashboard
+    static async dashboard(req, res) {
+        try {
+            res.render('admin/pages/monitoring/index', {
+                layout: 'admin/partials/layout',
+                title: 'Real-time Monitoring Dashboard'
+            });
+        } catch (error) {
+            console.error('Monitoring dashboard error:', error);
+            res.status(500).send('Error loading monitoring dashboard');
+        }
+    }
+    
+    // Get current statistics
+    static async getStats(req, res) {
+        try {
+            // Get 24h transactions
+            const last24h = moment().subtract(24, 'hours');
+            const transactions24h = await Transaction.countDocuments({
+                createdAt: { $gte: last24h.toDate() },
+                status: 'success'
+            });
+            
+            // Get total devices
+            const totalDevices = await Device.countDocuments();
+            const activatedDevices = await Device.countDocuments({
+                is_active: true
+            });
+            
+            // Get monthly revenue (last 6 months)
+            const monthlyRevenue = [];
+            for (let i = 5; i >= 0; i--) {
+                const startDate = moment().subtract(i, 'months').startOf('month');
+                const endDate = moment().subtract(i, 'months').endOf('month');
+                
+                const revenue = await Transaction.aggregate([
+                    {
+                        $match: {
+                            createdAt: { $gte: startDate.toDate(), $lte: endDate.toDate() },
+                            status: 'success'
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            total: { $sum: { $toDouble: '$price' } }
+                        }
+                    }
+                ]);
+                
+                monthlyRevenue.push({
+                    month: startDate.format('MMM YYYY'),
+                    revenue: revenue.length > 0 ? revenue[0].total : 0
+                });
+            }
+            
+            // Get daily registrations (last 7 days)
+            const dailyRegistrations = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = moment().subtract(i, 'days').startOf('day');
+                const nextDate = moment().subtract(i, 'days').endOf('day');
+                
+                const count = await Device.countDocuments({
+                    createdAt: { $gte: date.toDate(), $lte: nextDate.toDate() }
+                });
+                
+                dailyRegistrations.push({
+                    date: date.format('MMM DD'),
+                    count: count
+                });
+            }
+            
+            // Convert MAC stats to array format
+            const macStatsArray = Array.from(global.monitoringStats.macStats.entries()).map(([mac, stats]) => ({
+                macAddress: mac,
+                totalRequests: stats.totalRequests,
+                ipAddresses: Array.from(stats.ipAddresses),
+                firstRequest: stats.firstRequest,
+                lastRequest: stats.lastRequest,
+                endpoints: Array.from(stats.endpoints)
+            })).sort((a, b) => b.totalRequests - a.totalRequests);
+            
+            const response = {
+                totalDevices,
+                activatedDevices,
+                last24hTransactions: transactions24h,
+                totalRequests: global.monitoringStats.totalRequests,
+                activeDevices: global.monitoringStats.activeDevices.size,
+                platformDistribution: global.monitoringStats.platformDistribution,
+                monthlyRevenue,
+                dailyRegistrations,
+                macStats: macStatsArray.slice(0, 100), // Top 100 MACs
+                recentLogs: global.monitoringStats.logs.slice(0, 100) // Last 100 logs
+            };
+            
+            res.json(response);
+        } catch (error) {
+            console.error('Get stats error:', error);
+            res.status(500).json({ error: 'Failed to get statistics' });
+        }
+    }
+    
+    // Block a MAC address
+    static async blockMac(req, res) {
+        try {
+            const { macAddress, reason } = req.body;
+            
+            if (!macAddress) {
+                return res.status(400).json({ error: 'MAC address is required' });
+            }
+            
+            // Add to blocked MAC addresses
+            global.blocked_mac_address[macAddress] = {
+                reason: reason || 'Blocked via monitoring dashboard',
+                timestamp: moment().format('YYYY-MM-DD HH:mm:ss')
+            };
+            
+            // Remove from active devices
+            global.monitoringStats.activeDevices.delete(macAddress);
+            
+            // Remove from MAC stats
+            global.monitoringStats.macStats.delete(macAddress);
+            
+            res.json({ success: true, message: 'MAC address blocked successfully' });
+        } catch (error) {
+            console.error('Block MAC error:', error);
+            res.status(500).json({ error: 'Failed to block MAC address' });
+        }
+    }
+    
+    // Get detailed info for a specific MAC address
+    static async getMacDetails(req, res) {
+        try {
+            const { macAddress } = req.params;
+            
+            const macStats = global.monitoringStats.macStats.get(macAddress);
+            if (!macStats) {
+                return res.status(404).json({ error: 'MAC address not found in current session' });
+            }
+            
+            // Get device info from database
+            const device = await Device.findOne({ mac_address: macAddress });
+            
+            // Get transaction history
+            const transactions = await Transaction.find({ mac_address: macAddress })
+                .sort({ createdAt: -1 })
+                .limit(10);
+            
+            // Filter logs for this MAC
+            const macLogs = global.monitoringStats.logs.filter(log => log.macAddress === macAddress);
+            
+            res.json({
+                macAddress,
+                stats: {
+                    ...macStats,
+                    ipAddresses: Array.from(macStats.ipAddresses),
+                    endpoints: Array.from(macStats.endpoints)
+                },
+                device,
+                transactions,
+                logs: macLogs.slice(0, 50) // Last 50 logs for this MAC
+            });
+        } catch (error) {
+            console.error('Get MAC details error:', error);
+            res.status(500).json({ error: 'Failed to get MAC details' });
+        }
+    }
+}
+
+module.exports = MonitoringController;

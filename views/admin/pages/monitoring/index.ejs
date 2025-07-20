@@ -758,3 +758,564 @@
     </script>
 </body>
 </html>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<style>
+.monitoring-dashboard {
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.stats-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    display: block;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 20px;
+}
+
+.logs-container {
+    max-height: 400px;
+    overflow-y: auto;
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.log-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-family: monospace;
+    font-size: 0.85rem;
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+.mac-table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table {
+    margin: 0;
+}
+
+.table th {
+    background: #f8f9fa;
+    border: none;
+    font-weight: 600;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.status-online { background: #28a745; }
+.status-offline { background: #dc3545; }
+.status-warning { background: #ffc107; }
+
+.platform-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.badge-android { background: #a4c639; color: white; }
+.badge-ios { background: #007aff; color: white; }
+.badge-smarttv { background: #6f42c1; color: white; }
+.badge-web { background: #17a2b8; color: white; }
+.badge-other { background: #6c757d; color: white; }
+
+.refresh-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+}
+
+.real-time-indicator {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.pulse {
+    width: 8px;
+    height: 8px;
+    background: #28a745;
+    border-radius: 50%;
+    margin-right: 5px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+</style>
+
+<div class="monitoring-dashboard">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-white mb-0">
+                <i class="fas fa-chart-line me-2"></i>
+                Real-time Monitoring Dashboard
+                <div class="real-time-indicator">
+                    <div class="pulse"></div>
+                    <small style="color: rgba(255,255,255,0.8);">Live</small>
+                </div>
+            </h1>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalDevices">0</span>
+                    <div class="stat-label">Total Devices</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-item">
+                    <span class="stat-number" id="activatedDevices">0</span>
+                    <div class="stat-label">Activated Devices</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-item">
+                    <span class="stat-number" id="last24hTransactions">0</span>
+                    <div class="stat-label">24h Transactions</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalRequests">0</span>
+                    <div class="stat-label">Total Requests</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="stats-card">
+                <h5>Platform Distribution</h5>
+                <div class="chart-container">
+                    <canvas id="platformChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stats-card">
+                <h5>Monthly Revenue (Last 6 Months)</h5>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="stats-card">
+                <h5>Daily Registrations (Last 7 Days)</h5>
+                <div class="chart-container">
+                    <canvas id="registrationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAC Address Statistics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>MAC Address API Statistics</h5>
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshMacStats()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+                <div class="mac-table">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>MAC Address</th>
+                                <th>Total Requests</th>
+                                <th>IP Addresses</th>
+                                <th>First Request</th>
+                                <th>Last Request</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="macStatsTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Logs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Monitoring Logs</h5>
+                    <button class="btn btn-outline-danger btn-sm" onclick="clearLogs()">
+                        <i class="fas fa-trash"></i> Clear Logs
+                    </button>
+                </div>
+                <div class="logs-container" id="logsContainer">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Refresh Button -->
+<button class="btn btn-primary btn-lg refresh-btn" onclick="refreshAll()">
+    <i class="fas fa-sync fa-spin" id="refreshIcon"></i>
+</button>
+
+<script>
+let socket;
+let charts = {};
+
+// Initialize Socket.IO connection
+function initSocket() {
+    socket = io();
+    
+    socket.on('connect', function() {
+        console.log('Connected to monitoring socket');
+    });
+    
+    socket.on('newRequest', function(data) {
+        updateRealtimeStats(data);
+        addLogEntry(data);
+    });
+}
+
+// Initialize charts
+function initCharts() {
+    // Platform Distribution Chart
+    const platformCtx = document.getElementById('platformChart').getContext('2d');
+    charts.platform = new Chart(platformCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Android', 'iOS', 'Smart TV', 'Web', 'Other'],
+            datasets: [{
+                data: [0, 0, 0, 0, 0],
+                backgroundColor: ['#a4c639', '#007aff', '#6f42c1', '#17a2b8', '#6c757d']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Revenue Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    charts.revenue = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Revenue ($)',
+                data: [],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Registration Chart
+    const registrationCtx = document.getElementById('registrationChart').getContext('2d');
+    charts.registration = new Chart(registrationCtx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Registrations',
+                data: [],
+                backgroundColor: '#764ba2'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Load and update all data
+async function loadData() {
+    try {
+        const response = await fetch('/admin/monitoring/stats');
+        const data = await response.json();
+        
+        updateStats(data);
+        updateCharts(data);
+        updateMacTable(data.macStats);
+        updateLogs(data.recentLogs);
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
+    }
+}
+
+// Update basic stats
+function updateStats(data) {
+    document.getElementById('totalDevices').textContent = data.totalDevices.toLocaleString();
+    document.getElementById('activatedDevices').textContent = data.activatedDevices.toLocaleString();
+    document.getElementById('last24hTransactions').textContent = data.last24hTransactions.toLocaleString();
+    document.getElementById('totalRequests').textContent = data.totalRequests.toLocaleString();
+}
+
+// Update charts
+function updateCharts(data) {
+    // Platform chart
+    const platformData = [
+        data.platformDistribution.android,
+        data.platformDistribution.ios,
+        data.platformDistribution.smarttv,
+        data.platformDistribution.web,
+        data.platformDistribution.other
+    ];
+    charts.platform.data.datasets[0].data = platformData;
+    charts.platform.update();
+    
+    // Revenue chart
+    charts.revenue.data.labels = data.monthlyRevenue.map(item => item.month);
+    charts.revenue.data.datasets[0].data = data.monthlyRevenue.map(item => item.revenue);
+    charts.revenue.update();
+    
+    // Registration chart
+    charts.registration.data.labels = data.dailyRegistrations.map(item => item.date);
+    charts.registration.data.datasets[0].data = data.dailyRegistrations.map(item => item.count);
+    charts.registration.update();
+}
+
+// Update MAC address table
+function updateMacTable(macStats) {
+    const tbody = document.getElementById('macStatsTable');
+    tbody.innerHTML = '';
+    
+    macStats.slice(0, 50).forEach(mac => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><code>${mac.macAddress}</code></td>
+            <td>${mac.totalRequests}</td>
+            <td>${mac.ipAddresses.length}</td>
+            <td>${mac.firstRequest}</td>
+            <td>${mac.lastRequest}</td>
+            <td>
+                <button class="btn btn-info btn-sm" onclick="viewMacDetails('${mac.macAddress}')">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-warning btn-sm" onclick="blockMac('${mac.macAddress}')">
+                    <i class="fas fa-ban"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Update logs
+function updateLogs(logs) {
+    const container = document.getElementById('logsContainer');
+    container.innerHTML = '';
+    
+    logs.forEach(log => {
+        const logElement = document.createElement('div');
+        logElement.className = 'log-item';
+        logElement.innerHTML = `
+            <span class="text-muted">${log.timestamp}</span>
+            <strong>${log.macAddress}</strong>
+            <code>${log.endpoint}</code>
+            <span class="text-info">${log.ip}</span>
+            <span class="badge badge-secondary">${log.status}</span>
+        `;
+        container.appendChild(logElement);
+    });
+}
+
+// Real-time updates
+function updateRealtimeStats(data) {
+    document.getElementById('totalRequests').textContent = data.totalRequests.toLocaleString();
+}
+
+function addLogEntry(data) {
+    const container = document.getElementById('logsContainer');
+    const logElement = document.createElement('div');
+    logElement.className = 'log-item';
+    logElement.innerHTML = `
+        <span class="text-muted">${data.timestamp}</span>
+        <strong>${data.macAddress || 'N/A'}</strong>
+        <code>${data.endpoint}</code>
+        <span class="text-info">${data.ip}</span>
+        <span class="platform-badge badge-${data.platform}">${data.platform}</span>
+    `;
+    container.insertBefore(logElement, container.firstChild);
+    
+    // Keep only last 100 entries
+    while (container.children.length > 100) {
+        container.removeChild(container.lastChild);
+    }
+}
+
+// Action functions
+async function blockMac(macAddress) {
+    if (!confirm(`Are you sure you want to block MAC address ${macAddress}?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/admin/monitoring/block-mac', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                macAddress: macAddress,
+                reason: 'Blocked via monitoring dashboard'
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            alert('MAC address blocked successfully');
+            loadData(); // Refresh data
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        console.error('Block MAC error:', error);
+        alert('Error blocking MAC address');
+    }
+}
+
+async function viewMacDetails(macAddress) {
+    try {
+        const response = await fetch(`/admin/monitoring/mac/${macAddress}`);
+        const data = await response.json();
+        
+        // Create modal or new window with detailed info
+        const details = `
+            MAC Address: ${data.macAddress}
+            Total Requests: ${data.stats.totalRequests}
+            IP Addresses: ${data.stats.ipAddresses.join(', ')}
+            First Request: ${data.stats.firstRequest}
+            Last Request: ${data.stats.lastRequest}
+            Device Status: ${data.device ? data.device.is_active ? 'Active' : 'Inactive' : 'Not Found'}
+        `;
+        
+        alert(details);
+    } catch (error) {
+        console.error('View MAC details error:', error);
+        alert('Error fetching MAC details');
+    }
+}
+
+function refreshAll() {
+    const icon = document.getElementById('refreshIcon');
+    icon.classList.add('fa-spin');
+    
+    loadData().finally(() => {
+        setTimeout(() => {
+            icon.classList.remove('fa-spin');
+        }, 1000);
+    });
+}
+
+function refreshMacStats() {
+    loadData();
+}
+
+function clearLogs() {
+    if (confirm('Are you sure you want to clear all logs?')) {
+        document.getElementById('logsContainer').innerHTML = '';
+    }
+}
+
+// Initialize everything when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initCharts();
+    initSocket();
+    loadData();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(loadData, 30000);
+});
+</script>

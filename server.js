@@ -441,6 +441,9 @@ const api_route=require('./routes/api');
 const reseller_route=require('./routes/reseller')
 app.use('/',frontend_route);
 app.use('/admin/',admin_route)
+// Import monitoring middleware
+require('./middlewares/monitoring');
+
 // Apply monitoring middleware to API routes
 app.use('/api', global.trackRequest, api_route);
 app.use('/reseller/',reseller_route);
