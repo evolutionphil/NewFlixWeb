@@ -45,81 +45,57 @@ async function getMonitoringData() {
         const todayDateString = startOfToday.toISOString().split('T')[0];
         const monthStartDateString = startOfMonth.toISOString().split('T')[0];
 
-        console.log('Date calculations:', {
-            now: now.toISOString(),
-            startOfToday: startOfToday.toISOString(),
-            startOfMonth: startOfMonth.toISOString(),
-            todayDateString,
-            monthStartDateString
-        });
+        // Use a fixed price of 8.99 for calculations as requested
+        const STANDARD_PRICE = 8.99;
 
-        // Get today's transactions (from 00:00 to current time) - check both created_time and pay_time fields
-        const transactions24hQuery = {
+        // Get today's transactions count only (optimized for performance)
+        const totalTransactions24h = await Transaction.countDocuments({
             $or: [
                 { created_time: { $gte: startOfTodayTimestamp } },
                 { pay_time: { $gte: todayDateString } }
             ],
             status: 'success'
-        };
+        });
         
-        const transactions24h = await Transaction.find(transactions24hQuery).select('amount created_time pay_time');
-        console.log('Today transactions found:', transactions24h.length);
-        
-        const totalTransactions24h = transactions24h.length;
-        const revenue24h = transactions24h.reduce((sum, t) => {
-            return sum + (parseFloat(t.amount) || 0);
-        }, 0);
+        // Calculate 24h revenue using standard price
+        const revenue24h = totalTransactions24h * STANDARD_PRICE;
 
-        // Get monthly transactions with revenue (from start of month to now)
-        const monthlyTransactionsQuery = {
+        // Get monthly transactions count (optimized for performance)
+        const monthlyTransactionCount = await Transaction.countDocuments({
             $or: [
                 { created_time: { $gte: startOfMonthTimestamp } },
                 { pay_time: { $gte: monthStartDateString } }
             ],
             status: 'success'
-        };
-        
-        const monthlyTransactions = await Transaction.find(monthlyTransactionsQuery).select('amount created_time pay_time');
-        console.log('Monthly transactions found:', monthlyTransactions.length);
-        
-        // Debug: Show breakdown of transaction amounts
-        const amountBreakdown = {};
-        monthlyTransactions.forEach(t => {
-            const amount = parseFloat(t.amount) || 0;
-            if (amountBreakdown[amount]) {
-                amountBreakdown[amount]++;
-            } else {
-                amountBreakdown[amount] = 1;
-            }
         });
-        console.log('Monthly transaction amount breakdown:', amountBreakdown);
         
-        const monthlyRevenue = monthlyTransactions.reduce((sum, t) => {
-            return sum + (parseFloat(t.amount) || 0);
-        }, 0);
+        // Calculate monthly revenue using standard price
+        const monthlyRevenue = monthlyTransactionCount * STANDARD_PRICE;
 
-        // Get total devices
-        const totalDevices = await Device.countDocuments({});
-        console.log('Total devices:', totalDevices);
+        // Run all device queries in parallel for better performance
+        const [totalDevices, activeDevices, trialDevices, platformAggregation] = await Promise.all([
+            Device.countDocuments({}),
+            Device.countDocuments({
+                $or: [
+                    { expire_date: { $gte: nowTimestamp } },
+                    { expire_date: { $gte: now.getTime() } }
+                ],
+                is_trial: 2  // 2 means activated
+            }),
+            Device.countDocuments({
+                is_trial: 1  // 1 means trial
+            }),
+            Device.aggregate([
+                {
+                    $group: {
+                        _id: '$app_type',
+                        count: { $sum: 1 }
+                    }
+                }
+            ])
+        ]);
 
-        // Get active devices (devices that are activated and not expired)
-        const activeDevices = await Device.countDocuments({
-            $or: [
-                { expire_date: { $gte: nowTimestamp } },
-                { expire_date: { $gte: now.getTime() } }
-            ],
-            is_trial: 2  // 2 means activated
-        });
-        console.log('Active devices:', activeDevices);
-
-        // Get trial devices (devices that are in trial)
-        const trialDevices = await Device.countDocuments({
-            is_trial: 1  // 1 means trial
-        });
-        console.log('Trial devices:', trialDevices);
-
-        // Platform distribution - check app_type field
-        const devices = await Device.find({}).select('app_type');
+        // Process platform distribution from aggregation
         const platformDistribution = {
             android: 0,
             iOS: 0,
@@ -129,20 +105,22 @@ async function getMonitoringData() {
             other: 0
         };
 
-        devices.forEach(device => {
-            const appType = (device.app_type || '').toLowerCase();
+        platformAggregation.forEach(item => {
+            const appType = (item._id || '').toLowerCase();
+            const count = item.count;
+            
             if (appType.includes('android')) {
-                platformDistribution.android++;
+                platformDistribution.android += count;
             } else if (appType.includes('ios') || appType.includes('apple')) {
-                platformDistribution.iOS++;
+                platformDistribution.iOS += count;
             } else if (appType.includes('samsung') || appType.includes('tizen')) {
-                platformDistribution.samsung++;
+                platformDistribution.samsung += count;
             } else if (appType.includes('lg') || appType.includes('webos')) {
-                platformDistribution.lg++;
+                platformDistribution.lg += count;
             } else if (appType.includes('tvos') || appType.includes('appletv')) {
-                platformDistribution.tvOS++;
+                platformDistribution.tvOS += count;
             } else {
-                platformDistribution.other++;
+                platformDistribution.other += count;
             }
         });
 
@@ -156,7 +134,6 @@ async function getMonitoringData() {
             platformDistribution
         };
 
-        console.log('Final monitoring stats:', result);
         return result;
 
     } catch (error) {
@@ -173,43 +150,7 @@ async function getMonitoringData() {
     }
 }
 
-// Socket connection handler
-exports.handleSocketConnection = (io) => {
-    io.on('connection', (socket) => {
-        console.log('Client connected to monitoring dashboard');
-
-        // Send initial stats immediately
-        getMonitoringData().then(stats => {
-            socket.emit('monitoringStats', stats);
-        }).catch(error => {
-            console.error('Error sending initial stats:', error);
-            socket.emit('monitoringStats', {
-                totalTransactions24h: 0,
-                revenue24h: 0,
-                totalDevices: 0,
-                activeDevices: 0,
-                trialDevices: 0,
-                monthlyRevenue: 0,
-                platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 }
-            });
-        });
-
-        // Send stats every 30 seconds
-        const statsInterval = setInterval(async () => {
-            try {
-                const stats = await getMonitoringData();
-                socket.emit('monitoringStats', stats);
-            } catch (error) {
-                console.error('Error sending periodic stats:', error);
-            }
-        }, 30000);
-
-        socket.on('disconnect', () => {
-            console.log('Client disconnected from monitoring dashboard');
-            clearInterval(statsInterval);
-        });
-    });
-};
+// Removed Socket.IO functionality - monitoring now uses regular HTTP requests
 
 // Debug function to check database data
 exports.debugData = async (req, res) => {

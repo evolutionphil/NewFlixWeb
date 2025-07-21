@@ -30,16 +30,7 @@ const fs = require('fs');
 const path=require('path');
 const PORT=4000;
 
-// Socket.IO setup
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
-});
+// Removed Socket.IO setup - monitoring now uses regular HTTP requests
 
 app.use(cors());
 app.use(bodyParser.urlencoded({
@@ -119,19 +110,8 @@ connection.once('open', async function() {
 connection.on('error', (error) => {
     console.log('MongoDB connection error:', error.message);
 });
-// Socket.IO connection handling
-io.on('connection', (socket) => {
-    console.log('Client connected to monitoring dashboard');
-    
-    socket.on('disconnect', () => {
-        console.log('Client disconnected from monitoring dashboard');
-    });
-});
-
-// Make io available globally for monitoring updates
-global.io = io;
-
-httpServer.listen(PORT,function () {
+// Regular HTTP server without Socket.IO
+app.listen(PORT, '0.0.0.0', function () {
     console.log('Server is running on Port: '+PORT);
 })
 
