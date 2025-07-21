@@ -62,10 +62,13 @@ async function getMonitoringData() {
         console.log(`Today's date string: ${todayDateString}`);
         console.log(`Today's transaction count: ${totalTransactions24h}`);
         
-        // Calculate 24h revenue: transaction count × €8.99
-        const revenue24h = (totalTransactions24h || 0) * standardPrice;
+        // Ensure we have a valid transaction count
+        const safeTransactionCount24h = Number.isInteger(totalTransactions24h) ? totalTransactions24h : 0;
         
-        console.log(`Today's revenue calculation: ${totalTransactions24h} × ${standardPrice} = ${revenue24h}`);
+        // Calculate 24h revenue: transaction count × €8.99
+        const revenue24h = safeTransactionCount24h * standardPrice;
+        
+        console.log(`Today's revenue calculation: ${safeTransactionCount24h} × ${standardPrice} = ${revenue24h}`);
 
         // Get monthly transactions count from start of month to current date
         // Create regex pattern for the current month (YYYY-MM-)
@@ -91,10 +94,13 @@ async function getMonitoringData() {
         console.log(`Month pattern: ${monthPattern}`);
         console.log(`Monthly transaction count: ${monthlyTransactionCount}`);
         
-        // Calculate monthly revenue: transaction count × €8.99
-        const monthlyRevenue = (monthlyTransactionCount || 0) * standardPrice;
+        // Ensure we have a valid monthly transaction count
+        const safeMonthlyTransactionCount = Number.isInteger(monthlyTransactionCount) ? monthlyTransactionCount : 0;
         
-        console.log(`Monthly revenue calculation: ${monthlyTransactionCount} × ${standardPrice} = ${monthlyRevenue}`);
+        // Calculate monthly revenue: transaction count × €8.99
+        const monthlyRevenue = safeMonthlyTransactionCount * standardPrice;
+        
+        console.log(`Monthly revenue calculation: ${safeMonthlyTransactionCount} × ${standardPrice} = ${monthlyRevenue}`);
 
         // Get current timestamp as string for comparison
         const nowTimestamp = now.getTime().toString();
@@ -151,17 +157,23 @@ async function getMonitoringData() {
             }
         });
 
+        // Ensure we have valid numbers before formatting
+        const validRevenue24h = (!isNaN(revenue24h) && isFinite(revenue24h)) ? revenue24h : 0;
+        const validMonthlyRevenue = (!isNaN(monthlyRevenue) && isFinite(monthlyRevenue)) ? monthlyRevenue : 0;
+
         const result = {
             totalTransactions24h: totalTransactions24h || 0,
-            revenue24h: '€' + (isNaN(revenue24h) ? 0 : revenue24h).toFixed(2),
+            revenue24h: '€' + validRevenue24h.toFixed(2),
             totalDevices,
             activeDevices,
             trialDevices,
-            monthlyRevenue: '€' + (isNaN(monthlyRevenue) ? 0 : monthlyRevenue).toFixed(2),
+            monthlyRevenue: '€' + validMonthlyRevenue.toFixed(2),
             platformDistribution
         };
         
-        console.log('Final result:', result);
+        console.log('Final result with validation:', result);
+        console.log('Revenue validation - 24h:', { revenue24h, validRevenue24h, isNaN: isNaN(revenue24h), isFinite: isFinite(revenue24h) });
+        console.log('Monthly validation:', { monthlyRevenue, validMonthlyRevenue, isNaN: isNaN(monthlyRevenue), isFinite: isFinite(monthlyRevenue) });
 
         return result;
 
