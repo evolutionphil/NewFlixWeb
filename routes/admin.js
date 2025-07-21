@@ -157,17 +157,26 @@ router.get('/update-expire-date-format',adminController.updateExpireDateFormat)
 router.get('/update-reseller-activity',adminController.updateResellerActivity)
 
 const MonitoringController = require('../controllers/MonitoringController');
-function isAuthenticated(req, res, next) {
+
+function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next()
     }
     res.redirect('/admin/login')
 }
+
 function checkNotAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return res.redirect('/admin')
     }
     next()
+}
+
+function isAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next()
+    }
+    res.redirect('/admin/login')
 }
 
 router.get('/monitoring', isAuthenticated, MonitoringController.index);
