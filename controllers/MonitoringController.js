@@ -60,7 +60,16 @@ async function getMonitoringData() {
         });
         
         console.log(`Today's date string: ${todayDateString}`);
-        console.log(`Today's transaction count: ${totalTransactions24h}`);
+        console.log(`Today's successful transaction count: ${totalTransactions24h}`);
+        
+        // Double check: count all transactions for today (including failed ones)
+        const allTransactions24h = await Transaction.countDocuments({
+            $or: [
+                { pay_time: todayDateString },
+                { pay_time: { $regex: `^${todayDateString}` } }
+            ]
+        });
+        console.log(`Today's total transactions (all statuses): ${allTransactions24h}`);
         
         // Ensure we have a valid transaction count
         const safeTransactionCount24h = Number.isInteger(totalTransactions24h) ? totalTransactions24h : 0;
@@ -92,7 +101,21 @@ async function getMonitoringData() {
         });
         
         console.log(`Month pattern: ${monthPattern}`);
-        console.log(`Monthly transaction count: ${monthlyTransactionCount}`);
+        console.log(`Monthly successful transaction count: ${monthlyTransactionCount}`);
+        
+        // Double check: count all monthly transactions (including failed ones)
+        const allMonthlyTransactions = await Transaction.countDocuments({
+            $or: [
+                { 
+                    pay_time: { 
+                        $gte: monthStartDateString, 
+                        $lte: currentDateString 
+                    } 
+                },
+                { pay_time: { $regex: monthPattern } }
+            ]
+        });
+        console.log(`Monthly total transactions (all statuses): ${allMonthlyTransactions}`);
         
         // Ensure we have a valid monthly transaction count
         const safeMonthlyTransactionCount = Number.isInteger(monthlyTransactionCount) ? monthlyTransactionCount : 0;
