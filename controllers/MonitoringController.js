@@ -74,7 +74,6 @@ async function getMonitoringData() {
 
         // Get current timestamp as string for comparison
         const nowTimestamp = now.getTime().toString();
-        const currentDateString = now.toISOString().split('T')[0];
 
         // Run all device queries in parallel for better performance
         const [totalDevices, activeDevices, trialDevices, platformAggregation] = await Promise.all([
