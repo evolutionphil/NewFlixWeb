@@ -55,8 +55,12 @@ async function getMonitoringData() {
         }
 
         // Get today's transactions count only (00:00 to 23:59 today)
+        // Check both date string format and timestamp format for pay_time
         const totalTransactions24h = await Transaction.countDocuments({
-            pay_time: todayDateString,
+            $or: [
+                { pay_time: todayDateString },
+                { pay_time: { $regex: `^${todayDateString}` } }
+            ],
             status: 'success'
         });
         
@@ -65,7 +69,10 @@ async function getMonitoringData() {
 
         // Get monthly transactions count from start of month to current date
         const monthlyTransactionCount = await Transaction.countDocuments({
-            pay_time: { $gte: monthStartDateString, $lte: currentDateString },
+            $or: [
+                { pay_time: { $gte: monthStartDateString, $lte: currentDateString } },
+                { pay_time: { $regex: `^${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}` } }
+            ],
             status: 'success'
         });
         
@@ -129,11 +136,11 @@ async function getMonitoringData() {
 
         const result = {
             totalTransactions24h,
-            revenue24h: '€' + (Math.round(revenue24h * 100) / 100).toFixed(2),
+            revenue24h: '€' + (revenue24h || 0).toFixed(2),
             totalDevices,
             activeDevices,
             trialDevices,
-            monthlyRevenue: '€' + (Math.round(monthlyRevenue * 100) / 100).toFixed(2),
+            monthlyRevenue: '€' + (monthlyRevenue || 0).toFixed(2),
             platformDistribution
         };
 
