@@ -50,6 +50,7 @@ async function getMonitoringData() {
             if (pricePackage && pricePackage.price) {
                 standardPrice = parseFloat(pricePackage.price);
             }
+            console.log('Price being used for calculations:', standardPrice);
         } catch (err) {
             console.log('Using default price:', standardPrice);
         }
@@ -64,8 +65,12 @@ async function getMonitoringData() {
             status: 'success'
         });
         
+        console.log('Today transactions count:', totalTransactions24h);
+        console.log('Standard price:', standardPrice);
+        
         // Calculate 24h revenue using standard price
         const revenue24h = totalTransactions24h * standardPrice;
+        console.log('Calculated 24h revenue:', revenue24h);
 
         // Get monthly transactions count from start of month to current date
         const monthlyTransactionCount = await Transaction.countDocuments({
@@ -76,8 +81,11 @@ async function getMonitoringData() {
             status: 'success'
         });
         
+        console.log('Monthly transactions count:', monthlyTransactionCount);
+        
         // Calculate monthly revenue using standard price
         const monthlyRevenue = monthlyTransactionCount * standardPrice;
+        console.log('Calculated monthly revenue:', monthlyRevenue);
 
         // Get current timestamp as string for comparison
         const nowTimestamp = now.getTime().toString();
@@ -165,8 +173,30 @@ async function getMonitoringData() {
 // Debug function to check database data
 exports.debugData = async (req, res) => {
     try {
+        const now = new Date();
+        const todayDateString = now.toISOString().split('T')[0];
+        const monthStartDateString = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0).toISOString().split('T')[0];
+        
+        // Get today's transactions
+        const todayTransactions = await Transaction.find({
+            $or: [
+                { pay_time: todayDateString },
+                { pay_time: { $regex: `^${todayDateString}` } }
+            ],
+            status: 'success'
+        }).select('pay_time status amount created_time');
+        
+        // Get this month's transactions
+        const monthlyTransactions = await Transaction.find({
+            $or: [
+                { pay_time: { $gte: monthStartDateString, $lte: todayDateString } },
+                { pay_time: { $regex: `^${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}` } }
+            ],
+            status: 'success'
+        }).select('pay_time status amount created_time');
+        
         // Get sample transactions
-        const sampleTransactions = await Transaction.find({}).limit(5).select('created_time pay_time status amount');
+        const sampleTransactions = await Transaction.find({}).limit(10).select('created_time pay_time status amount');
         
         // Get sample devices
         const sampleDevices = await Device.find({}).limit(5).select('created_time expire_date is_trial app_type');
@@ -179,12 +209,18 @@ exports.debugData = async (req, res) => {
         const totalDevices = await Device.countDocuments({});
         
         const debugInfo = {
+            todayDateString,
+            monthStartDateString,
+            todayTransactions,
+            monthlyTransactions,
             sampleTransactions,
             sampleDevices,
             counts: {
                 totalTransactions,
                 successTransactions,
-                totalDevices
+                totalDevices,
+                todayTransactionsCount: todayTransactions.length,
+                monthlyTransactionsCount: monthlyTransactions.length
             },
             currentTime: new Date().toISOString(),
             currentTimestamp: new Date().getTime().toString()
