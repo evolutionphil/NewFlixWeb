@@ -32,45 +32,45 @@ async function getMonitoringData() {
     try {
         const now = new Date();
         
-        // Get start of today (00:00:00 of current day)
+        // Get start of today (00:00:00 of current day) and end of today (23:59:59)
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+        const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-        
-        // Convert dates to different formats for comparison
-        const startOfTodayTimestamp = startOfToday.getTime().toString();
-        const startOfMonthTimestamp = startOfMonth.getTime().toString();
-        const nowTimestamp = now.getTime().toString();
         
         // Format dates as YYYY-MM-DD for pay_time field comparison
         const todayDateString = startOfToday.toISOString().split('T')[0];
         const monthStartDateString = startOfMonth.toISOString().split('T')[0];
+        const currentDateString = now.toISOString().split('T')[0];
 
-        // Use a fixed price of 8.99 for calculations as requested
-        const STANDARD_PRICE = 8.99;
+        // Get fixed price from database or use default
+        const PricePackage = require('../models/PricePackage.model');
+        let standardPrice = 8.99;
+        try {
+            const pricePackage = await PricePackage.findOne({});
+            if (pricePackage && pricePackage.price) {
+                standardPrice = parseFloat(pricePackage.price);
+            }
+        } catch (err) {
+            console.log('Using default price:', standardPrice);
+        }
 
-        // Get today's transactions count only (optimized for performance)
+        // Get today's transactions count only (00:00 to 23:59 today)
         const totalTransactions24h = await Transaction.countDocuments({
-            $or: [
-                { created_time: { $gte: startOfTodayTimestamp } },
-                { pay_time: { $gte: todayDateString } }
-            ],
+            pay_time: todayDateString,
             status: 'success'
         });
         
         // Calculate 24h revenue using standard price
-        const revenue24h = totalTransactions24h * STANDARD_PRICE;
+        const revenue24h = totalTransactions24h * standardPrice;
 
-        // Get monthly transactions count (optimized for performance)
+        // Get monthly transactions count from start of month to current date
         const monthlyTransactionCount = await Transaction.countDocuments({
-            $or: [
-                { created_time: { $gte: startOfMonthTimestamp } },
-                { pay_time: { $gte: monthStartDateString } }
-            ],
+            pay_time: { $gte: monthStartDateString, $lte: currentDateString },
             status: 'success'
         });
         
         // Calculate monthly revenue using standard price
-        const monthlyRevenue = monthlyTransactionCount * STANDARD_PRICE;
+        const monthlyRevenue = monthlyTransactionCount * standardPrice;
 
         // Run all device queries in parallel for better performance
         const [totalDevices, activeDevices, trialDevices, platformAggregation] = await Promise.all([
