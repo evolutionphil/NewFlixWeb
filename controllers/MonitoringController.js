@@ -18,96 +18,136 @@ exports.index = async (req, res) => {
 // Get monitoring statistics
 exports.getMonitoringStats = async (req, res) => {
     try {
-        const now = moment();
-        const today = now.format('YYYY-MM-DD');
-        const yesterday = now.subtract(1, 'day').format('YYYY-MM-DD');
+        // Get monitoring statistics
+        const stats = await getMonitoringData();
+        res.json(stats);
+    } catch (error) {
+        console.error('Error getting monitoring stats:', error);
+        res.status(500).json({ error: 'Failed to get monitoring stats' });
+    }
+};
+
+async function getMonitoringData() {
+    try {
+        // Get 24h transactions
+        const yesterday = moment().subtract(1, 'day').toDate();
+        const totalTransactions24h = await Transaction.countDocuments({
+            pay_time: { $gte: yesterday },
+            status: 'success'
+        });
 
         // Get total devices
         const totalDevices = await Device.countDocuments({});
 
-        // Get active devices (those with is_trial = 2)
-        const activeDevices = await Device.countDocuments({ is_trial: 2 });
+        // Get active devices (devices with expire_date in future)
+        const now = new Date();
+        const activeDevices = await Device.countDocuments({
+            expire_date: { $gte: now }
+        });
 
-        // Get 24h transactions count
-        const transactions24h = await Transaction.countDocuments({
-            pay_time: {
-                $gte: today + ' 00:00',
-                $lte: today + ' 23:59'
-            },
+        // Get this month's revenue
+        const startOfMonth = moment().startOf('month').toDate();
+        const monthlyTransactions = await Transaction.find({
+            pay_time: { $gte: startOfMonth },
+            status: 'success'
+        });
+        const monthlyRevenue = monthlyTransactions.reduce((sum, t) => sum + (parseFloat(t.price) || 0), 0);
+
+        // Platform distribution
+        const devices = await Device.find({});
+        const platformDistribution = {
+            android: 0,
+            iOS: 0,
+            samsung: 0,
+            lg: 0,
+            tvOS: 0,
+            macOS: 0
+        };
+
+        devices.forEach(device => {
+            const userAgent = (device.user_agent || '').toLowerCase();
+            if (userAgent.includes('android')) platformDistribution.android++;
+            else if (userAgent.includes('ios') || userAgent.includes('iphone')) platformDistribution.iOS++;
+            else if (userAgent.includes('samsung') || userAgent.includes('tizen')) platformDistribution.samsung++;
+            else if (userAgent.includes('lg') || userAgent.includes('webos')) platformDistribution.lg++;
+            else if (userAgent.includes('tvos') || userAgent.includes('apple tv')) platformDistribution.tvOS++;
+            else if (userAgent.includes('mac')) platformDistribution.macOS++;
+        });
+
+        // Device status
+        const trialDevices = await Device.countDocuments({
+            expire_date: { $gte: now },
+            status: 'trial'
+        });
+        const inactiveDevices = await Device.countDocuments({
+            expire_date: { $lt: now }
+        });
+
+        const deviceStatus = {
+            active: activeDevices - trialDevices,
+            trial: trialDevices,
+            inactive: inactiveDevices
+        };
+
+        // Hourly transactions for last 24 hours
+        const hourlyTransactions = new Array(24).fill(0);
+        const last24Hours = await Transaction.find({
+            pay_time: { $gte: yesterday },
             status: 'success'
         });
 
-        // Get platform distribution
-        const platformDistribution = await Device.aggregate([
-            {
-                $group: {
-                    _id: '$app_type',
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
+        last24Hours.forEach(transaction => {
+            const hour = moment(transaction.pay_time).hour();
+            hourlyTransactions[hour]++;
+        });
 
-        // Get device status distribution
-        const deviceStatus = await Device.aggregate([
-            {
-                $group: {
-                    _id: {
-                        $cond: {
-                            if: { $eq: ['$is_trial', 2] },
-                            then: 'Active',
-                            else: 'Inactive'
-                        }
-                    },
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
-
-        // Get monthly revenue for last 6 months
-        const sixMonthsAgo = moment().subtract(6, 'months').format('YYYY-MM-DD');
-        const monthlyRevenue = await Transaction.aggregate([
-            {
-                $match: {
-                    pay_time: { $gte: sixMonthsAgo + ' 00:00' },
-                    status: 'success'
-                }
-            },
-            {
-                $group: {
-                    _id: {
-                        $dateToString: {
-                            format: '%Y-%m',
-                            date: {
-                                $dateFromString: {
-                                    dateString: '$pay_time'
-                                }
-                            }
-                        }
-                    },
-                    revenue: { $sum: { $toDouble: '$amount' } },
-                    count: { $sum: 1 }
-                }
-            },
-            {
-                $sort: { _id: 1 }
-            }
-        ]);
-
-        const stats = {
-            totalDevices,
-            activeDevices,
-            transactions24h,
-            platformDistribution,
-            deviceStatus,
-            monthlyRevenue
+        // Monthly revenue for last 6 months
+        const monthlyRevenueData = {
+            labels: [],
+            data: []
         };
 
-        res.json(stats);
+        for (let i = 5; i >= 0; i--) {
+            const monthStart = moment().subtract(i, 'month').startOf('month').toDate();
+            const monthEnd = moment().subtract(i, 'month').endOf('month').toDate();
+            const monthName = moment().subtract(i, 'month').format('MMM YYYY');
+
+            const monthTransactions = await Transaction.find({
+                pay_time: { $gte: monthStart, $lte: monthEnd },
+                status: 'success'
+            });
+
+            const monthRevenue = monthTransactions.reduce((sum, t) => sum + (parseFloat(t.price) || 0), 0);
+
+            monthlyRevenueData.labels.push(monthName);
+            monthlyRevenueData.data.push(monthRevenue);
+        }
+
+        return {
+            totalTransactions24h,
+            totalDevices,
+            activeDevices,
+            monthlyRevenue: Math.round(monthlyRevenue * 100) / 100,
+            platformDistribution,
+            deviceStatus,
+            hourlyTransactions,
+            monthlyRevenueData
+        };
+
     } catch (error) {
-        console.error('Error getting monitoring stats:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error in getMonitoringData:', error);
+        return {
+            totalTransactions24h: 0,
+            totalDevices: 0,
+            activeDevices: 0,
+            monthlyRevenue: 0,
+            platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, macOS: 0 },
+            deviceStatus: { active: 0, trial: 0, inactive: 0 },
+            hourlyTransactions: new Array(24).fill(0),
+            monthlyRevenueData: { labels: [], data: [] }
+        };
     }
-};
+}
 
 exports.handleSocketConnection = (io) => {
     io.on('connection', (socket) => {

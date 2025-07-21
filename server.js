@@ -29,6 +29,18 @@ app.use(expressLayouts);
 const fs = require('fs');
 const path=require('path');
 const PORT=4000;
+
+// Socket.IO setup
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
 app.use(cors());
 app.use(bodyParser.urlencoded({
     extended: true,
@@ -107,7 +119,19 @@ connection.once('open', async function() {
 connection.on('error', (error) => {
     console.log('MongoDB connection error:', error.message);
 });
-app.listen(PORT,function () {
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+    console.log('Client connected to monitoring dashboard');
+    
+    socket.on('disconnect', () => {
+        console.log('Client disconnected from monitoring dashboard');
+    });
+});
+
+// Make io available globally for monitoring updates
+global.io = io;
+
+httpServer.listen(PORT,function () {
     console.log('Server is running on Port: '+PORT);
 })
 
