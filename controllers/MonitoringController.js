@@ -1,3 +1,4 @@
+
 const Device = require('../models/Device.model');
 const Transaction = require('../models/Transaction.model');
 const moment = require('moment');
@@ -29,76 +30,96 @@ exports.getMonitoringStats = async (req, res) => {
 
 async function getMonitoringData() {
     try {
-        // Get 24h transactions
-        const yesterday = moment().subtract(1, 'day').toDate();
+        // Get 24h transactions - using proper date comparison
+        const yesterday = moment().subtract(24, 'hours').toDate();
         const totalTransactions24h = await Transaction.countDocuments({
-            pay_time: { $gte: yesterday },
+            created_time: { $gte: yesterday.getTime().toString() },
             status: 'success'
         });
 
         // Get total devices
         const totalDevices = await Device.countDocuments({});
 
-        // Get active devices (devices with expire_date in future)
+        // Get active devices (devices that are not trial and not expired)
         const now = new Date();
         const activeDevices = await Device.countDocuments({
-            expire_date: { $gte: now }
+            $or: [
+                { expire_date: { $gte: now.getTime().toString() } },
+                { expire_date: { $exists: false } }
+            ],
+            is_trial: { $ne: 0 }
         });
 
         // Get this month's revenue
         const startOfMonth = moment().startOf('month').toDate();
         const monthlyTransactions = await Transaction.find({
-            pay_time: { $gte: startOfMonth },
+            created_time: { $gte: startOfMonth.getTime().toString() },
             status: 'success'
-        });
-        const monthlyRevenue = monthlyTransactions.reduce((sum, t) => sum + (parseFloat(t.price) || 0), 0);
+        }).select('amount');
+        
+        const monthlyRevenue = monthlyTransactions.reduce((sum, t) => {
+            return sum + (parseFloat(t.amount) || 0);
+        }, 0);
 
-        // Platform distribution
-        const devices = await Device.find({});
+        // Platform distribution - check app_type field
+        const devices = await Device.find({}).select('app_type');
         const platformDistribution = {
             android: 0,
             iOS: 0,
             samsung: 0,
             lg: 0,
             tvOS: 0,
-            macOS: 0
+            other: 0
         };
 
         devices.forEach(device => {
-            const userAgent = (device.user_agent || '').toLowerCase();
-            if (userAgent.includes('android')) platformDistribution.android++;
-            else if (userAgent.includes('ios') || userAgent.includes('iphone')) platformDistribution.iOS++;
-            else if (userAgent.includes('samsung') || userAgent.includes('tizen')) platformDistribution.samsung++;
-            else if (userAgent.includes('lg') || userAgent.includes('webos')) platformDistribution.lg++;
-            else if (userAgent.includes('tvos') || userAgent.includes('apple tv')) platformDistribution.tvOS++;
-            else if (userAgent.includes('mac')) platformDistribution.macOS++;
+            const appType = (device.app_type || '').toLowerCase();
+            if (appType.includes('android')) {
+                platformDistribution.android++;
+            } else if (appType.includes('ios') || appType.includes('apple')) {
+                platformDistribution.iOS++;
+            } else if (appType.includes('samsung') || appType.includes('tizen')) {
+                platformDistribution.samsung++;
+            } else if (appType.includes('lg') || appType.includes('webos')) {
+                platformDistribution.lg++;
+            } else if (appType.includes('tvos') || appType.includes('appletv')) {
+                platformDistribution.tvOS++;
+            } else {
+                platformDistribution.other++;
+            }
         });
 
-        // Device status
+        // Device status - using correct field names
         const trialDevices = await Device.countDocuments({
-            expire_date: { $gte: now },
-            status: 'trial'
+            is_trial: 0  // 0 means trial
         });
-        const inactiveDevices = await Device.countDocuments({
-            expire_date: { $lt: now }
+        
+        const expiredDevices = await Device.countDocuments({
+            expire_date: { $lt: now.getTime().toString() },
+            is_trial: { $ne: 0 }
         });
 
         const deviceStatus = {
-            active: activeDevices - trialDevices,
+            active: activeDevices,
             trial: trialDevices,
-            inactive: inactiveDevices
+            inactive: expiredDevices
         };
 
         // Hourly transactions for last 24 hours
         const hourlyTransactions = new Array(24).fill(0);
         const last24Hours = await Transaction.find({
-            pay_time: { $gte: yesterday },
+            created_time: { $gte: yesterday.getTime().toString() },
             status: 'success'
-        });
+        }).select('created_time');
 
         last24Hours.forEach(transaction => {
-            const hour = moment(transaction.pay_time).hour();
-            hourlyTransactions[hour]++;
+            const transactionTime = moment(parseInt(transaction.created_time));
+            if (transactionTime.isValid()) {
+                const hour = transactionTime.hour();
+                if (hour >= 0 && hour < 24) {
+                    hourlyTransactions[hour]++;
+                }
+            }
         });
 
         // Monthly revenue for last 6 months
@@ -108,19 +129,24 @@ async function getMonitoringData() {
         };
 
         for (let i = 5; i >= 0; i--) {
-            const monthStart = moment().subtract(i, 'month').startOf('month').toDate();
-            const monthEnd = moment().subtract(i, 'month').endOf('month').toDate();
-            const monthName = moment().subtract(i, 'month').format('MMM YYYY');
+            const monthStart = moment().subtract(i, 'month').startOf('month');
+            const monthEnd = moment().subtract(i, 'month').endOf('month');
+            const monthName = monthStart.format('MMM YYYY');
 
             const monthTransactions = await Transaction.find({
-                pay_time: { $gte: monthStart, $lte: monthEnd },
+                created_time: { 
+                    $gte: monthStart.valueOf().toString(), 
+                    $lte: monthEnd.valueOf().toString() 
+                },
                 status: 'success'
-            });
+            }).select('amount');
 
-            const monthRevenue = monthTransactions.reduce((sum, t) => sum + (parseFloat(t.price) || 0), 0);
+            const monthRevenue = monthTransactions.reduce((sum, t) => {
+                return sum + (parseFloat(t.amount) || 0);
+            }, 0);
 
             monthlyRevenueData.labels.push(monthName);
-            monthlyRevenueData.data.push(monthRevenue);
+            monthlyRevenueData.data.push(Math.round(monthRevenue * 100) / 100);
         }
 
         return {
@@ -141,7 +167,7 @@ async function getMonitoringData() {
             totalDevices: 0,
             activeDevices: 0,
             monthlyRevenue: 0,
-            platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, macOS: 0 },
+            platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 },
             deviceStatus: { active: 0, trial: 0, inactive: 0 },
             hourlyTransactions: new Array(24).fill(0),
             monthlyRevenueData: { labels: [], data: [] }
@@ -149,26 +175,44 @@ async function getMonitoringData() {
     }
 }
 
+// Socket connection handler
 exports.handleSocketConnection = (io) => {
     io.on('connection', (socket) => {
         console.log('Client connected to monitoring dashboard');
 
-        socket.on('disconnect', () => {
-            console.log('Client disconnected from monitoring dashboard');
+        // Send initial stats immediately
+        getMonitoringData().then(stats => {
+            socket.emit('monitoringStats', stats);
+        }).catch(error => {
+            console.error('Error sending initial stats:', error);
+            socket.emit('monitoringStats', {
+                totalTransactions24h: 0,
+                totalDevices: 0,
+                activeDevices: 0,
+                monthlyRevenue: 0,
+                platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 },
+                deviceStatus: { active: 0, trial: 0, inactive: 0 },
+                hourlyTransactions: new Array(24).fill(0),
+                monthlyRevenueData: { labels: [], data: [] }
+            });
         });
 
         // Send stats every 30 seconds
         const statsInterval = setInterval(async () => {
             try {
-                const stats = await exports.getMonitoringStats();
+                const stats = await getMonitoringData();
                 socket.emit('monitoringStats', stats);
             } catch (error) {
-                console.error('Error sending stats:', error);
+                console.error('Error sending periodic stats:', error);
             }
         }, 30000);
 
         socket.on('disconnect', () => {
+            console.log('Client disconnected from monitoring dashboard');
             clearInterval(statsInterval);
         });
     });
 };
+
+// Export the getMonitoringData function for testing
+exports.getMonitoringData = getMonitoringData;
