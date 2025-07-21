@@ -32,18 +32,22 @@ async function getMonitoringData() {
     try {
         const now = new Date();
         
-        // Get start of today (00:00:00 of current day) and end of today (23:59:59)
-        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-        const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+        // Use UTC to ensure consistent timezone handling across environments
+        const nowUTC = new Date();
         
-        // Format dates as YYYY-MM-DD for pay_time field comparison
-        const todayDateString = startOfToday.toISOString().split('T')[0];
-        const monthStartDateString = startOfMonth.toISOString().split('T')[0];
-        const currentDateString = now.toISOString().split('T')[0];
+        // Get start of today in UTC (00:00:00 of current day)
+        const startOfTodayUTC = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), nowUTC.getUTCDate(), 0, 0, 0, 0));
+        const startOfMonthUTC = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), 1, 0, 0, 0, 0));
+        
+        // Format dates as YYYY-MM-DD for pay_time field comparison (using UTC)
+        const todayDateString = startOfTodayUTC.toISOString().split('T')[0];
+        const monthStartDateString = startOfMonthUTC.toISOString().split('T')[0];
+        const currentDateString = nowUTC.toISOString().split('T')[0];
 
         // Use fixed price of €8.99 for all calculations
         const standardPrice = 8.99;
+        
+        console.log(`Environment timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`);
 
         // Get today's transactions count only (00:00 to 23:59 today)
         // Check for exact date match and date string starting with today's date
@@ -59,7 +63,10 @@ async function getMonitoringData() {
             ]
         });
         
-        console.log(`Today's date string: ${todayDateString}`);
+        console.log(`Server time: ${now.toISOString()}`);
+        console.log(`Server UTC time: ${nowUTC.toISOString()}`);
+        console.log(`Today's date string (UTC): ${todayDateString}`);
+        console.log(`Current date string (UTC): ${currentDateString}`);
         console.log(`Today's successful transaction count: ${totalTransactions24h}`);
         
         // Double check: count all transactions for today (including failed ones)
