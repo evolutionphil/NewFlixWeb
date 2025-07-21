@@ -30,20 +30,42 @@ exports.getMonitoringStats = async (req, res) => {
 
 async function getMonitoringData() {
     try {
-        // Get 24h transactions - using proper date comparison
-        const yesterday = moment().subtract(24, 'hours').toDate();
-        const totalTransactions24h = await Transaction.countDocuments({
-            created_time: { $gte: yesterday.getTime().toString() },
+        const now = new Date();
+        const yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        // Convert dates to timestamp strings for comparison
+        const yesterdayTimestamp = yesterday.getTime().toString();
+        const startOfMonthTimestamp = startOfMonth.getTime().toString();
+
+        // Get 24h transactions with revenue
+        const transactions24h = await Transaction.find({
+            created_time: { $gte: yesterdayTimestamp },
             status: 'success'
-        });
+        }).select('amount');
+        
+        const totalTransactions24h = transactions24h.length;
+        const revenue24h = transactions24h.reduce((sum, t) => {
+            return sum + (parseFloat(t.amount) || 0);
+        }, 0);
+
+        // Get monthly transactions with revenue
+        const monthlyTransactions = await Transaction.find({
+            created_time: { $gte: startOfMonthTimestamp },
+            status: 'success'
+        }).select('amount');
+        
+        const monthlyRevenue = monthlyTransactions.reduce((sum, t) => {
+            return sum + (parseFloat(t.amount) || 0);
+        }, 0);
 
         // Get total devices
         const totalDevices = await Device.countDocuments({});
 
         // Get active devices (devices that are activated and not expired)
-        const now = new Date();
+        const nowTimestamp = now.getTime().toString();
         const activeDevices = await Device.countDocuments({
-            expire_date: { $gte: now.getTime().toString() },
+            expire_date: { $gte: nowTimestamp },
             is_trial: 2  // 2 means activated
         });
 
@@ -52,16 +74,11 @@ async function getMonitoringData() {
             is_trial: 1  // 1 means trial
         });
 
-        // Get this month's revenue
-        const startOfMonth = moment().startOf('month').toDate();
-        const monthlyTransactions = await Transaction.find({
-            created_time: { $gte: startOfMonth.getTime().toString() },
-            status: 'success'
-        }).select('amount');
-        
-        const monthlyRevenue = monthlyTransactions.reduce((sum, t) => {
-            return sum + (parseFloat(t.amount) || 0);
-        }, 0);
+        // Get 24h activated devices (devices activated in last 24 hours)
+        const activatedDevices24h = await Device.countDocuments({
+            created_time: { $gte: yesterdayTimestamp },
+            is_trial: 2  // 2 means activated
+        });
 
         // Platform distribution - check app_type field
         const devices = await Device.find({}).select('app_type');
@@ -91,13 +108,13 @@ async function getMonitoringData() {
             }
         });
 
-        
-
         return {
             totalTransactions24h,
+            revenue24h: Math.round(revenue24h * 100) / 100,
             totalDevices,
             activeDevices,
             trialDevices,
+            activatedDevices24h,
             monthlyRevenue: Math.round(monthlyRevenue * 100) / 100,
             platformDistribution
         };
@@ -106,9 +123,11 @@ async function getMonitoringData() {
         console.error('Error in getMonitoringData:', error);
         return {
             totalTransactions24h: 0,
+            revenue24h: 0,
             totalDevices: 0,
             activeDevices: 0,
             trialDevices: 0,
+            activatedDevices24h: 0,
             monthlyRevenue: 0,
             platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 }
         };
@@ -127,9 +146,11 @@ exports.handleSocketConnection = (io) => {
             console.error('Error sending initial stats:', error);
             socket.emit('monitoringStats', {
                 totalTransactions24h: 0,
+                revenue24h: 0,
                 totalDevices: 0,
                 activeDevices: 0,
                 trialDevices: 0,
+                activatedDevices24h: 0,
                 monthlyRevenue: 0,
                 platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 }
             });

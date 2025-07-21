@@ -1,81 +1,176 @@
 
-<div class="page">
-    <div class="page-header">
-        <h1 class="page-title">Monitoring Dashboard</h1>
+<link rel="stylesheet" href="/admin/template/examples/css/dashboard/ecommerce.css">
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Monitoring Dashboard</h1>
     </div>
-    <div class="page-content">
-        <!-- Stats Cards Row -->
-        <div class="row" id="statsCards">
-            <div class="col-lg-3 col-sm-6">
-                <div class="card card-block bg-blue-600 p-20">
-                    <div class="counter counter-md text-left">
+</div>
+
+<div class="page-content">
+    <!-- Stats Cards Row -->
+    <div class="row">
+        <!-- 24h Transactions -->
+        <div class="col-lg-3 col-sm-6">
+            <div class="widget widget-shadow">
+                <div class="widget-content bg-white p-20">
+                    <div class="counter text-left">
                         <div class="counter-number-group">
-                            <span class="counter-number color-white" id="transactions24h">Loading...</span>
+                            <span class="counter-number font-size-40" id="totalTransactions24h">0</span>
                         </div>
-                        <div class="counter-label text-uppercase color-white">24h Transactions</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-sm-6">
-                <div class="card card-block bg-green-600 p-20">
-                    <div class="counter counter-md text-left">
-                        <div class="counter-number-group">
-                            <span class="counter-number color-white" id="totalDevices">Loading...</span>
-                        </div>
-                        <div class="counter-label text-uppercase color-white">Total Devices</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-sm-6">
-                <div class="card card-block bg-orange-600 p-20">
-                    <div class="counter counter-md text-left">
-                        <div class="counter-number-group">
-                            <span class="counter-number color-white" id="activeDevices">Loading...</span>
-                        </div>
-                        <div class="counter-label text-uppercase color-white">Active Devices</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-sm-6">
-                <div class="card card-block bg-cyan-600 p-20">
-                    <div class="counter counter-md text-left">
-                        <div class="counter-number-group">
-                            <span class="counter-number color-white" id="trialDevices">Loading...</span>
-                        </div>
-                        <div class="counter-label text-uppercase color-white">Trial Devices</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Second Row for Monthly Revenue -->
-        <div class="row">
-            <div class="col-lg-3 col-sm-6"></div>
-            <div class="col-lg-3 col-sm-6"></div>
-            <div class="col-lg-3 col-sm-6"></div>
-            <div class="col-lg-3 col-sm-6">
-                <div class="card card-block bg-purple-600 p-20">
-                    <div class="counter counter-md text-left">
-                        <div class="counter-number-group">
-                            <span class="counter-number color-white">$</span>
-                            <span class="counter-number color-white" id="monthlyRevenue">Loading...</span>
-                        </div>
-                        <div class="counter-label text-uppercase color-white">Monthly Revenue</div>
+                        <div class="counter-label text-uppercase font-size-12">24h Transactions</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Row -->
-        <div class="row">
-            <!-- Platform Distribution -->
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">Platform Distribution</h4>
+        <!-- 24h Revenue -->
+        <div class="col-lg-3 col-sm-6">
+            <div class="widget widget-shadow">
+                <div class="widget-content bg-white p-20">
+                    <div class="counter text-left">
+                        <div class="counter-number-group">
+                            <span class="counter-number font-size-40" id="revenue24h">$0</span>
+                        </div>
+                        <div class="counter-label text-uppercase font-size-12">24h Revenue</div>
                     </div>
-                    <div class="card-body">
-                        <canvas id="platformChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Devices -->
+        <div class="col-lg-3 col-sm-6">
+            <div class="widget widget-shadow">
+                <div class="widget-content bg-white p-20">
+                    <div class="counter text-left">
+                        <div class="counter-number-group">
+                            <span class="counter-number font-size-40" id="totalDevices">0</span>
+                        </div>
+                        <div class="counter-label text-uppercase font-size-12">Total Devices</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Devices -->
+        <div class="col-lg-3 col-sm-6">
+            <div class="widget widget-shadow">
+                <div class="widget-content bg-white p-20">
+                    <div class="counter text-left">
+                        <div class="counter-number-group">
+                            <span class="counter-number font-size-40" id="activeDevices">0</span>
+                        </div>
+                        <div class="counter-label text-uppercase font-size-12">Active Devices</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Stats Row -->
+    <div class="row">
+        <!-- Trial Devices -->
+        <div class="col-lg-3 col-sm-6">
+            <div class="widget widget-shadow">
+                <div class="widget-content bg-white p-20">
+                    <div class="counter text-left">
+                        <div class="counter-number-group">
+                            <span class="counter-number font-size-40" id="trialDevices">0</span>
+                        </div>
+                        <div class="counter-label text-uppercase font-size-12">Trial Devices</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 24h Activated Devices -->
+        <div class="col-lg-3 col-sm-6">
+            <div class="widget widget-shadow">
+                <div class="widget-content bg-white p-20">
+                    <div class="counter text-left">
+                        <div class="counter-number-group">
+                            <span class="counter-number font-size-40" id="activatedDevices24h">0</span>
+                        </div>
+                        <div class="counter-label text-uppercase font-size-12">24h Activated Devices</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Revenue -->
+        <div class="col-lg-3 col-sm-6">
+            <div class="widget widget-shadow">
+                <div class="widget-content bg-white p-20">
+                    <div class="counter text-left">
+                        <div class="counter-number-group">
+                            <span class="counter-number font-size-40" id="monthlyRevenue">$0</span>
+                        </div>
+                        <div class="counter-label text-uppercase font-size-12">Monthly Revenue</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty slot for future use -->
+        <div class="col-lg-3 col-sm-6">
+            <div class="widget widget-shadow">
+                <div class="widget-content bg-white p-20">
+                    <div class="counter text-left">
+                        <div class="counter-number-group">
+                            <span class="counter-number font-size-40">-</span>
+                        </div>
+                        <div class="counter-label text-uppercase font-size-12">Reserved</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Distribution -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Platform Distribution</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-2 text-center">
+                            <div class="counter">
+                                <span class="counter-number font-size-24" id="platform-android">0</span>
+                                <div class="counter-label">Android</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="counter">
+                                <span class="counter-number font-size-24" id="platform-ios">0</span>
+                                <div class="counter-label">iOS</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="counter">
+                                <span class="counter-number font-size-24" id="platform-samsung">0</span>
+                                <div class="counter-label">Samsung</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="counter">
+                                <span class="counter-number font-size-24" id="platform-lg">0</span>
+                                <div class="counter-label">LG</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="counter">
+                                <span class="counter-number font-size-24" id="platform-tvos">0</span>
+                                <div class="counter-label">tvOS</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <div class="counter">
+                                <span class="counter-number font-size-24" id="platform-other">0</span>
+                                <div class="counter-label">Other</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -83,168 +178,101 @@
     </div>
 </div>
 
-<!-- Error Modal -->
-<div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Connection Error</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p id="errorMessage">Unable to load monitoring data. Please refresh the page.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="location.reload()">Refresh Page</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include Socket.IO -->
 <script src="/socket.io/socket.io.js"></script>
-<script>
-// Global chart variables
-let platformChart;
-let socket;
-let reconnectAttempts = 0;
-const maxReconnectAttempts = 5;
 
-// Initialize dashboard
-document.addEventListener('DOMContentLoaded', function() {
-    initializeCharts();
-    connectSocket();
-    loadInitialData();
+<script>
+// Initialize socket connection
+const socket = io();
+
+// Function to format currency
+function formatCurrency(amount) {
+    return '$' + parseFloat(amount).toFixed(2);
+}
+
+// Function to animate counter
+function animateCounter(element, endValue, isRevenue = false) {
+    const duration = 1000; // 1 second
+    const startValue = parseInt(element.textContent.replace(/[^0-9.-]/g, '')) || 0;
+    const startTime = performance.now();
+    
+    function updateCounter(currentTime) {
+        const elapsedTime = currentTime - startTime;
+        const progress = Math.min(elapsedTime / duration, 1);
+        
+        const currentValue = startValue + (endValue - startValue) * progress;
+        
+        if (isRevenue) {
+            element.textContent = formatCurrency(currentValue);
+        } else {
+            element.textContent = Math.round(currentValue);
+        }
+        
+        if (progress < 1) {
+            requestAnimationFrame(updateCounter);
+        }
+    }
+    
+    requestAnimationFrame(updateCounter);
+}
+
+// Function to update stats display
+function updateStats(data) {
+    console.log('Updating stats with data:', data);
+    
+    // Update counters with animation
+    animateCounter(document.getElementById('totalTransactions24h'), data.totalTransactions24h);
+    animateCounter(document.getElementById('revenue24h'), data.revenue24h, true);
+    animateCounter(document.getElementById('totalDevices'), data.totalDevices);
+    animateCounter(document.getElementById('activeDevices'), data.activeDevices);
+    animateCounter(document.getElementById('trialDevices'), data.trialDevices);
+    animateCounter(document.getElementById('activatedDevices24h'), data.activatedDevices24h);
+    animateCounter(document.getElementById('monthlyRevenue'), data.monthlyRevenue, true);
+    
+    // Update platform distribution
+    if (data.platformDistribution) {
+        document.getElementById('platform-android').textContent = data.platformDistribution.android;
+        document.getElementById('platform-ios').textContent = data.platformDistribution.iOS;
+        document.getElementById('platform-samsung').textContent = data.platformDistribution.samsung;
+        document.getElementById('platform-lg').textContent = data.platformDistribution.lg;
+        document.getElementById('platform-tvos').textContent = data.platformDistribution.tvOS;
+        document.getElementById('platform-other').textContent = data.platformDistribution.other;
+    }
+}
+
+// Socket event listeners
+socket.on('connect', function() {
+    console.log('Connected to monitoring dashboard');
 });
 
-function connectSocket() {
-    try {
-        socket = io();
-        
-        socket.on('connect', function() {
-            console.log('Connected to monitoring dashboard');
-            reconnectAttempts = 0;
-        });
+socket.on('disconnect', function() {
+    console.log('Disconnected from monitoring dashboard');
+});
 
-        socket.on('monitoringStats', function(data) {
-            updateDashboard(data);
-        });
+socket.on('monitoringStats', function(data) {
+    console.log('Received monitoring stats:', data);
+    updateStats(data);
+});
 
-        socket.on('disconnect', function() {
-            console.log('Disconnected from monitoring dashboard');
-            showError('Connection lost. Attempting to reconnect...');
-        });
+socket.on('connect_error', function(error) {
+    console.log('Connection error:', error);
+});
 
-        socket.on('connect_error', function(error) {
-            console.error('Connection error:', error);
-            reconnectAttempts++;
-            if (reconnectAttempts >= maxReconnectAttempts) {
-                showError('Unable to connect to server. Please refresh the page.');
-            }
-        });
-    } catch (error) {
-        console.error('Socket connection error:', error);
-        loadInitialData();
-    }
-}
-
+// Load initial data via AJAX as fallback
 function loadInitialData() {
     fetch('/admin/api/monitoring-stats')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            updateDashboard(data);
+            console.log('Loaded initial data via API:', data);
+            updateStats(data);
         })
         .catch(error => {
-            console.error('Error loading initial data:', error);
-            showError('Failed to load monitoring data: ' + error.message);
-            // Set default values
-            updateDashboard({
-                totalTransactions24h: 0,
-                totalDevices: 0,
-                activeDevices: 0,
-                trialDevices: 0,
-                monthlyRevenue: 0,
-                platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 }
-            });
+            console.log('Error loading initial data:', error);
         });
 }
 
-function updateDashboard(data) {
-    try {
-        // Update stats cards
-        document.getElementById('transactions24h').textContent = data.totalTransactions24h || 0;
-        document.getElementById('totalDevices').textContent = data.totalDevices || 0;
-        document.getElementById('activeDevices').textContent = data.activeDevices || 0;
-        document.getElementById('trialDevices').textContent = data.trialDevices || 0;
-        document.getElementById('monthlyRevenue').textContent = (data.monthlyRevenue || 0).toFixed(2);
-
-        // Update charts
-        updatePlatformChart(data.platformDistribution || {});
-    } catch (error) {
-        console.error('Error updating dashboard:', error);
-        showError('Error updating dashboard: ' + error.message);
-    }
-}
-
-function initializeCharts() {
-    // Platform Distribution Chart
-    const platformCtx = document.getElementById('platformChart').getContext('2d');
-    platformChart = new Chart(platformCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Android', 'iOS', 'Samsung', 'LG', 'tvOS', 'Other'],
-            datasets: [{
-                data: [0, 0, 0, 0, 0, 0],
-                backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#E91E63', '#9C27B0', '#607D8B']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    
-}
-
-function updatePlatformChart(data) {
-    if (platformChart && data) {
-        platformChart.data.datasets[0].data = [
-            data.android || 0,
-            data.iOS || 0,
-            data.samsung || 0,
-            data.lg || 0,
-            data.tvOS || 0,
-            data.other || 0
-        ];
-        platformChart.update();
-    }
-}
-
-
-
-function showError(message) {
-    document.getElementById('errorMessage').textContent = message;
-    $('#errorModal').modal('show');
-}
-
-// Refresh data every 30 seconds if socket is not connected
-setInterval(function() {
-    if (!socket || !socket.connected) {
-        loadInitialData();
-    }
-}, 30000);
+// Load initial data when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadInitialData();
+});
 </script>
