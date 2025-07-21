@@ -46,29 +46,55 @@ async function getMonitoringData() {
         const standardPrice = 8.99;
 
         // Get today's transactions count only (00:00 to 23:59 today)
-        // Check both date string format and timestamp format for pay_time
+        // Check for exact date match and date string starting with today's date
         const totalTransactions24h = await Transaction.countDocuments({
-            $or: [
-                { pay_time: todayDateString },
-                { pay_time: { $regex: `^${todayDateString}` } }
-            ],
-            status: 'success'
+            $and: [
+                {
+                    $or: [
+                        { pay_time: todayDateString },
+                        { pay_time: { $regex: `^${todayDateString}` } }
+                    ]
+                },
+                { status: 'success' }
+            ]
         });
+        
+        console.log(`Today's date string: ${todayDateString}`);
+        console.log(`Today's transaction count: ${totalTransactions24h}`);
         
         // Calculate 24h revenue: transaction count × €8.99
-        const revenue24h = totalTransactions24h * standardPrice;
+        const revenue24h = (totalTransactions24h || 0) * standardPrice;
+        
+        console.log(`Today's revenue calculation: ${totalTransactions24h} × ${standardPrice} = ${revenue24h}`);
 
         // Get monthly transactions count from start of month to current date
+        // Create regex pattern for the current month (YYYY-MM-)
+        const monthPattern = `^${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-`;
+        
         const monthlyTransactionCount = await Transaction.countDocuments({
-            $or: [
-                { pay_time: { $gte: monthStartDateString, $lte: currentDateString } },
-                { pay_time: { $regex: `^${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}` } }
-            ],
-            status: 'success'
+            $and: [
+                {
+                    $or: [
+                        { 
+                            pay_time: { 
+                                $gte: monthStartDateString, 
+                                $lte: currentDateString 
+                            } 
+                        },
+                        { pay_time: { $regex: monthPattern } }
+                    ]
+                },
+                { status: 'success' }
+            ]
         });
         
+        console.log(`Month pattern: ${monthPattern}`);
+        console.log(`Monthly transaction count: ${monthlyTransactionCount}`);
+        
         // Calculate monthly revenue: transaction count × €8.99
-        const monthlyRevenue = monthlyTransactionCount * standardPrice;
+        const monthlyRevenue = (monthlyTransactionCount || 0) * standardPrice;
+        
+        console.log(`Monthly revenue calculation: ${monthlyTransactionCount} × ${standardPrice} = ${monthlyRevenue}`);
 
         // Get current timestamp as string for comparison
         const nowTimestamp = now.getTime().toString();
@@ -126,14 +152,16 @@ async function getMonitoringData() {
         });
 
         const result = {
-            totalTransactions24h,
-            revenue24h: '€' + (revenue24h || 0).toFixed(2),
+            totalTransactions24h: totalTransactions24h || 0,
+            revenue24h: '€' + (isNaN(revenue24h) ? 0 : revenue24h).toFixed(2),
             totalDevices,
             activeDevices,
             trialDevices,
-            monthlyRevenue: '€' + (monthlyRevenue || 0).toFixed(2),
+            monthlyRevenue: '€' + (isNaN(monthlyRevenue) ? 0 : monthlyRevenue).toFixed(2),
             platformDistribution
         };
+        
+        console.log('Final result:', result);
 
         return result;
 
