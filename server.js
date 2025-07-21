@@ -558,17 +558,21 @@ async function getOpenSubtitlesToken() {
 
         console.log('Getting new OpenSubtitles token...');
         
-        // Check if credentials are provided
-        if (!process.env.OPENSUBTITLES_USERNAME || !process.env.OPENSUBTITLES_PASSWORD || !process.env.OPENSUBTITLES_API_KEY) {
+        // Check if credentials are provided (try database settings first, then env vars)
+        const apiKey = settings.opensubtitles_api_key || process.env.OPENSUBTITLES_API_KEY;
+        const username = settings.opensubtitles_username || process.env.OPENSUBTITLES_USERNAME;
+        const password = settings.opensubtitles_password || process.env.OPENSUBTITLES_PASSWORD;
+        
+        if (!username || !password || !apiKey) {
             throw new Error('OpenSubtitles credentials not configured');
         }
 
         const loginResponse = await axios.post('https://api.opensubtitles.com/api/v1/login', {
-            username: process.env.OPENSUBTITLES_USERNAME,
-            password: process.env.OPENSUBTITLES_PASSWORD
+            username: username,
+            password: password
         }, {
             headers: {
-                'Api-Key': process.env.OPENSUBTITLES_API_KEY,
+                'Api-Key': apiKey,
                 'User-Agent': 'FlixIPTV v1.0.0',
                 'Content-Type': 'application/json'
             }
@@ -598,8 +602,9 @@ app.get('/subtitle-test/:movie_name1?', async (req, res) => {
         const movie_name = req.params.movie_name1 || "The Matrix";
         console.log('Searching subtitles for:', movie_name);
         
-        // Check if API key is configured
-        if (!process.env.OPENSUBTITLES_API_KEY) {
+        // Check if API key is configured (try database settings first, then env vars)
+        const apiKey = settings.opensubtitles_api_key || process.env.OPENSUBTITLES_API_KEY;
+        if (!apiKey) {
             return res.status(500).json({
                 error: 'OpenSubtitles API not configured',
                 message: 'API key is missing'
@@ -620,7 +625,7 @@ app.get('/subtitle-test/:movie_name1?', async (req, res) => {
         }
 
         const headers = {
-            'Api-Key': process.env.OPENSUBTITLES_API_KEY,
+            'Api-Key': apiKey,
             'User-Agent': 'FlixIPTV v1.0.0',
             'Content-Type': 'application/json'
         };

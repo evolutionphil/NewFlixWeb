@@ -1,0 +1,75 @@
+
+<div class="page-header">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+        <li class="breadcrumb-item active">OpenSubtitles Settings</li>
+    </ol>
+    <h1 class="page-title">OpenSubtitles API Settings</h1>
+</div>
+
+<div class="page-content">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">OpenSubtitles Configuration</h3>
+                </div>
+                <div class="panel-body">
+                    <form action="/admin/saveOpenSubtitlesSettings" method="post">
+                        <div class="form-group">
+                            <label class="form-control-label" for="api_key">API Key</label>
+                            <input type="text" class="form-control" id="api_key" name="api_key" 
+                                   value="<%= opensubtitles_api_key %>" placeholder="Enter OpenSubtitles API Key">
+                            <small class="form-text text-muted">
+                                Get your API key from <a href="https://www.opensubtitles.com/en/consumers" target="_blank">OpenSubtitles API</a>
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-control-label" for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   value="<%= opensubtitles_username %>" placeholder="Enter OpenSubtitles Username">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-control-label" for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   value="<%= opensubtitles_password %>" placeholder="Enter OpenSubtitles Password">
+                            <small class="form-text text-muted">
+                                Password will be stored securely and masked in the interface
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                            <a href="/admin" class="btn btn-default">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">About OpenSubtitles API</h3>
+                </div>
+                <div class="panel-body">
+                    <p>The OpenSubtitles API allows your application to search and download subtitles for movies and TV shows.</p>
+                    
+                    <h5>Setup Instructions:</h5>
+                    <ol>
+                        <li>Create an account at <a href="https://www.opensubtitles.com" target="_blank">OpenSubtitles.com</a></li>
+                        <li>Apply for API access at the <a href="https://www.opensubtitles.com/en/consumers" target="_blank">developers page</a></li>
+                        <li>Get your API key from your consumer dashboard</li>
+                        <li>Enter your credentials above</li>
+                    </ol>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <strong>Note:</strong> The API has rate limits. Make sure to follow their usage guidelines.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

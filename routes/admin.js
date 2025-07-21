@@ -128,8 +128,11 @@ router.post('/reseller-content/save',adminController.saveResellerContent);
 router.get('/showSupportEmailSetting',adminController.showSupportEmailSetting);
 router.post('/saveSupportEmailSetting',adminController.saveSupportEmailSetting);
 
-router.get('/showYoutubeApiKey',adminController.showYoutubeApiKey);
-router.post('/saveYoutubeApiKey',adminController.saveYoutubeApiKey);
+router.get('/showYoutubeApiKey',checkAuthenticated,adminController.showYoutubeApiKey);
+router.post('/saveYoutubeApiKey',checkAuthenticated,adminController.saveYoutubeApiKey);
+
+router.get('/showOpenSubtitlesSettings',checkAuthenticated,adminController.showOpenSubtitlesSettings);
+router.post('/saveOpenSubtitlesSettings',checkAuthenticated,adminController.saveOpenSubtitlesSettings);
 
 router.get('/profile',adminController.showProfile);
 router.post('/updateProfile',adminController.updateProfile);

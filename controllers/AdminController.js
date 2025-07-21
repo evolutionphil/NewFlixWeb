@@ -1628,6 +1628,50 @@ exports.saveYoutubeApiKey=(req,res)=>{
     })
 }
 
+exports.showOpenSubtitlesSettings=(req,res)=>{
+    let keys=['opensubtitles_api_key','opensubtitles_username','opensubtitles_password'];
+    let data={};
+    keys.map(key=>{
+        data[key]=settings[key] ? settings[key] : ''
+    })
+    res.render('admin/pages/opensubtitles_setting',
+        {
+            menu:'opensubtitles-setting',layout: './admin/partials/layout',
+            ...data
+        }
+    );
+}
+
+exports.saveOpenSubtitlesSettings=(req,res)=>{
+    let input=req.body;
+    let keys=['opensubtitles_api_key','opensubtitles_username','opensubtitles_password'];
+    let {api_key, username, password}=input;
+    
+    let insert_data=[];
+    insert_data.push({
+        key:'opensubtitles_api_key',
+        value:api_key
+    })
+    insert_data.push({
+        key:'opensubtitles_username',
+        value:username
+    })
+    insert_data.push({
+        key:'opensubtitles_password',
+        value:password
+    })
+    
+    settings.opensubtitles_api_key=api_key;
+    settings.opensubtitles_username=username;
+    settings.opensubtitles_password=password;
+
+    Setting.deleteMany({key:{$in:keys}}).then(()=>{
+        Setting.insertMany(insert_data).then(()=>{
+            return res.redirect('/admin/showOpenSubtitlesSettings');
+        })
+    })
+}
+
 exports.showProfile=async (req,res)=>{
     if(process.env.MAINTANCE_MODE==1)
         return res.render('maintance',{layout:false});
