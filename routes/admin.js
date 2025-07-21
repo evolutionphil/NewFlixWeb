@@ -83,7 +83,7 @@ router.get('/price-setting',adminController.showPriceSetting);
 router.post('/savePrice',adminController.savePrice);
 
 router.get('/showPaypalSetting',adminController.showPaypalSetting);
-routerpost('/savePaypalSetting',adminController.savePaypalSetting);
+router.post('/savePaypalSetting',adminController.savePaypalSetting);
 
 router.get('/showSendGridSetting',adminController.showSendGridSetting);
 router.post('/saveSendGridSetting',adminController.saveSendGridSetting);
