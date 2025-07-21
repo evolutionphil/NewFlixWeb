@@ -79,8 +79,20 @@ async function getMonitoringData() {
             status: 'success'
         };
         
-        const monthlyTransactions = await Transaction.find(monthlyTransactionsQuery).select('amount');
+        const monthlyTransactions = await Transaction.find(monthlyTransactionsQuery).select('amount created_time pay_time');
         console.log('Monthly transactions found:', monthlyTransactions.length);
+        
+        // Debug: Show breakdown of transaction amounts
+        const amountBreakdown = {};
+        monthlyTransactions.forEach(t => {
+            const amount = parseFloat(t.amount) || 0;
+            if (amountBreakdown[amount]) {
+                amountBreakdown[amount]++;
+            } else {
+                amountBreakdown[amount] = 1;
+            }
+        });
+        console.log('Monthly transaction amount breakdown:', amountBreakdown);
         
         const monthlyRevenue = monthlyTransactions.reduce((sum, t) => {
             return sum + (parseFloat(t.amount) || 0);
