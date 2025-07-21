@@ -557,13 +557,19 @@ async function getOpenSubtitlesToken() {
         }
 
         console.log('Getting new OpenSubtitles token...');
+        
+        // Check if credentials are provided
+        if (!process.env.OPENSUBTITLES_USERNAME || !process.env.OPENSUBTITLES_PASSWORD || !process.env.OPENSUBTITLES_API_KEY) {
+            throw new Error('OpenSubtitles credentials not configured');
+        }
+
         const loginResponse = await axios.post('https://api.opensubtitles.com/api/v1/login', {
-            username: process.env.OPENSUBTITLES_USERNAME || '',
-            password: process.env.OPENSUBTITLES_PASSWORD || ''
+            username: process.env.OPENSUBTITLES_USERNAME,
+            password: process.env.OPENSUBTITLES_PASSWORD
         }, {
             headers: {
                 'Api-Key': process.env.OPENSUBTITLES_API_KEY,
-                'User-Agent': 'Flixapp v1.0.0',
+                'User-Agent': 'FlixIPTV v1.0.0',
                 'Content-Type': 'application/json'
             }
         });
@@ -575,10 +581,13 @@ async function getOpenSubtitlesToken() {
             console.log('Successfully obtained OpenSubtitles token');
             return openSubtitlesToken;
         } else {
-            throw new Error('No token received from login');
+            throw new Error('No token received from login response');
         }
     } catch (error) {
         console.error('OpenSubtitles login error:', error.response?.data || error.message);
+        // Reset token on error
+        openSubtitlesToken = null;
+        tokenExpiry = null;
         throw error;
     }
 }
@@ -586,37 +595,64 @@ async function getOpenSubtitlesToken() {
 // OpenSubtitles API implementation using correct v1 API
 app.get('/subtitle-test/:movie_name1?', async (req, res) => {
     try {
-        const movie_name = req.params.movie_name1 || "20th Century Girl (2022)";
+        const movie_name = req.params.movie_name1 || "The Matrix";
         console.log('Searching subtitles for:', movie_name);
         
-        // Get authentication token
+        // Check if API key is configured
+        if (!process.env.OPENSUBTITLES_API_KEY) {
+            return res.status(500).json({
+                error: 'OpenSubtitles API not configured',
+                message: 'API key is missing'
+            });
+        }
+
+        // Get authentication token (required for most operations)
         let token;
         try {
             token = await getOpenSubtitlesToken();
         } catch (loginError) {
-            console.log('Authentication failed, trying without login (anonymous access)');
-            token = null;
+            console.log('Authentication failed:', loginError.message);
+            return res.status(500).json({
+                error: 'Authentication failed',
+                message: 'Could not authenticate with OpenSubtitles API',
+                details: loginError.message
+            });
         }
 
         const headers = {
             'Api-Key': process.env.OPENSUBTITLES_API_KEY,
-            'User-Agent': 'Flixapp v1.0.0',
+            'User-Agent': 'FlixIPTV v1.0.0',
             'Content-Type': 'application/json'
         };
 
-        // Add Authorization header if we have a token
+        // Add Authorization header
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        // Try multiple search strategies
+        // Try multiple search strategies with proper parameters
         const searchStrategies = [
-            // Original query
-            { query: movie_name },
+            // Original query with most common languages
+            { 
+                query: movie_name,
+                languages: 'en,es,fr,de',
+                order_by: 'download_count',
+                order_direction: 'desc'
+            },
             // Without year if present
-            { query: movie_name.replace(/\(\d{4}\)/g, '').trim() },
-            // Try just the main title
-            { query: movie_name.split('(')[0].trim() }
+            { 
+                query: movie_name.replace(/\(\d{4}\)/g, '').trim(),
+                languages: 'en',
+                order_by: 'download_count',
+                order_direction: 'desc'
+            },
+            // Try just the main title (before any parentheses)
+            { 
+                query: movie_name.split('(')[0].trim(),
+                languages: 'en',
+                order_by: 'download_count',
+                order_direction: 'desc'
+            }
         ];
 
         let subtitles = [];
@@ -627,33 +663,38 @@ app.get('/subtitle-test/:movie_name1?', async (req, res) => {
             console.log('Trying search strategy:', strategy);
             
             try {
-                const searchParams = {
-                    ...strategy,
-                    languages: 'en,es,fr,de,it,ko,ja,zh,ar',
-                    order_by: 'download_count',
-                    order_direction: 'desc'
-                };
-
-                console.log('Search params:', searchParams);
-                console.log('Headers:', headers);
+                console.log('Search params:', strategy);
+                console.log('Headers (without token):', { ...headers, Authorization: headers.Authorization ? '[REDACTED]' : 'none' });
 
                 const searchResponse = await axios.get('https://api.opensubtitles.com/api/v1/subtitles', {
-                    params: searchParams,
-                    headers: headers
+                    params: strategy,
+                    headers: headers,
+                    timeout: 10000 // 10 second timeout
                 });
 
                 console.log('API Response status:', searchResponse.status);
-                console.log('API Response data keys:', Object.keys(searchResponse.data));
+                console.log('API Response data structure:', {
+                    hasData: !!searchResponse.data.data,
+                    dataLength: searchResponse.data.data?.length || 0,
+                    totalPages: searchResponse.data.total_pages,
+                    totalCount: searchResponse.data.total_count
+                });
 
                 subtitles = searchResponse.data.data || [];
                 if (subtitles.length > 0) {
                     usedStrategy = strategy;
-                    console.log(`Found ${subtitles.length} subtitles using strategy:`, strategy);
+                    console.log(`Found ${subtitles.length} subtitles using strategy:`, strategy.query);
                     break;
                 }
             } catch (strategyError) {
                 lastError = strategyError;
-                console.log('Strategy failed:', strategy, strategyError.response?.status, strategyError.response?.data || strategyError.message);
+                console.log('Strategy failed for query:', strategy.query);
+                console.log('Error details:', {
+                    status: strategyError.response?.status,
+                    statusText: strategyError.response?.statusText,
+                    data: strategyError.response?.data,
+                    message: strategyError.message
+                });
                 continue;
             }
         }
@@ -730,19 +771,23 @@ app.get('/subtitle-test/:movie_name1?', async (req, res) => {
         });
 
         return res.json({
+            success: true,
             query: movie_name,
-            strategy_used: usedStrategy,
+            strategy_used: usedStrategy?.query || null,
             total_found: subtitles.length,
             available_languages: Object.keys(languageMap),
             language_details: languageMap,
             api_status: 'success',
             authenticated: !!token,
-            sample_results: processedSubtitles.slice(0, 3).map(sub => ({
+            sample_results: processedSubtitles.slice(0, 5).map(sub => ({
+                id: sub.id,
                 movie: sub.attributes.feature_details?.movie_name || 'Unknown',
                 year: sub.attributes.feature_details?.year || 'Unknown',
                 language: sub.attributes.language,
                 downloads: sub.attributes.download_count || 0,
-                release: sub.attributes.release || 'Unknown'
+                release: sub.attributes.release || 'Unknown',
+                hearing_impaired: sub.attributes.hearing_impaired || false,
+                trusted: sub.attributes.from_trusted || false
             }))
         });
 
