@@ -265,6 +265,17 @@ exports.savePlaylists=(req,res)=>{
                     }
 
                     let device_id=device._id;
+                    // Check device activation status before saving playlists
+                    if(device.is_trial == 1) {
+                        // Device is in trial mode - redirect to activation with trial message
+                        req.flash('success','This MAC address (' + mac_address + ') is in trial mode. You can activate it now before the trial ends on ' + device.expire_date + '.');
+                        return res.redirect('/activation');
+                    } else if(device.is_trial == 0) {
+                        // Device is not activated - redirect to activation
+                        req.flash('error','Your app is not activated. You can activate it now.');
+                        return res.redirect('/activation');
+                    }
+
                     PlayList.deleteMany({device_id:device_id}).then(()=>{
                         let insert_records=[];
                         urls.map((url,index)=>{
@@ -276,12 +287,6 @@ exports.savePlaylists=(req,res)=>{
                         })
                         PlayList.insertMany(insert_records).then(()=>{
                             req.flash('success','Your playlists saved successfully');
-
-                            // Check if device needs activation
-                            if(device.is_trial != 2) {
-                                return res.redirect('/activation');
-                            }
-
                             return res.redirect('/mylist');
                         })
                     })
@@ -349,9 +354,12 @@ exports.updatePinCode=async (req,res)=>{
                     return res.redirect('/mylist');
                 }
 
-                // Check if device is in trial mode and redirect to activation page
+                // Check device activation status
                 if(device.is_trial==1){
-                    req.flash('success','This MAC address (' + mac_address + ') is in trial mode. You can activate it before the trial ends on ' + device.expire_date + '.');
+                    req.flash('success','This MAC address (' + mac_address + ') is in trial mode. You can activate it now before the trial ends on ' + device.expire_date + '.');
+                    return res.redirect('/activation');
+                } else if(device.is_trial==0){
+                    req.flash('error','Your app is not activated. You can activate it now.');
                     return res.redirect('/activation');
                 }
 
