@@ -42,18 +42,8 @@ async function getMonitoringData() {
         const monthStartDateString = startOfMonth.toISOString().split('T')[0];
         const currentDateString = now.toISOString().split('T')[0];
 
-        // Get fixed price from database or use default
-        const PricePackage = require('../models/PricePackage.model');
-        let standardPrice = 8.99;
-        try {
-            const pricePackage = await PricePackage.findOne({});
-            if (pricePackage && pricePackage.price) {
-                standardPrice = parseFloat(pricePackage.price);
-            }
-            console.log('Price being used for calculations:', standardPrice);
-        } catch (err) {
-            console.log('Using default price:', standardPrice);
-        }
+        // Use fixed price of €8.99 for all calculations
+        const standardPrice = 8.99;
 
         // Get today's transactions count only (00:00 to 23:59 today)
         // Check both date string format and timestamp format for pay_time
@@ -65,12 +55,8 @@ async function getMonitoringData() {
             status: 'success'
         });
         
-        console.log('Today transactions count:', totalTransactions24h);
-        console.log('Standard price:', standardPrice);
-        
-        // Calculate 24h revenue using standard price
+        // Calculate 24h revenue: transaction count × €8.99
         const revenue24h = totalTransactions24h * standardPrice;
-        console.log('Calculated 24h revenue:', revenue24h);
 
         // Get monthly transactions count from start of month to current date
         const monthlyTransactionCount = await Transaction.countDocuments({
@@ -81,11 +67,8 @@ async function getMonitoringData() {
             status: 'success'
         });
         
-        console.log('Monthly transactions count:', monthlyTransactionCount);
-        
-        // Calculate monthly revenue using standard price
+        // Calculate monthly revenue: transaction count × €8.99
         const monthlyRevenue = monthlyTransactionCount * standardPrice;
-        console.log('Calculated monthly revenue:', monthlyRevenue);
 
         // Get current timestamp as string for comparison
         const nowTimestamp = now.getTime().toString();
@@ -144,11 +127,11 @@ async function getMonitoringData() {
 
         const result = {
             totalTransactions24h,
-            revenue24h: revenue24h || 0,
+            revenue24h: '€' + (revenue24h || 0).toFixed(2),
             totalDevices,
             activeDevices,
             trialDevices,
-            monthlyRevenue: monthlyRevenue || 0,
+            monthlyRevenue: '€' + (monthlyRevenue || 0).toFixed(2),
             platformDistribution
         };
 
