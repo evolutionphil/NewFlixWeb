@@ -29,7 +29,7 @@
                 <div class="widget-content bg-white p-20">
                     <div class="counter text-left">
                         <div class="counter-number-group">
-                            <span class="counter-number font-size-40" id="revenue24h">$0</span>
+                            <span class="counter-number font-size-40" id="revenue24h">€0.00</span>
                         </div>
                         <div class="counter-label text-uppercase font-size-12">24h Revenue</div>
                     </div>
@@ -88,7 +88,7 @@
                 <div class="widget-content bg-white p-20">
                     <div class="counter text-left">
                         <div class="counter-number-group">
-                            <span class="counter-number font-size-40" id="monthlyRevenue">$0</span>
+                            <span class="counter-number font-size-40" id="monthlyRevenue">€0.00</span>
                         </div>
                         <div class="counter-label text-uppercase font-size-12">Monthly Revenue</div>
                     </div>
@@ -166,13 +166,13 @@
 <script>
 // Function to format currency
 function formatCurrency(amount) {
-    return '$' + parseFloat(amount).toFixed(2);
+    return '€' + parseFloat(amount).toFixed(2);
 }
 
 // Function to animate counter
 function animateCounter(element, endValue, isRevenue = false) {
     const duration = 1000; // 1 second
-    const startValue = parseInt(element.textContent.replace(/[^0-9.-]/g, '')) || 0;
+    const startValue = parseFloat(element.textContent.replace(/[^0-9.-]/g, '')) || 0;
     const startTime = performance.now();
 
     function updateCounter(currentTime) {
@@ -236,3 +236,4 @@ document.addEventListener('DOMContentLoaded', function() {
     loadInitialData();
 });
 </script>
+```
