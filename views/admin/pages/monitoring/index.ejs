@@ -1,4 +1,3 @@
-
 <link rel="stylesheet" href="/admin/template/examples/css/dashboard/ecommerce.css">
 
 <div class="page-header">
@@ -78,20 +77,6 @@
                             <span class="counter-number font-size-40" id="trialDevices">0</span>
                         </div>
                         <div class="counter-label text-uppercase font-size-12">Trial Devices</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 24h Activated Devices -->
-        <div class="col-lg-3 col-sm-6">
-            <div class="widget widget-shadow">
-                <div class="widget-content bg-white p-20">
-                    <div class="counter text-left">
-                        <div class="counter-number-group">
-                            <span class="counter-number font-size-40" id="activatedDevices24h">0</span>
-                        </div>
-                        <div class="counter-label text-uppercase font-size-12">24h Activated Devices</div>
                     </div>
                 </div>
             </div>
@@ -195,40 +180,39 @@ function animateCounter(element, endValue, isRevenue = false) {
     const duration = 1000; // 1 second
     const startValue = parseInt(element.textContent.replace(/[^0-9.-]/g, '')) || 0;
     const startTime = performance.now();
-    
+
     function updateCounter(currentTime) {
         const elapsedTime = currentTime - startTime;
         const progress = Math.min(elapsedTime / duration, 1);
-        
+
         const currentValue = startValue + (endValue - startValue) * progress;
-        
+
         if (isRevenue) {
             element.textContent = formatCurrency(currentValue);
         } else {
             element.textContent = Math.round(currentValue);
         }
-        
+
         if (progress < 1) {
             requestAnimationFrame(updateCounter);
         }
     }
-    
+
     requestAnimationFrame(updateCounter);
 }
 
 // Function to update stats display
 function updateStats(data) {
     console.log('Updating stats with data:', data);
-    
+
     // Update counters with animation
     animateCounter(document.getElementById('totalTransactions24h'), data.totalTransactions24h);
     animateCounter(document.getElementById('revenue24h'), data.revenue24h, true);
     animateCounter(document.getElementById('totalDevices'), data.totalDevices);
     animateCounter(document.getElementById('activeDevices'), data.activeDevices);
     animateCounter(document.getElementById('trialDevices'), data.trialDevices);
-    animateCounter(document.getElementById('activatedDevices24h'), data.activatedDevices24h);
     animateCounter(document.getElementById('monthlyRevenue'), data.monthlyRevenue, true);
-    
+
     // Update platform distribution
     if (data.platformDistribution) {
         document.getElementById('platform-android').textContent = data.platformDistribution.android;
@@ -251,7 +235,14 @@ socket.on('disconnect', function() {
 
 socket.on('monitoringStats', function(data) {
     console.log('Received monitoring stats:', data);
-    updateStats(data);
+
+    // Update stats cards
+    $('#totalTransactions24h').text(data.totalTransactions24h || 0);
+    $('#revenue24h').text('$' + (data.revenue24h || 0).toFixed(2));
+    $('#monthlyRevenue').text('$' + (data.monthlyRevenue || 0).toFixed(2));
+    $('#totalDevices').text(data.totalDevices || 0);
+    $('#activeDevices').text(data.activeDevices || 0);
+    $('#trialDevices').text(data.trialDevices || 0);
 });
 
 socket.on('connect_error', function(error) {

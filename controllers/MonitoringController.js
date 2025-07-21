@@ -31,44 +31,50 @@ exports.getMonitoringStats = async (req, res) => {
 async function getMonitoringData() {
     try {
         const now = new Date();
-        const yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         
-        // Convert dates to timestamp strings for comparison - using milliseconds
-        const yesterdayTimestamp = yesterday.getTime().toString();
+        // Get start of today (00:00:00 of current day)
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+        
+        // Convert dates to different formats for comparison
+        const startOfTodayTimestamp = startOfToday.getTime().toString();
         const startOfMonthTimestamp = startOfMonth.getTime().toString();
         const nowTimestamp = now.getTime().toString();
+        
+        // Format dates as YYYY-MM-DD for pay_time field comparison
+        const todayDateString = startOfToday.toISOString().split('T')[0];
+        const monthStartDateString = startOfMonth.toISOString().split('T')[0];
 
         console.log('Date calculations:', {
             now: now.toISOString(),
-            yesterday: yesterday.toISOString(),
+            startOfToday: startOfToday.toISOString(),
             startOfMonth: startOfMonth.toISOString(),
-            yesterdayTimestamp,
-            startOfMonthTimestamp
+            todayDateString,
+            monthStartDateString
         });
 
-        // Get 24h transactions with revenue - check both created_time and pay_time fields
+        // Get today's transactions (from 00:00 to current time) - check both created_time and pay_time fields
         const transactions24hQuery = {
             $or: [
-                { created_time: { $gte: yesterdayTimestamp } },
-                { pay_time: { $gte: yesterday.toISOString().split('T')[0] } }
+                { created_time: { $gte: startOfTodayTimestamp } },
+                { pay_time: { $gte: todayDateString } }
             ],
             status: 'success'
         };
         
         const transactions24h = await Transaction.find(transactions24hQuery).select('amount created_time pay_time');
-        console.log('24h transactions found:', transactions24h.length);
+        console.log('Today transactions found:', transactions24h.length);
         
         const totalTransactions24h = transactions24h.length;
         const revenue24h = transactions24h.reduce((sum, t) => {
             return sum + (parseFloat(t.amount) || 0);
         }, 0);
 
-        // Get monthly transactions with revenue
+        // Get monthly transactions with revenue (from start of month to now)
         const monthlyTransactionsQuery = {
             $or: [
                 { created_time: { $gte: startOfMonthTimestamp } },
-                { pay_time: { $gte: startOfMonth.toISOString().split('T')[0] } }
+                { pay_time: { $gte: monthStartDateString } }
             ],
             status: 'success'
         };
@@ -99,16 +105,6 @@ async function getMonitoringData() {
             is_trial: 1  // 1 means trial
         });
         console.log('Trial devices:', trialDevices);
-
-        // Get 24h activated devices (devices activated in last 24 hours)
-        const activatedDevices24h = await Device.countDocuments({
-            $or: [
-                { created_time: { $gte: yesterdayTimestamp } },
-                { created_time: { $gte: yesterday.getTime() } }
-            ],
-            is_trial: 2  // 2 means activated
-        });
-        console.log('24h activated devices:', activatedDevices24h);
 
         // Platform distribution - check app_type field
         const devices = await Device.find({}).select('app_type');
@@ -144,7 +140,6 @@ async function getMonitoringData() {
             totalDevices,
             activeDevices,
             trialDevices,
-            activatedDevices24h,
             monthlyRevenue: Math.round(monthlyRevenue * 100) / 100,
             platformDistribution
         };
@@ -160,7 +155,6 @@ async function getMonitoringData() {
             totalDevices: 0,
             activeDevices: 0,
             trialDevices: 0,
-            activatedDevices24h: 0,
             monthlyRevenue: 0,
             platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 }
         };
@@ -183,7 +177,6 @@ exports.handleSocketConnection = (io) => {
                 totalDevices: 0,
                 activeDevices: 0,
                 trialDevices: 0,
-                activatedDevices24h: 0,
                 monthlyRevenue: 0,
                 platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 }
             });
