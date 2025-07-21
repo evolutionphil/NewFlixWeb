@@ -83,7 +83,7 @@ router.get('/price-setting',adminController.showPriceSetting);
 router.post('/savePrice',adminController.savePrice);
 
 router.get('/showPaypalSetting',adminController.showPaypalSetting);
-router.post('/savePaypalSetting',adminController.savePaypalSetting);
+routerpost('/savePaypalSetting',adminController.savePaypalSetting);
 
 router.get('/showSendGridSetting',adminController.showSendGridSetting);
 router.post('/saveSendGridSetting',adminController.saveSendGridSetting);
@@ -156,11 +156,8 @@ router.get('/add_mac_to_transactions',adminController.addMacToTransaction);
 router.get('/update-expire-date-format',adminController.updateExpireDateFormat)
 router.get('/update-reseller-activity',adminController.updateResellerActivity)
 
-
-
-
-
-function checkAuthenticated(req, res, next) {
+const MonitoringController = require('../controllers/MonitoringController');
+function isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next()
     }
@@ -172,5 +169,8 @@ function checkNotAuthenticated(req, res, next) {
     }
     next()
 }
-module.exports = router;
 
+router.get('/monitoring', isAuthenticated, MonitoringController.index);
+router.get('/api/monitoring-stats', isAuthenticated, MonitoringController.getMonitoringStats);
+
+module.exports = router;

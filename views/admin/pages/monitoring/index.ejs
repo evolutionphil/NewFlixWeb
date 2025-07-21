@@ -1,0 +1,269 @@
+<div class="page-content">
+    <!-- Key Metrics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h4 id="totalTransactions24h">0</h4>
+                    <p>24h Transactions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h4 id="totalDevices">0</h4>
+                    <p>Total Devices</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h4 id="activeDevices">0</h4>
+                    <p>Active Devices</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h4 id="monthlyRevenue">$0</h4>
+                    <p>This Month Revenue</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Distribution & Device Status -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="panel panel-boxed">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Platform Distribution</h4>
+                </div>
+                <div class="panel-body">
+                    <canvas id="platformChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-boxed">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Device Status</h4>
+                </div>
+                <div class="panel-body">
+                    <canvas id="deviceStatusChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 24h Transactions Chart -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="panel panel-boxed">
+                <div class="panel-heading">
+                    <h4 class="panel-title">24h Transaction Activity</h4>
+                </div>
+                <div class="panel-body">
+                    <canvas id="transactionChart" width="800" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Revenue Chart -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="panel panel-boxed">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Monthly Revenue (Last 6 Months)</h4>
+                </div>
+                <div class="panel-body">
+                    <canvas id="revenueChart" width="800" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+let platformChart, deviceStatusChart, transactionChart, revenueChart;
+
+// Initialize charts
+function initCharts() {
+    // Platform Distribution Chart
+    const platformCtx = document.getElementById('platformChart').getContext('2d');
+    platformChart = new Chart(platformCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Android', 'iOS', 'Samsung', 'LG', 'tvOS', 'macOS'],
+            datasets: [{
+                data: [0, 0, 0, 0, 0, 0],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Device Status Chart
+    const deviceStatusCtx = document.getElementById('deviceStatusChart').getContext('2d');
+    deviceStatusChart = new Chart(deviceStatusCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Active', 'Trial', 'Inactive'],
+            datasets: [{
+                data: [0, 0, 0],
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // 24h Transaction Chart
+    const transactionCtx = document.getElementById('transactionChart').getContext('2d');
+    transactionChart = new Chart(transactionCtx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+            datasets: [{
+                label: 'Transactions',
+                data: new Array(24).fill(0),
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Monthly Revenue Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    revenueChart = new Chart(revenueCtx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Revenue ($)',
+                data: [],
+                backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                borderColor: '#28a745',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Socket connection
+const socket = io();
+
+socket.on('connect', () => {
+    console.log('Client connected to monitoring dashboard');
+    loadInitialData();
+});
+
+socket.on('disconnect', () => {
+    console.log('Client disconnected from monitoring dashboard');
+});
+
+socket.on('monitoringStats', (data) => {
+    updateDashboard(data);
+});
+
+function loadInitialData() {
+    fetch('/admin/api/monitoring-stats')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Initial data loaded:', data);
+            updateDashboard(data);
+        })
+        .catch(error => {
+            console.error('Error loading initial data:', error);
+        });
+}
+
+function updateDashboard(data) {
+    // Update key metrics
+    document.getElementById('totalTransactions24h').textContent = data.totalTransactions24h || 0;
+    document.getElementById('totalDevices').textContent = data.totalDevices || 0;
+    document.getElementById('activeDevices').textContent = data.activeDevices || 0;
+    document.getElementById('monthlyRevenue').textContent = '$' + (data.monthlyRevenue || 0).toLocaleString();
+
+    // Update platform distribution
+    if (data.platformDistribution && platformChart) {
+        platformChart.data.datasets[0].data = [
+            data.platformDistribution.android || 0,
+            data.platformDistribution.iOS || 0,
+            data.platformDistribution.samsung || 0,
+            data.platformDistribution.lg || 0,
+            data.platformDistribution.tvOS || 0,
+            data.platformDistribution.macOS || 0
+        ];
+        platformChart.update();
+    }
+
+    // Update device status
+    if (data.deviceStatus && deviceStatusChart) {
+        deviceStatusChart.data.datasets[0].data = [
+            data.deviceStatus.active || 0,
+            data.deviceStatus.trial || 0,
+            data.deviceStatus.inactive || 0
+        ];
+        deviceStatusChart.update();
+    }
+
+    // Update 24h transactions
+    if (data.hourlyTransactions && transactionChart) {
+        transactionChart.data.datasets[0].data = data.hourlyTransactions;
+        transactionChart.update();
+    }
+
+    // Update monthly revenue
+    if (data.monthlyRevenueData && revenueChart) {
+        revenueChart.data.labels = data.monthlyRevenueData.labels;
+        revenueChart.data.datasets[0].data = data.monthlyRevenueData.data;
+        revenueChart.update();
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initCharts();
+});
+
+// Auto refresh every 30 seconds
+setInterval(() => {
+    loadInitialData();
+}, 30000);
+</script>
