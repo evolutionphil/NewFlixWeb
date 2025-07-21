@@ -268,7 +268,7 @@ exports.savePlaylists=(req,res)=>{
                     // Check device activation status before saving playlists
                     if(device.is_trial == 1) {
                         // Device is in trial mode - redirect to activation with trial message
-                        req.flash('success','This MAC address (' + mac_address + ') is in trial mode. You can activate it now before the trial ends on ' + device.expire_date + '.');
+                        req.flash('success','The MAC address (' + mac_address + ') is currently in trial mode. You can activate it before the trial period ends on ' + device.expire_date + '. Your playlist has been uploaded successfully.');
                         return res.redirect('/activation');
                     } else if(device.is_trial == 0) {
                         // Device is not activated - redirect to activation
