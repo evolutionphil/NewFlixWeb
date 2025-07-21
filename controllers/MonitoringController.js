@@ -72,13 +72,17 @@ async function getMonitoringData() {
         // Calculate monthly revenue using standard price
         const monthlyRevenue = monthlyTransactionCount * standardPrice;
 
+        // Get current timestamp as string for comparison
+        const nowTimestamp = now.getTime().toString();
+        const currentDateString = now.toISOString().split('T')[0];
+
         // Run all device queries in parallel for better performance
         const [totalDevices, activeDevices, trialDevices, platformAggregation] = await Promise.all([
             Device.countDocuments({}),
             Device.countDocuments({
                 $or: [
-                    { expire_date: { $gte: nowTimestamp } },
-                    { expire_date: { $gte: now.getTime() } }
+                    { expire_date: { $gte: currentDateString } },
+                    { expire_date: { $gte: nowTimestamp } }
                 ],
                 is_trial: 2  // 2 means activated
             }),
