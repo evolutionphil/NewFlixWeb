@@ -129,11 +129,11 @@ async function getMonitoringData() {
 
         const result = {
             totalTransactions24h,
-            revenue24h: Math.round(revenue24h * 100) / 100,
+            revenue24h: '€' + (Math.round(revenue24h * 100) / 100).toFixed(2),
             totalDevices,
             activeDevices,
             trialDevices,
-            monthlyRevenue: Math.round(monthlyRevenue * 100) / 100,
+            monthlyRevenue: '€' + (Math.round(monthlyRevenue * 100) / 100).toFixed(2),
             platformDistribution
         };
 
@@ -143,11 +143,11 @@ async function getMonitoringData() {
         console.error('Error in getMonitoringData:', error);
         return {
             totalTransactions24h: 0,
-            revenue24h: 0,
+            revenue24h: '€0.00',
             totalDevices: 0,
             activeDevices: 0,
             trialDevices: 0,
-            monthlyRevenue: 0,
+            monthlyRevenue: '€0.00',
             platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 }
         };
     }
