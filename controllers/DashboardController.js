@@ -50,6 +50,12 @@ async function calculateEarningsStats() {
 }
 
 exports.dashboard = async (req, res) => {
-    // Redirect to monitoring dashboard as requested
-    res.redirect('/admin/monitoring');
+    const stats = await calculateEarningsStats();
+
+    res.render('admin/pages/dashboard/index', {
+        menu: 'dashboard',
+        layout: './admin/partials/layout',
+        user: req.user,
+        stats: stats
+    });
 }

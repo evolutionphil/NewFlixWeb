@@ -107,27 +107,7 @@ connection.once('open', async function() {
 connection.on('error', (error) => {
     console.log('MongoDB connection error:', error.message);
 });
-const server = require('http').createServer(app);
-const io = require('socket.io')(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
-});
-
-// Make io globally available for monitoring
-global.io = io;
-
-// Socket.IO connection handling
-io.on('connection', (socket) => {
-    console.log('Client connected to monitoring dashboard');
-
-    socket.on('disconnect', () => {
-        console.log('Client disconnected from monitoring dashboard');
-    });
-});
-
-server.listen(PORT, '0.0.0.0', function () {
+app.listen(PORT,function () {
     console.log('Server is running on Port: '+PORT);
 })
 
@@ -162,7 +142,7 @@ global.settings={
     paypal_client_id: '',
     paypal_secret: '',
     price: '7.49',
-
+    
     themes: [
         {
             "name": "Standart",
@@ -439,21 +419,10 @@ const frontend_route=require('./routes/frontend');
 const admin_route=require('./routes/admin')
 const api_route=require('./routes/api');
 const reseller_route=require('./routes/reseller')
-
-// Import monitoring middleware
-require('./middlewares/monitoring');
-
 app.use('/',frontend_route);
 app.use('/admin/',admin_route)
-
-// Apply monitoring middleware specifically to API routes
-app.use('/api', global.trackRequest, api_route);
-
+app.use('/api',api_route);
 app.use('/reseller/',reseller_route);
-
-// Add monitoring routes
-const monitoring_route=require('./routes/monitoring');
-app.use('/admin/monitoring/',monitoring_route);
 
 async function removePendingTransactions(){
     let day=moment().subtract('5','days').format('Y-MM-DD');
@@ -615,7 +584,7 @@ app.get('/subtitle-test/:movie_name1?', async (req, res) => {
     try {
         const movie_name = req.params.movie_name1 || "20th Century Girl (2022)";
         console.log('Searching subtitles for:', movie_name);
-
+        
         // Get authentication token
         let token;
         try {
@@ -652,7 +621,7 @@ app.get('/subtitle-test/:movie_name1?', async (req, res) => {
 
         for (const strategy of searchStrategies) {
             console.log('Trying search strategy:', strategy);
-
+            
             try {
                 const searchParams = {
                     ...strategy,
@@ -775,7 +744,7 @@ app.get('/subtitle-test/:movie_name1?', async (req, res) => {
 
     } catch (error) {
         console.error('OpenSubtitles API Error:', error.message);
-
+        
         let errorResponse = {
             error: 'OpenSubtitles API Error',
             message: error.message,
@@ -806,15 +775,6 @@ app.get('/test-email',async(req, res)=>{
         res.send('ok')}
     );
 })
-
-// Test endpoint for monitoring
-app.get('/test-monitoring', (req, res) => {
-    res.json({ 
-        message: 'Monitoring test successful', 
-        timestamp: new Date().toISOString(),
-        totalRequests: global.monitoringStats ? global.monitoringStats.totalRequests : 0
-    });
-});
 
 app.get('/test-email-content',async (req,res)=>{
     const puppeteer = require('puppeteer');
