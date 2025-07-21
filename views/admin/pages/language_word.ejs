@@ -1,7 +1,16 @@
 <div class="page-content">
     <div class="panel panel-boxed">
         <div class="panel-body">
-            <h3 class="text-right"><%= language.name %></h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3><%= language.name %></h3>
+                </div>
+                <div class="col-md-6 text-right">
+                    <button type="button" class="btn btn-info btn-translate" data-language-id="<%= language._id %>" data-language-code="<%= language.code %>">
+                        <i class="fa fa-language"></i> Auto Translate from English
+                    </button>
+                </div>
+            </div>
             <h3 class="mt-50">Or Upload Words Manually</h3>
             <form method="post" action="/admin/saveLanguageWord/<%=language.id%>">
                 <div class="row">
@@ -24,3 +33,47 @@
         </div>
     </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    $('.btn-translate').click(function() {
+        const languageId = $(this).data('language-id');
+        const languageCode = $(this).data('language-code');
+        const btn = $(this);
+        
+        // Don't translate if it's English
+        if (languageCode === 'en') {
+            alert('Cannot translate English to English!');
+            return;
+        }
+        
+        if (confirm('This will translate all English words to ' + languageCode + '. Existing translations will be overwritten. Continue?')) {
+            btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Translating...');
+            
+            $.ajax({
+                url: '/admin/translate-language-words',
+                method: 'POST',
+                data: {
+                    language_id: languageId,
+                    target_language_code: languageCode
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert(response.msg);
+                        // Reload the page to show new translations
+                        window.location.reload();
+                    } else {
+                        alert('Translation failed: ' + response.msg);
+                    }
+                },
+                error: function() {
+                    alert('Translation failed: Server error');
+                },
+                complete: function() {
+                    btn.prop('disabled', false).html('<i class="fa fa-language"></i> Auto Translate from English');
+                }
+            });
+        }
+    });
+});
+</script>
