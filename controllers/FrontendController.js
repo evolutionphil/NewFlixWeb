@@ -267,14 +267,21 @@ exports.savePlaylists=(req,res)=>{
                     let device_id=device._id;
                     PlayList.deleteMany({device_id:device_id}).then(()=>{
                         let insert_records=[];
-                        urls.map((item,index)=>{
+                        urls.map((url,index)=>{
                             insert_records.push({
                                 device_id:device_id,
-                                url:urls[index]
+                                url:url,
+                                created_time:moment().format('Y-MM-DD H:mm')
                             })
                         })
                         PlayList.insertMany(insert_records).then(()=>{
                             req.flash('success','Your playlists saved successfully');
+
+                            // Check if device needs activation
+                            if(device.is_trial != 2) {
+                                return res.redirect('/activation');
+                            }
+
                             return res.redirect('/mylist');
                         })
                     })
