@@ -181,5 +181,6 @@ function isAuthenticated(req, res, next) {
 
 router.get('/monitoring', isAuthenticated, MonitoringController.index);
 router.get('/api/monitoring-stats', isAuthenticated, MonitoringController.getMonitoringStats);
+router.get('/api/monitoring-debug', isAuthenticated, MonitoringController.debugData);
 
 module.exports = router;

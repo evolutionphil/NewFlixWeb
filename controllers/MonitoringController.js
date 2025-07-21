@@ -34,15 +34,30 @@ async function getMonitoringData() {
         const yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         
-        // Convert dates to timestamp strings for comparison
+        // Convert dates to timestamp strings for comparison - using milliseconds
         const yesterdayTimestamp = yesterday.getTime().toString();
         const startOfMonthTimestamp = startOfMonth.getTime().toString();
+        const nowTimestamp = now.getTime().toString();
 
-        // Get 24h transactions with revenue
-        const transactions24h = await Transaction.find({
-            created_time: { $gte: yesterdayTimestamp },
+        console.log('Date calculations:', {
+            now: now.toISOString(),
+            yesterday: yesterday.toISOString(),
+            startOfMonth: startOfMonth.toISOString(),
+            yesterdayTimestamp,
+            startOfMonthTimestamp
+        });
+
+        // Get 24h transactions with revenue - check both created_time and pay_time fields
+        const transactions24hQuery = {
+            $or: [
+                { created_time: { $gte: yesterdayTimestamp } },
+                { pay_time: { $gte: yesterday.toISOString().split('T')[0] } }
+            ],
             status: 'success'
-        }).select('amount');
+        };
+        
+        const transactions24h = await Transaction.find(transactions24hQuery).select('amount created_time pay_time');
+        console.log('24h transactions found:', transactions24h.length);
         
         const totalTransactions24h = transactions24h.length;
         const revenue24h = transactions24h.reduce((sum, t) => {
@@ -50,10 +65,16 @@ async function getMonitoringData() {
         }, 0);
 
         // Get monthly transactions with revenue
-        const monthlyTransactions = await Transaction.find({
-            created_time: { $gte: startOfMonthTimestamp },
+        const monthlyTransactionsQuery = {
+            $or: [
+                { created_time: { $gte: startOfMonthTimestamp } },
+                { pay_time: { $gte: startOfMonth.toISOString().split('T')[0] } }
+            ],
             status: 'success'
-        }).select('amount');
+        };
+        
+        const monthlyTransactions = await Transaction.find(monthlyTransactionsQuery).select('amount');
+        console.log('Monthly transactions found:', monthlyTransactions.length);
         
         const monthlyRevenue = monthlyTransactions.reduce((sum, t) => {
             return sum + (parseFloat(t.amount) || 0);
@@ -61,24 +82,33 @@ async function getMonitoringData() {
 
         // Get total devices
         const totalDevices = await Device.countDocuments({});
+        console.log('Total devices:', totalDevices);
 
         // Get active devices (devices that are activated and not expired)
-        const nowTimestamp = now.getTime().toString();
         const activeDevices = await Device.countDocuments({
-            expire_date: { $gte: nowTimestamp },
+            $or: [
+                { expire_date: { $gte: nowTimestamp } },
+                { expire_date: { $gte: now.getTime() } }
+            ],
             is_trial: 2  // 2 means activated
         });
+        console.log('Active devices:', activeDevices);
 
         // Get trial devices (devices that are in trial)
         const trialDevices = await Device.countDocuments({
             is_trial: 1  // 1 means trial
         });
+        console.log('Trial devices:', trialDevices);
 
         // Get 24h activated devices (devices activated in last 24 hours)
         const activatedDevices24h = await Device.countDocuments({
-            created_time: { $gte: yesterdayTimestamp },
+            $or: [
+                { created_time: { $gte: yesterdayTimestamp } },
+                { created_time: { $gte: yesterday.getTime() } }
+            ],
             is_trial: 2  // 2 means activated
         });
+        console.log('24h activated devices:', activatedDevices24h);
 
         // Platform distribution - check app_type field
         const devices = await Device.find({}).select('app_type');
@@ -108,7 +138,7 @@ async function getMonitoringData() {
             }
         });
 
-        return {
+        const result = {
             totalTransactions24h,
             revenue24h: Math.round(revenue24h * 100) / 100,
             totalDevices,
@@ -118,6 +148,9 @@ async function getMonitoringData() {
             monthlyRevenue: Math.round(monthlyRevenue * 100) / 100,
             platformDistribution
         };
+
+        console.log('Final monitoring stats:', result);
+        return result;
 
     } catch (error) {
         console.error('Error in getMonitoringData:', error);
@@ -171,6 +204,41 @@ exports.handleSocketConnection = (io) => {
             clearInterval(statsInterval);
         });
     });
+};
+
+// Debug function to check database data
+exports.debugData = async (req, res) => {
+    try {
+        // Get sample transactions
+        const sampleTransactions = await Transaction.find({}).limit(5).select('created_time pay_time status amount');
+        
+        // Get sample devices
+        const sampleDevices = await Device.find({}).limit(5).select('created_time expire_date is_trial app_type');
+        
+        // Count all transactions
+        const totalTransactions = await Transaction.countDocuments({});
+        const successTransactions = await Transaction.countDocuments({ status: 'success' });
+        
+        // Count all devices
+        const totalDevices = await Device.countDocuments({});
+        
+        const debugInfo = {
+            sampleTransactions,
+            sampleDevices,
+            counts: {
+                totalTransactions,
+                successTransactions,
+                totalDevices
+            },
+            currentTime: new Date().toISOString(),
+            currentTimestamp: new Date().getTime().toString()
+        };
+        
+        res.json(debugInfo);
+    } catch (error) {
+        console.error('Debug data error:', error);
+        res.status(500).json({ error: 'Failed to get debug data' });
+    }
 };
 
 // Export the getMonitoringData function for testing
