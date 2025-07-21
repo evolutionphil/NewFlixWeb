@@ -37,6 +37,23 @@
                 </div>
             </div>
             <div class="col-lg-3 col-sm-6">
+                <div class="card card-block bg-cyan-600 p-20">
+                    <div class="counter counter-md text-left">
+                        <div class="counter-number-group">
+                            <span class="counter-number color-white" id="trialDevices">Loading...</span>
+                        </div>
+                        <div class="counter-label text-uppercase color-white">Trial Devices</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Second Row for Monthly Revenue -->
+        <div class="row">
+            <div class="col-lg-3 col-sm-6"></div>
+            <div class="col-lg-3 col-sm-6"></div>
+            <div class="col-lg-3 col-sm-6"></div>
+            <div class="col-lg-3 col-sm-6">
                 <div class="card card-block bg-purple-600 p-20">
                     <div class="counter counter-md text-left">
                         <div class="counter-number-group">
@@ -52,54 +69,13 @@
         <!-- Charts Row -->
         <div class="row">
             <!-- Platform Distribution -->
-            <div class="col-lg-6">
+            <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header">
                         <h4 class="card-title">Platform Distribution</h4>
                     </div>
                     <div class="card-body">
                         <canvas id="platformChart" height="300"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Device Status -->
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">Device Status</h4>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="deviceStatusChart" height="300"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Activity Charts Row -->
-        <div class="row">
-            <!-- 24h Transaction Activity -->
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">24h Transaction Activity</h4>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="hourlyChart" height="100"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Monthly Revenue Row -->
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">Monthly Revenue (Last 6 Months)</h4>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="monthlyRevenueChart" height="100"></canvas>
                     </div>
                 </div>
             </div>
@@ -132,7 +108,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
 // Global chart variables
-let platformChart, deviceStatusChart, hourlyChart, monthlyRevenueChart;
+let platformChart;
 let socket;
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 5;
@@ -194,11 +170,9 @@ function loadInitialData() {
                 totalTransactions24h: 0,
                 totalDevices: 0,
                 activeDevices: 0,
+                trialDevices: 0,
                 monthlyRevenue: 0,
-                platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 },
-                deviceStatus: { active: 0, trial: 0, inactive: 0 },
-                hourlyTransactions: new Array(24).fill(0),
-                monthlyRevenueData: { labels: [], data: [] }
+                platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 }
             });
         });
 }
@@ -209,13 +183,11 @@ function updateDashboard(data) {
         document.getElementById('transactions24h').textContent = data.totalTransactions24h || 0;
         document.getElementById('totalDevices').textContent = data.totalDevices || 0;
         document.getElementById('activeDevices').textContent = data.activeDevices || 0;
+        document.getElementById('trialDevices').textContent = data.trialDevices || 0;
         document.getElementById('monthlyRevenue').textContent = (data.monthlyRevenue || 0).toFixed(2);
 
         // Update charts
         updatePlatformChart(data.platformDistribution || {});
-        updateDeviceStatusChart(data.deviceStatus || {});
-        updateHourlyChart(data.hourlyTransactions || []);
-        updateMonthlyRevenueChart(data.monthlyRevenueData || { labels: [], data: [] });
     } catch (error) {
         console.error('Error updating dashboard:', error);
         showError('Error updating dashboard: ' + error.message);
@@ -245,77 +217,7 @@ function initializeCharts() {
         }
     });
 
-    // Device Status Chart
-    const statusCtx = document.getElementById('deviceStatusChart').getContext('2d');
-    deviceStatusChart = new Chart(statusCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Active', 'Trial', 'Inactive'],
-            datasets: [{
-                data: [0, 0, 0],
-                backgroundColor: ['#4CAF50', '#FF9800', '#F44336']
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    // Hourly Activity Chart
-    const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
-    hourlyChart = new Chart(hourlyCtx, {
-        type: 'line',
-        data: {
-            labels: Array.from({length: 24}, (_, i) => i + ':00'),
-            datasets: [{
-                label: 'Transactions',
-                data: new Array(24).fill(0),
-                borderColor: '#2196F3',
-                backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // Monthly Revenue Chart
-    const monthlyCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
-    monthlyRevenueChart = new Chart(monthlyCtx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Revenue ($)',
-                data: [],
-                backgroundColor: '#4CAF50',
-                borderColor: '#45a049',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+    
 }
 
 function updatePlatformChart(data) {
@@ -332,31 +234,7 @@ function updatePlatformChart(data) {
     }
 }
 
-function updateDeviceStatusChart(data) {
-    if (deviceStatusChart && data) {
-        deviceStatusChart.data.datasets[0].data = [
-            data.active || 0,
-            data.trial || 0,
-            data.inactive || 0
-        ];
-        deviceStatusChart.update();
-    }
-}
 
-function updateHourlyChart(data) {
-    if (hourlyChart && data) {
-        hourlyChart.data.datasets[0].data = data;
-        hourlyChart.update();
-    }
-}
-
-function updateMonthlyRevenueChart(data) {
-    if (monthlyRevenueChart && data) {
-        monthlyRevenueChart.data.labels = data.labels || [];
-        monthlyRevenueChart.data.datasets[0].data = data.data || [];
-        monthlyRevenueChart.update();
-    }
-}
 
 function showError(message) {
     document.getElementById('errorMessage').textContent = message;

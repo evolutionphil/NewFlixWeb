@@ -40,14 +40,16 @@ async function getMonitoringData() {
         // Get total devices
         const totalDevices = await Device.countDocuments({});
 
-        // Get active devices (devices that are not trial and not expired)
+        // Get active devices (devices that are activated and not expired)
         const now = new Date();
         const activeDevices = await Device.countDocuments({
-            $or: [
-                { expire_date: { $gte: now.getTime().toString() } },
-                { expire_date: { $exists: false } }
-            ],
-            is_trial: { $ne: 0 }
+            expire_date: { $gte: now.getTime().toString() },
+            is_trial: 2  // 2 means activated
+        });
+
+        // Get trial devices (devices that are in trial)
+        const trialDevices = await Device.countDocuments({
+            is_trial: 1  // 1 means trial
         });
 
         // Get this month's revenue
@@ -89,75 +91,15 @@ async function getMonitoringData() {
             }
         });
 
-        // Device status - using correct field names
-        const trialDevices = await Device.countDocuments({
-            is_trial: 0  // 0 means trial
-        });
         
-        const expiredDevices = await Device.countDocuments({
-            expire_date: { $lt: now.getTime().toString() },
-            is_trial: { $ne: 0 }
-        });
-
-        const deviceStatus = {
-            active: activeDevices,
-            trial: trialDevices,
-            inactive: expiredDevices
-        };
-
-        // Hourly transactions for last 24 hours
-        const hourlyTransactions = new Array(24).fill(0);
-        const last24Hours = await Transaction.find({
-            created_time: { $gte: yesterday.getTime().toString() },
-            status: 'success'
-        }).select('created_time');
-
-        last24Hours.forEach(transaction => {
-            const transactionTime = moment(parseInt(transaction.created_time));
-            if (transactionTime.isValid()) {
-                const hour = transactionTime.hour();
-                if (hour >= 0 && hour < 24) {
-                    hourlyTransactions[hour]++;
-                }
-            }
-        });
-
-        // Monthly revenue for last 6 months
-        const monthlyRevenueData = {
-            labels: [],
-            data: []
-        };
-
-        for (let i = 5; i >= 0; i--) {
-            const monthStart = moment().subtract(i, 'month').startOf('month');
-            const monthEnd = moment().subtract(i, 'month').endOf('month');
-            const monthName = monthStart.format('MMM YYYY');
-
-            const monthTransactions = await Transaction.find({
-                created_time: { 
-                    $gte: monthStart.valueOf().toString(), 
-                    $lte: monthEnd.valueOf().toString() 
-                },
-                status: 'success'
-            }).select('amount');
-
-            const monthRevenue = monthTransactions.reduce((sum, t) => {
-                return sum + (parseFloat(t.amount) || 0);
-            }, 0);
-
-            monthlyRevenueData.labels.push(monthName);
-            monthlyRevenueData.data.push(Math.round(monthRevenue * 100) / 100);
-        }
 
         return {
             totalTransactions24h,
             totalDevices,
             activeDevices,
+            trialDevices,
             monthlyRevenue: Math.round(monthlyRevenue * 100) / 100,
-            platformDistribution,
-            deviceStatus,
-            hourlyTransactions,
-            monthlyRevenueData
+            platformDistribution
         };
 
     } catch (error) {
@@ -166,11 +108,9 @@ async function getMonitoringData() {
             totalTransactions24h: 0,
             totalDevices: 0,
             activeDevices: 0,
+            trialDevices: 0,
             monthlyRevenue: 0,
-            platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 },
-            deviceStatus: { active: 0, trial: 0, inactive: 0 },
-            hourlyTransactions: new Array(24).fill(0),
-            monthlyRevenueData: { labels: [], data: [] }
+            platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 }
         };
     }
 }
@@ -189,11 +129,9 @@ exports.handleSocketConnection = (io) => {
                 totalTransactions24h: 0,
                 totalDevices: 0,
                 activeDevices: 0,
+                trialDevices: 0,
                 monthlyRevenue: 0,
-                platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 },
-                deviceStatus: { active: 0, trial: 0, inactive: 0 },
-                hourlyTransactions: new Array(24).fill(0),
-                monthlyRevenueData: { labels: [], data: [] }
+                platformDistribution: { android: 0, iOS: 0, samsung: 0, lg: 0, tvOS: 0, other: 0 }
             });
         });
 
