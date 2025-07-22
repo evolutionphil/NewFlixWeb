@@ -2,7 +2,16 @@
     <div class="panel panel-boxed">
         <div class="panel-body">
             <h3 class="text-right"><%= language.name %></h3>
-            <h3 class="mt-50">Or Upload Words Manually</h3>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h3 class="mt-50">Or Upload Words Manually</h3>
+                </div>
+                <div class="col-md-6 text-right">
+                    <button type="button" class="btn btn-info" id="autoTranslateBtn" onclick="autoTranslate()">
+                        <i class="fa fa-language"></i> Auto Translate from English
+                    </button>
+                </div>
+            </div>
             <form method="post" action="/admin/saveLanguageWord/<%=language.id%>">
                 <div class="row">
                     <% words.map(item=>{%>
@@ -24,3 +33,58 @@
         </div>
     </div>
 </div>
+
+<script>
+function autoTranslate() {
+    const btn = document.getElementById('autoTranslateBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Translating...';
+    btn.disabled = true;
+
+    // Get all English words that need translation
+    const wordsToTranslate = [];
+    <% words.forEach(function(word) { %>
+        wordsToTranslate.push({
+            id: '<%= word.id %>',
+            name: '<%= word.name %>',
+            currentValue: document.querySelector('input[name="language_word-<%= word.id %>"]').value
+        });
+    <% }); %>
+
+    // Call the translation API
+    fetch('/admin/translateWords', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            words: wordsToTranslate,
+            targetLanguageCode: '<%= language.code %>',
+            languageId: '<%= language.id %>'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update the form fields with translated text
+            data.translations.forEach(translation => {
+                const input = document.querySelector(`input[name="language_word-${translation.wordId}"]`);
+                if (input && translation.translatedText) {
+                    input.value = translation.translatedText;
+                }
+            });
+            alert('Translation completed successfully!');
+        } else {
+            alert('Translation failed: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Translation failed: ' + error.message);
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+</script>

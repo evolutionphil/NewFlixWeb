@@ -58,6 +58,7 @@ router.post('/word/create',adminController.createWord);
 router.post('/word/delete/:id',adminController.deleteWord);
 router.get('/language-word/:id',adminController.languageWord);
 router.post('/saveLanguageWord/:language_id',adminController.saveLanguageWord);
+router.post('/translateWords',adminController.translateWords);
 
 
 router.get('/showAppBackground',adminController.showAppBackground);

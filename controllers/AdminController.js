@@ -594,6 +594,68 @@ exports.saveLanguageWord=(req,res)=>{
     })
 }
 
+exports.translateWords = async (req, res) => {
+    try {
+        const { words, targetLanguageCode, languageId } = req.body;
+        
+        // Check if Google Translate API key is configured
+        if (!settings.google_search_api_key) {
+            return res.json({
+                status: 'error',
+                message: 'Google API key not configured. Please set it in Google Settings.'
+            });
+        }
+
+        const { Translate } = require('@google-cloud/translate').v2;
+        
+        // Initialize Google Translate client
+        const translate = new Translate({
+            key: settings.google_search_api_key
+        });
+
+        const translations = [];
+        
+        // Process each word for translation
+        for (const word of words) {
+            let translatedText = word.currentValue; // Use existing value if already filled
+            
+            // Only translate if the field is empty or we want to override
+            if (!word.currentValue || word.currentValue.trim() === '') {
+                try {
+                    // Translate from English to target language
+                    const [translation] = await translate.translate(word.name, {
+                        from: 'en',
+                        to: targetLanguageCode
+                    });
+                    translatedText = translation;
+                } catch (translateError) {
+                    console.error(`Translation error for word "${word.name}":`, translateError);
+                    // Keep the original English word if translation fails
+                    translatedText = word.name;
+                }
+            }
+            
+            translations.push({
+                wordId: word.id,
+                originalText: word.name,
+                translatedText: translatedText
+            });
+        }
+
+        res.json({
+            status: 'success',
+            translations: translations
+        });
+
+    } catch (error) {
+        console.error('Translation error:', error);
+        res.json({
+            status: 'error',
+            message: 'Translation service error: ' + error.message
+        });
+    }
+}
+
 exports.showDemoUrl=(req,res)=>{
     Setting.findOne({key:'demo_url'}).then(data=>{
         let demo_url=data!=null ? data.value : '';
