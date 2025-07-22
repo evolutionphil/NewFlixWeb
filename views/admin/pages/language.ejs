@@ -12,6 +12,9 @@
             <div class="table-responsive">
                 <div class="text-right mb-10">
                     <button class="btn btn-primary" id="add-new-btn">Add New</button>
+                     <button class="btn btn-info" onclick="fillAllLanguagesWithEnglish()">
+                        <i class="fa fa-copy"></i> Fill All Languages with English
+                    </button>
                 </div>
                 <table class="table" id="instruction-tags-table">
                     <thead class="table-dark">
@@ -182,6 +185,26 @@
                     }
                 },
                 error:error=>{
+                }
+            })
+        }
+
+        function fillAllLanguagesWithEnglish() {
+            // Implement the logic to fill empty fields with English text for all languages
+            // This function needs to iterate through all languages and their words,
+            // check for empty translations, and fill them with the English text.
+            // You'll likely need to make an AJAX request to the server to perform this operation.
+
+            $.ajax({
+                method:'post',
+                url:site_url+"/admin/language/fill-with-english", // Assuming you have this endpoint
+                success:data=>{
+                    showSuccessNotify("All languages filled with English text successfully");
+                    // Optionally, reload the page or update the table to reflect the changes
+                    location.reload();
+                },
+                error:error=>{
+                    showErrorNotify("Sorry, something went wrong while filling languages. Please try later.")
                 }
             })
         }

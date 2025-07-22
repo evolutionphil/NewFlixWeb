@@ -631,6 +631,79 @@ exports.translateWords = async (req, res) => {
     }
 }
 
+exports.fillAllLanguagesWithEnglish = async (req, res) => {
+    try {
+        // Get all languages
+        const languages = await Language.find();
+        // Get all words
+        const words = await Word.find();
+        
+        let totalUpdated = 0;
+        
+        // Process each language
+        for (const language of languages) {
+            // Get existing language words for this language
+            const existingLanguageWords = await LanguageWord.find({ language_id: language._id });
+            const existingWordMap = {};
+            existingLanguageWords.forEach(lw => {
+                existingWordMap[lw.word_id] = lw;
+            });
+            
+            // Create or update language words
+            const languageWordsToInsert = [];
+            const languageWordsToUpdate = [];
+            
+            for (const word of words) {
+                const existingLangWord = existingWordMap[word._id];
+                
+                if (!existingLangWord) {
+                    // Create new language word with English text
+                    languageWordsToInsert.push({
+                        language_id: language._id,
+                        word_id: word._id,
+                        value: word.name
+                    });
+                    totalUpdated++;
+                } else if (!existingLangWord.value || existingLangWord.value.trim() === '') {
+                    // Update empty language word with English text
+                    languageWordsToUpdate.push({
+                        _id: existingLangWord._id,
+                        value: word.name
+                    });
+                    totalUpdated++;
+                }
+            }
+            
+            // Insert new language words
+            if (languageWordsToInsert.length > 0) {
+                await LanguageWord.insertMany(languageWordsToInsert);
+            }
+            
+            // Update existing empty language words
+            for (const updateData of languageWordsToUpdate) {
+                await LanguageWord.findByIdAndUpdate(updateData._id, { value: updateData.value });
+            }
+        }
+        
+        // Update settings cache
+        getSettings();
+        
+        res.json({
+            status: 'success',
+            message: `Successfully filled ${totalUpdated} empty language fields with English text across ${languages.length} languages.`,
+            totalUpdated: totalUpdated,
+            languagesProcessed: languages.length
+        });
+
+    } catch (error) {
+        console.error('Fill all languages error:', error);
+        res.json({
+            status: 'error',
+            message: 'Error filling languages: ' + error.message
+        });
+    }
+}
+
 exports.showDemoUrl=(req,res)=>{
     Setting.findOne({key:'demo_url'}).then(data=>{
         let demo_url=data!=null ? data.value : '';
