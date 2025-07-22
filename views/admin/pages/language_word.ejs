@@ -8,7 +8,7 @@
                 </div>
                 <div class="col-md-6 text-right">
                     <button type="button" class="btn btn-info" id="autoTranslateBtn" onclick="autoTranslate()">
-                        <i class="fa fa-language"></i> Auto Translate from English
+                        <i class="fa fa-copy"></i> Fill Empty Fields with English Text
                     </button>
                 </div>
             </div>
@@ -38,7 +38,7 @@
 function autoTranslate() {
     const btn = document.getElementById('autoTranslateBtn');
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Translating...';
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Filling Fields...';
     btn.disabled = true;
 
     // Get all English words that need translation
@@ -69,18 +69,18 @@ function autoTranslate() {
             // Update the form fields with translated text
             data.translations.forEach(translation => {
                 const input = document.querySelector(`input[name="language_word-${translation.wordId}"]`);
-                if (input && translation.translatedText) {
+                if (input && !input.value.trim()) {
                     input.value = translation.translatedText;
                 }
             });
-            alert('Translation completed successfully!');
+            alert(data.message || 'Empty fields filled with English text. Please translate manually.');
         } else {
-            alert('Translation failed: ' + data.message);
+            alert('Operation failed: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Translation failed: ' + error.message);
+        alert('Network error occurred: ' + error.message);
     })
     .finally(() => {
         btn.innerHTML = originalText;

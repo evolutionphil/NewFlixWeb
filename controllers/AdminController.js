@@ -598,41 +598,15 @@ exports.translateWords = async (req, res) => {
     try {
         const { words, targetLanguageCode, languageId } = req.body;
         
-        // Check if Google Translate API key is configured
-        if (!settings.google_search_api_key) {
-            return res.json({
-                status: 'error',
-                message: 'Google API key not configured. Please set it in Google Settings.'
-            });
-        }
-
-        const { Translate } = require('@google-cloud/translate').v2;
-        
-        // Initialize Google Translate client
-        const translate = new Translate({
-            key: settings.google_search_api_key
-        });
-
         const translations = [];
         
-        // Process each word for translation
+        // Process each word - just copy English text for empty fields
         for (const word of words) {
             let translatedText = word.currentValue; // Use existing value if already filled
             
-            // Only translate if the field is empty or we want to override
+            // Only fill empty fields with the English word as placeholder
             if (!word.currentValue || word.currentValue.trim() === '') {
-                try {
-                    // Translate from English to target language
-                    const [translation] = await translate.translate(word.name, {
-                        from: 'en',
-                        to: targetLanguageCode
-                    });
-                    translatedText = translation;
-                } catch (translateError) {
-                    console.error(`Translation error for word "${word.name}":`, translateError);
-                    // Keep the original English word if translation fails
-                    translatedText = word.name;
-                }
+                translatedText = word.name; // Use English word as fallback
             }
             
             translations.push({
@@ -644,14 +618,15 @@ exports.translateWords = async (req, res) => {
 
         res.json({
             status: 'success',
-            translations: translations
+            translations: translations,
+            message: 'Words populated with English text. Please manually translate them to the target language.'
         });
 
     } catch (error) {
         console.error('Translation error:', error);
         res.json({
             status: 'error',
-            message: 'Translation service error: ' + error.message
+            message: 'Error processing words: ' + error.message
         });
     }
 }
