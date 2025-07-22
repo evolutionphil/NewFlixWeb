@@ -1672,6 +1672,75 @@ exports.saveOpenSubtitlesSettings=(req,res)=>{
     })
 }
 
+exports.showGoogleSettings=(req,res)=>{
+    let keys=['google_search_api_key','google_search_engine_id','google_maps_api_key','google_analytics_id','google_recaptcha_site_key','google_recaptcha_secret_key','google_oauth_client_id','google_oauth_client_secret'];
+    let data={};
+    keys.map(key=>{
+        data[key]=settings[key] ? settings[key] : ''
+    })
+    res.render('admin/pages/google_setting',
+        {
+            menu:'google-setting',layout: './admin/partials/layout',
+            ...data
+        }
+    );
+}
+
+exports.saveGoogleSettings=(req,res)=>{
+    let input=req.body;
+    let keys=['google_search_api_key','google_search_engine_id','google_maps_api_key','google_analytics_id','google_recaptcha_site_key','google_recaptcha_secret_key','google_oauth_client_id','google_oauth_client_secret'];
+    let {search_api_key, search_engine_id, maps_api_key, analytics_id, recaptcha_site_key, recaptcha_secret_key, oauth_client_id, oauth_client_secret}=input;
+    
+    let insert_data=[];
+    insert_data.push({
+        key:'google_search_api_key',
+        value:search_api_key
+    })
+    insert_data.push({
+        key:'google_search_engine_id',
+        value:search_engine_id
+    })
+    insert_data.push({
+        key:'google_maps_api_key',
+        value:maps_api_key
+    })
+    insert_data.push({
+        key:'google_analytics_id',
+        value:analytics_id
+    })
+    insert_data.push({
+        key:'google_recaptcha_site_key',
+        value:recaptcha_site_key
+    })
+    insert_data.push({
+        key:'google_recaptcha_secret_key',
+        value:recaptcha_secret_key
+    })
+    insert_data.push({
+        key:'google_oauth_client_id',
+        value:oauth_client_id
+    })
+    insert_data.push({
+        key:'google_oauth_client_secret',
+        value:oauth_client_secret
+    })
+    
+    settings.google_search_api_key=search_api_key;
+    settings.google_search_engine_id=search_engine_id;
+    settings.google_maps_api_key=maps_api_key;
+    settings.google_analytics_id=analytics_id;
+    settings.google_recaptcha_site_key=recaptcha_site_key;
+    settings.google_recaptcha_secret_key=recaptcha_secret_key;
+    settings.google_oauth_client_id=oauth_client_id;
+    settings.google_oauth_client_secret=oauth_client_secret;
+
+    Setting.deleteMany({key:{$in:keys}}).then(()=>{
+        Setting.insertMany(insert_data).then(()=>{
+            return res.redirect('/admin/showGoogleSettings');
+        })
+    })
+}
+
 exports.showProfile=async (req,res)=>{
     if(process.env.MAINTANCE_MODE==1)
         return res.render('maintance',{layout:false});

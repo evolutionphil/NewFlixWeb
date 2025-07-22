@@ -133,6 +133,8 @@ router.post('/saveYoutubeApiKey',checkAuthenticated,adminController.saveYoutubeA
 
 router.get('/showOpenSubtitlesSettings',checkAuthenticated,adminController.showOpenSubtitlesSettings);
 router.post('/saveOpenSubtitlesSettings',checkAuthenticated,adminController.saveOpenSubtitlesSettings);
+router.get('/showGoogleSettings',checkAuthenticated,adminController.showGoogleSettings);
+router.post('/saveGoogleSettings',checkAuthenticated,adminController.saveGoogleSettings);
 
 router.get('/profile',adminController.showProfile);
 router.post('/updateProfile',adminController.updateProfile);

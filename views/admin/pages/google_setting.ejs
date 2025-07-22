@@ -1,0 +1,87 @@
+
+<div class="page" style="padding-top:0">
+    <div class="page-content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel">
+                    <div class="panel-body">
+                        <form class="" method="post" action="/admin/saveGoogleSettings" role="form">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Google Settings</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="search_api_key">Google Search API Key</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" id="search_api_key" name="search_api_key"
+                                               placeholder="Enter your Google Custom Search API Key" value="<%= google_search_api_key %>">
+                                        <small class="form-text text-muted">Used for Google Custom Search functionality</small>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="search_engine_id">Google Search Engine ID</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" id="search_engine_id" name="search_engine_id"
+                                               placeholder="Enter your Google Custom Search Engine ID" value="<%= google_search_engine_id %>">
+                                        <small class="form-text text-muted">Your Custom Search Engine ID (cx parameter)</small>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="maps_api_key">Google Maps API Key</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" id="maps_api_key" name="maps_api_key"
+                                               placeholder="Enter your Google Maps API Key" value="<%= google_maps_api_key %>">
+                                        <small class="form-text text-muted">Used for Google Maps integration</small>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="analytics_id">Google Analytics ID</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" id="analytics_id" name="analytics_id"
+                                               placeholder="Enter your Google Analytics Tracking ID (GA-XXXXXXXXX-X)" value="<%= google_analytics_id %>">
+                                        <small class="form-text text-muted">Your Google Analytics tracking ID</small>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="recaptcha_site_key">reCAPTCHA Site Key</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" id="recaptcha_site_key" name="recaptcha_site_key"
+                                               placeholder="Enter your reCAPTCHA Site Key" value="<%= google_recaptcha_site_key %>">
+                                        <small class="form-text text-muted">Public key for reCAPTCHA verification</small>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="recaptcha_secret_key">reCAPTCHA Secret Key</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" id="recaptcha_secret_key" name="recaptcha_secret_key"
+                                               placeholder="Enter your reCAPTCHA Secret Key" value="<%= google_recaptcha_secret_key %>">
+                                        <small class="form-text text-muted">Private key for reCAPTCHA verification</small>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="oauth_client_id">Google OAuth Client ID</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" id="oauth_client_id" name="oauth_client_id"
+                                               placeholder="Enter your Google OAuth Client ID" value="<%= google_oauth_client_id %>">
+                                        <small class="form-text text-muted">Used for Google OAuth authentication</small>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-md-3 form-control-label" for="oauth_client_secret">Google OAuth Client Secret</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" id="oauth_client_secret" name="oauth_client_secret"
+                                               placeholder="Enter your Google OAuth Client Secret" value="<%= google_oauth_client_secret %>">
+                                        <small class="form-text text-muted">Secret key for Google OAuth authentication</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-footer text-right">
+                                <button type="submit" class="btn btn-primary">Save Settings</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
