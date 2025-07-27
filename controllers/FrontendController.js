@@ -276,19 +276,26 @@ exports.savePlaylists=(req,res)=>{
                         return res.redirect('/activation');
                     }
 
-                    PlayList.deleteMany({device_id:device_id}).then(()=>{
-                        let insert_records=[];
-                        urls.map((url,index)=>{
-                            insert_records.push({
-                                device_id:device_id,
-                                url:url,
-                                created_time:moment().format('Y-MM-DD H:mm')
-                            })
+                    // Save playlists for both trial and activated devices
+                    await PlayList.deleteMany({device_id:device_id});
+                    let records=[];
+                    urls.map(item=>{
+                        records.push({
+                            device_id:device_id,
+                            url:item,
+                            created_time:moment().format('Y-MM-DD')
                         })
-                        PlayList.insertMany(insert_records).then(()=>{
-                            req.flash('success','Your playlists saved successfully');
+                    })
+                    PlayList.insertMany(records).then(()=>{
+                        if(device.is_trial == 1) {
+                            // Device is in trial mode - show success with trial message
+                            req.flash('success','The MAC address (' + mac_address + ') is currently in trial mode. You can activate it before the trial period ends on ' + device.expire_date + '. Your playlist has been uploaded successfully.');
+                            return res.redirect('/activation');
+                        } else {
+                            // Activated device
+                            req.flash('success','Playlists uploaded successfully');
                             return res.redirect('/mylist');
-                        })
+                        }
                     })
                 })
             }
