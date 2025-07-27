@@ -269,10 +269,36 @@ exports.savePlaylists=async(req,res)=>{
 
             let device_id = device._id;
 
+            // Validate URLs before saving
+            const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+            const validUrls = [];
+            const invalidUrls = [];
+
+            urls.forEach(url => {
+                const trimmedUrl = url.trim();
+                if (trimmedUrl && urlRegex.test(trimmedUrl)) {
+                    validUrls.push(trimmedUrl);
+                } else if (trimmedUrl) {
+                    invalidUrls.push(trimmedUrl);
+                }
+            });
+
+            // If there are invalid URLs, show error and don't save
+            if (invalidUrls.length > 0) {
+                req.flash('error', `Invalid URL format detected: ${invalidUrls.join(', ')}<br>Please check your URLs and try again.`);
+                return res.redirect('/mylist');
+            }
+
+            // If no valid URLs provided
+            if (validUrls.length === 0) {
+                req.flash('error', 'No valid URLs provided. Please enter at least one valid playlist URL.');
+                return res.redirect('/mylist');
+            }
+
             // Save playlists for both trial and activated devices
             await PlayList.deleteMany({device_id:device_id});
             let records = [];
-            urls.map(item=>{
+            validUrls.map(item=>{
                 records.push({
                     device_id:device_id,
                     url:item,
