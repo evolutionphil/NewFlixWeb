@@ -233,21 +233,20 @@ exports.mylist=async(req,res)=>{
     res.render('frontend/pages/mylist', {menu: 'mylist',...meta_data,mylist_content:mylist_content, host_name, recaptcha_site_key:recaptcha_site_key});
 }
 
-exports.savePlaylists=async(req,res)=>{
+exports.savePlaylists=(req,res)=>{
     let {
         urls,
         mac_address,
         recaptcha_token
     }=req.body;
-    // Temporarily disabled reCAPTCHA verification
-    // let secretKey =process.env.RECAPTCHA_SECRET_KEY;
-    // let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
-    // axios.post(verificationURL).then(
-    //     response=>{
-    //         let data=response.data;
-    //         if(data.score>=0.5){
+    let secretKey =process.env.RECAPTCHA_SECRET_KEY;
+    let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
+    axios.post(verificationURL).then(
+        response=>{
+            let data=response.data;
+            if(data.score>=0.5){
                 mac_address=mac_address.toLowerCase();
-                Device.findOne({mac_address:mac_address}).then(async device=>{
+                Device.findOne({mac_address:mac_address}).then(device=>{
                     if(!device) {
                         req.flash('error','Sorry, Device Not Found');
                         return res.redirect('/mylist');
@@ -299,18 +298,17 @@ exports.savePlaylists=async(req,res)=>{
                         }
                     })
                 })
-    // Temporarily disabled reCAPTCHA error handling
-    //         }
-    //         else{
-    //             req.flash('error','Sorry, recaptcha is not correct<br>Please Finish Recaptcha first and try again');
-    //             return res.redirect('/mylist');
-    //         }
-    //     },
-    //     error=>{
-    //         req.flash('error','Sorry, recaptcha is not correct');
-    //         return res.redirect('/mylist');
-    //     }
-    // )
+            }
+            else{
+                req.flash('error','Sorry, recaptcha is not correct<br>Please Finish Recaptcha first and try again');
+                return res.redirect('/mylist');
+            }
+        },
+        error=>{
+            req.flash('error','Sorry, recaptcha is not correct');
+            return res.redirect('/mylist');
+        }
+    )
 }
 exports.deletePlayList=(req,res)=>{
     let {delete_mac_address,recaptcha_token}=req.body;
