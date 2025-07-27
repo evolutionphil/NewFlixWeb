@@ -240,70 +240,67 @@ exports.savePlaylists=async(req,res)=>{
         recaptcha_token
     }=req.body;
 
-    // Temporarily disable reCAPTCHA verification
-    // let secretKey =process.env.RECAPTCHA_SECRET_KEY;
-    // let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
+    let secretKey =process.env.RECAPTCHA_SECRET_KEY;
+    let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
 
     try {
-        // Skip reCAPTCHA verification for now
-        // let response = await axios.post(verificationURL);
-        // let data = response.data;
-        // if(data.score>=0.5){
+        let response = await axios.post(verificationURL);
+        let data = response.data;
+        if(data.score>=0.5){
+            mac_address = mac_address.toLowerCase();
+            let device = await Device.findOne({mac_address:mac_address});
 
-        mac_address = mac_address.toLowerCase();
-        let device = await Device.findOne({mac_address:mac_address});
+            if(!device) {
+                req.flash('error','Sorry, Device Not Found');
+                return res.redirect('/mylist');
+            }
 
-        if(!device) {
-            req.flash('error','Sorry, Device Not Found');
-            return res.redirect('/mylist');
-        }
+            // If device is locked then don't allow to add playlists
+            if(device.lock==1){
+                req.flash('error','Sorry, your device is locked now. <br> Please contact support to unlock your device');
+                return res.redirect('/mylist');
+            }
 
-        // If device is locked then don't allow to add playlists
-        if(device.lock==1){
-            req.flash('error','Sorry, your device is locked now. <br> Please contact support to unlock your device');
-            return res.redirect('/mylist');
-        }
+            // If device trial period is expired then don't allow to add playlists
+            if(device.is_trial==1 && device.expire_date<moment().format('YYYY-MM-DD')){
+                req.flash('error','Sorry, your device trial period is expired. Please activate your device to continue.');
+                return res.redirect('/mylist');
+            }
 
-        // If device trial period is expired then don't allow to add playlists
-        if(device.is_trial==1 && device.expire_date<moment().format('YYYY-MM-DD')){
-            req.flash('error','Sorry, your device trial period is expired. Please activate your device to continue.');
-            return res.redirect('/mylist');
-        }
+            let device_id = device._id;
 
-        let device_id = device._id;
+            // Save playlists for both trial and activated devices
+            await PlayList.deleteMany({device_id:device_id});
+            let records = [];
+            urls.map(item=>{
+                records.push({
+                    device_id:device_id,
+                    url:item,
+                    created_time:moment().format('Y-MM-DD')
+                })
+            });
 
-        // Save playlists for both trial and activated devices
-        await PlayList.deleteMany({device_id:device_id});
-        let records = [];
-        urls.map(item=>{
-            records.push({
-                device_id:device_id,
-                url:item,
-                created_time:moment().format('Y-MM-DD')
-            })
-        });
+            await PlayList.insertMany(records);
 
-        await PlayList.insertMany(records);
+            // Check device activation status after saving playlists
+            if(device.is_trial == 1) {
+                // Device is in trial mode - show success with trial message
+                req.flash('success','The MAC address (' + mac_address + ') is currently in trial mode. You can activate it before the trial period ends on ' + device.expire_date + '. Your playlist has been uploaded successfully.');
+                return res.redirect('/activation');
+            } else if(device.is_trial == 0) {
+                // Device is not activated - redirect to activation
+                req.flash('error','Your app is not activated. You can activate it now.');
+                return res.redirect('/activation');
+            } else {
+                // Activated device (is_trial == 2)
+                req.flash('success','Playlists uploaded successfully');
+                return res.redirect('/mylist');
+            }
 
-        // Check device activation status after saving playlists
-        if(device.is_trial == 1) {
-            // Device is in trial mode - show success with trial message
-            req.flash('success','The MAC address (' + mac_address + ') is currently in trial mode. You can activate it before the trial period ends on ' + device.expire_date + '. Your playlist has been uploaded successfully.');
-            return res.redirect('/activation');
-        } else if(device.is_trial == 0) {
-            // Device is not activated - redirect to activation
-            req.flash('error','Your app is not activated. You can activate it now.');
-            return res.redirect('/activation');
         } else {
-            // Activated device (is_trial == 2)
-            req.flash('success','Playlists uploaded successfully');
+            req.flash('error','Sorry, recaptcha is not correct<br>Please Finish Recaptcha first and try again');
             return res.redirect('/mylist');
         }
-
-        // } else {
-        //     req.flash('error','Sorry, recaptcha is not correct<br>Please Finish Recaptcha first and try again');
-        //     return res.redirect('/mylist');
-        // }
 
     } catch(error) {
         console.log('Save playlist error:', error);
