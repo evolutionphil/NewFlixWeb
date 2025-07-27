@@ -239,12 +239,13 @@ exports.savePlaylists=(req,res)=>{
         mac_address,
         recaptcha_token
     }=req.body;
-    let secretKey =process.env.RECAPTCHA_SECRET_KEY;
-    let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
-    axios.post(verificationURL).then(
-        response=>{
-            let data=response.data;
-            if(data.score>=0.5){
+    // Temporarily disabled reCAPTCHA verification
+    // let secretKey =process.env.RECAPTCHA_SECRET_KEY;
+    // let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
+    // axios.post(verificationURL).then(
+    //     response=>{
+    //         let data=response.data;
+    //         if(data.score>=0.5){
                 mac_address=mac_address.toLowerCase();
                 Device.findOne({mac_address:mac_address}).then(device=>{
                     if(!device) {
@@ -298,17 +299,18 @@ exports.savePlaylists=(req,res)=>{
                         }
                     })
                 })
-            }
-            else{
-                req.flash('error','Sorry, recaptcha is not correct<br>Please Finish Recaptcha first and try again');
-                return res.redirect('/mylist');
-            }
-        },
-        error=>{
-            req.flash('error','Sorry, recaptcha is not correct');
-            return res.redirect('/mylist');
-        }
-    )
+    // Temporarily disabled reCAPTCHA error handling
+    //         }
+    //         else{
+    //             req.flash('error','Sorry, recaptcha is not correct<br>Please Finish Recaptcha first and try again');
+    //             return res.redirect('/mylist');
+    //         }
+    //     },
+    //     error=>{
+    //         req.flash('error','Sorry, recaptcha is not correct');
+    //         return res.redirect('/mylist');
+    //     }
+    // )
 }
 exports.deletePlayList=(req,res)=>{
     let {delete_mac_address,recaptcha_token}=req.body;
