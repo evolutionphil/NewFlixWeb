@@ -285,7 +285,7 @@ exports.savePlaylists=async(req,res)=>{
 
             // If there are invalid URLs, show error and don't save
             if (invalidUrls.length > 0) {
-                req.flash('error', `Invalid URL format detected: ${invalidUrls.join(', ')}<br>Please check your URLs and try again.`);
+                req.flash('error', `Invalid playlist URL format detected: ${invalidUrls.join(', ')}<br>Please enter valid playlist URLs starting with http:// or https:// (e.g., https://example.com/playlist.m3u)`);
                 return res.redirect('/mylist');
             }
 
