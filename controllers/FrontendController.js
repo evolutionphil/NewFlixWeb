@@ -233,7 +233,7 @@ exports.mylist=async(req,res)=>{
     res.render('frontend/pages/mylist', {menu: 'mylist',...meta_data,mylist_content:mylist_content, host_name, recaptcha_site_key:recaptcha_site_key});
 }
 
-exports.savePlaylists=(req,res)=>{
+exports.savePlaylists=async(req,res)=>{
     let {
         urls,
         mac_address,
@@ -247,7 +247,7 @@ exports.savePlaylists=(req,res)=>{
     //         let data=response.data;
     //         if(data.score>=0.5){
                 mac_address=mac_address.toLowerCase();
-                Device.findOne({mac_address:mac_address}).then(device=>{
+                Device.findOne({mac_address:mac_address}).then(async device=>{
                     if(!device) {
                         req.flash('error','Sorry, Device Not Found');
                         return res.redirect('/mylist');
