@@ -157,6 +157,7 @@ exports.activation=(req,res)=>{
         data[key] = settings[key] ? settings[key] : ''
     })
     let recaptcha_site_key=process.env.RECAPTCHA_SITE_KEY;
+    console.log('RECAPTCHA_SITE_KEY from env:', recaptcha_site_key ? 'Found' : 'Missing');
     promises.push(new Promise((resolve, reject)=>{
         CoinList.find().then(
             data=>{
