@@ -156,7 +156,7 @@ exports.activation=(req,res)=>{
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
-    let recaptcha_site_key=process.env.RECAPTCHA_SITE_KEY;
+    let recaptcha_site_key=settings.google_recaptcha_site_key;
     console.log('RECAPTCHA_SITE_KEY from env:', recaptcha_site_key ? 'Found' : 'Missing');
     promises.push(new Promise((resolve, reject)=>{
         CoinList.find().then(
@@ -202,7 +202,7 @@ exports.home=async(req,res)=>{
         data[key] = settings[key] ? settings[key] : ''
     })
 
-    let recaptcha_site_key=process.env.RECAPTCHA_SITE_KEY;
+    let recaptcha_site_key=settings.google_recaptcha_site_key;
     let title = data.mylist_meta_title;
     let keyword = data.mylist_meta_keyword;
     let description = data.mylist_meta_content;
@@ -221,7 +221,7 @@ exports.mylist=async(req,res)=>{
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
-    let recaptcha_site_key=process.env.RECAPTCHA_SITE_KEY;
+    let recaptcha_site_key=settings.google_recaptcha_site_key;
     let title = data.mylist_meta_title;
     let keyword = data.mylist_meta_keyword;
     let description = data.mylist_meta_content;
@@ -243,7 +243,7 @@ exports.savePlaylists=async(req,res)=>{
         recaptcha_token
     }=req.body;
 
-    let secretKey =process.env.RECAPTCHA_SECRET_KEY;
+    let secretKey =settings.google_recaptcha_secret_key;
     let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
 
     try {
@@ -339,7 +339,7 @@ exports.savePlaylists=async(req,res)=>{
 }
 exports.deletePlayList=(req,res)=>{
     let {delete_mac_address,recaptcha_token}=req.body;
-    let secretKey =process.env.RECAPTCHA_SECRET_KEY;
+    let secretKey =settings.google_recaptcha_secret_key;
     let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
     axios.post(verificationURL).then(
         response=>{
@@ -371,7 +371,7 @@ exports.deletePlayList=(req,res)=>{
 }
 exports.updatePinCode=async (req,res)=>{
     let {recaptcha_token,mac_address,pin_code}=req.body;
-    let secretKey =process.env.RECAPTCHA_SECRET_KEY;
+    let secretKey =settings.google_recaptcha_secret_key;
     let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
     axios.post(verificationURL).then(
         async response=>{
@@ -419,7 +419,7 @@ exports.showYoutubeList=async(req,res)=>{
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
-    let recaptcha_site_key=process.env.RECAPTCHA_SITE_KEY;
+    let recaptcha_site_key=settings.google_recaptcha_site_key;
     let title = data.youtubelist_meta_title;
     let keyword = data.youtubelist_meta_keyword;
     let description = data.youtubelist_meta_content;
@@ -436,7 +436,7 @@ exports.saveYoutubeLists=(req,res)=>{
         mac_address,
         recaptcha_token
     }=req.body;
-    let secretKey =process.env.RECAPTCHA_SECRET_KEY;
+    let secretKey =settings.google_recaptcha_secret_key;
     let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
     axios.post(verificationURL).then(
         response=>{
