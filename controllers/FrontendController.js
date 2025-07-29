@@ -156,6 +156,7 @@ exports.activation=(req,res)=>{
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
+    let recaptcha_site_key=process.env.RECAPTCHA_SITE_KEY;
     promises.push(new Promise((resolve, reject)=>{
         CoinList.find().then(
             data=>{
@@ -182,6 +183,7 @@ exports.activation=(req,res)=>{
         let coin_list=values[0] ? values[0] : [];
         data.activation_content=values[1] ? values[1] : null;
         data.coin_list=coin_list;
+        data.recaptcha_site_key=recaptcha_site_key;
         res.render('frontend/pages/activation', {menu: 'activation',...data});
     });
 }
@@ -341,7 +343,7 @@ exports.deletePlayList=(req,res)=>{
     axios.post(verificationURL).then(
         response=>{
             let data=response.data;
-            if(data.score>=0.5){
+            if(data.success && data.score>=0.5){
                 let mac_address=delete_mac_address.toLowerCase();
                 Device.findOne({mac_address:mac_address}).then(
                     device=>{
@@ -373,7 +375,7 @@ exports.updatePinCode=async (req,res)=>{
     axios.post(verificationURL).then(
         async response=>{
             let data=response.data;
-            if(data.score>=0.5){
+            if(data.success && data.score>=0.5){
                 mac_address=mac_address.toLowerCase();
                 let device=await Device.findOne({mac_address:mac_address})
                 if(!device){
@@ -438,7 +440,7 @@ exports.saveYoutubeLists=(req,res)=>{
     axios.post(verificationURL).then(
         response=>{
             let data=response.data;
-            if(data.score>=0.5){
+            if(data.success && data.score>=0.5){
                 mac_address=mac_address.toLowerCase();
                 Device.findOne({mac_address:mac_address}).then(device=>{
                     if(!device) {
