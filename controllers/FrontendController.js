@@ -156,8 +156,6 @@ exports.activation=(req,res)=>{
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
-    let recaptcha_site_key=settings.google_recaptcha_site_key;
-    console.log('RECAPTCHA_SITE_KEY from env:', recaptcha_site_key ? 'Found' : 'Missing');
     promises.push(new Promise((resolve, reject)=>{
         CoinList.find().then(
             data=>{
@@ -184,7 +182,6 @@ exports.activation=(req,res)=>{
         let coin_list=values[0] ? values[0] : [];
         data.activation_content=values[1] ? values[1] : null;
         data.coin_list=coin_list;
-        data.recaptcha_site_key=recaptcha_site_key;
         res.render('frontend/pages/activation', {menu: 'activation',...data});
     });
 }
@@ -202,7 +199,6 @@ exports.home=async(req,res)=>{
         data[key] = settings[key] ? settings[key] : ''
     })
 
-    let recaptcha_site_key=settings.google_recaptcha_site_key;
     let title = data.mylist_meta_title;
     let keyword = data.mylist_meta_keyword;
     let description = data.mylist_meta_content;
@@ -212,7 +208,7 @@ exports.home=async(req,res)=>{
 
     let mylist_content=await MyListContent.findOne();
 
-    res.render('frontend/pages/home', {menu: 'home',...meta_data,mylist_content:mylist_content,recaptcha_site_key:recaptcha_site_key});
+    res.render('frontend/pages/home', {menu: 'home',...meta_data,mylist_content:mylist_content});
 }
 
 exports.mylist=async(req,res)=>{
@@ -221,7 +217,6 @@ exports.mylist=async(req,res)=>{
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
-    let recaptcha_site_key=settings.google_recaptcha_site_key;
     let title = data.mylist_meta_title;
     let keyword = data.mylist_meta_keyword;
     let description = data.mylist_meta_content;
@@ -233,101 +228,89 @@ exports.mylist=async(req,res)=>{
 
     let host_name = req.hostname;
 
-    res.render('frontend/pages/mylist', {menu: 'mylist',...meta_data,mylist_content:mylist_content, host_name, recaptcha_site_key:recaptcha_site_key});
+    res.render('frontend/pages/mylist', {menu: 'mylist',...meta_data,mylist_content:mylist_content, host_name});
 }
 
 exports.savePlaylists=async(req,res)=>{
     let {
         urls,
-        mac_address,
-        recaptcha_token
+        mac_address
     }=req.body;
 
-    let secretKey =settings.google_recaptcha_secret_key;
-    let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
-
     try {
-        let response = await axios.post(verificationURL);
-        let data = response.data;
-        if(data.success && data.score>=0.5){
-            mac_address = mac_address.toLowerCase();
-            let device = await Device.findOne({mac_address:mac_address});
+        mac_address = mac_address.toLowerCase();
+        let device = await Device.findOne({mac_address:mac_address});
 
-            if(!device) {
-                req.flash('error','Sorry, Device Not Found');
-                return res.redirect('/mylist');
+        if(!device) {
+            req.flash('error','Sorry, Device Not Found');
+            return res.redirect('/mylist');
+        }
+
+        // If device is locked then don't allow to add playlists
+        if(device.lock==1){
+            req.flash('error','Sorry, your device is locked now. <br> Please contact support to unlock your device');
+            return res.redirect('/mylist');
+        }
+
+        // If device trial period is expired then don't allow to add playlists
+        if(device.is_trial==1 && device.expire_date<moment().format('YYYY-MM-DD')){
+            req.flash('error','Sorry, your device trial period is expired. Please activate your device to continue.');
+            return res.redirect('/mylist');
+        }
+
+        let device_id = device._id;
+
+        // Validate URLs before saving
+        const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+        const validUrls = [];
+        const invalidUrls = [];
+
+        urls.forEach(url => {
+            const trimmedUrl = url.trim();
+            if (trimmedUrl && urlRegex.test(trimmedUrl)) {
+                validUrls.push(trimmedUrl);
+            } else if (trimmedUrl) {
+                invalidUrls.push(trimmedUrl);
             }
+        });
 
-            // If device is locked then don't allow to add playlists
-            if(device.lock==1){
-                req.flash('error','Sorry, your device is locked now. <br> Please contact support to unlock your device');
-                return res.redirect('/mylist');
-            }
+        // If there are invalid URLs, show error and don't save
+        if (invalidUrls.length > 0) {
+            req.flash('error', `Invalid playlist URL format detected: ${invalidUrls.join(', ')}<br>Please enter valid playlist URLs starting with http:// or https:// (e.g., https://example.com/playlist.m3u)`);
+            return res.redirect('/mylist');
+        }
 
-            // If device trial period is expired then don't allow to add playlists
-            if(device.is_trial==1 && device.expire_date<moment().format('YYYY-MM-DD')){
-                req.flash('error','Sorry, your device trial period is expired. Please activate your device to continue.');
-                return res.redirect('/mylist');
-            }
+        // If no valid URLs provided
+        if (validUrls.length === 0) {
+            req.flash('error', 'No valid URLs provided. Please enter at least one valid playlist URL.');
+            return res.redirect('/mylist');
+        }
 
-            let device_id = device._id;
+        // Save playlists for both trial and activated devices
+        await PlayList.deleteMany({device_id:device_id});
+        let records = [];
+        validUrls.map(item=>{
+            records.push({
+                device_id:device_id,
+                url:item,
+                created_time:moment().format('Y-MM-DD')
+            })
+        });
 
-            // Validate URLs before saving
-            const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
-            const validUrls = [];
-            const invalidUrls = [];
+        await PlayList.insertMany(records);
 
-            urls.forEach(url => {
-                const trimmedUrl = url.trim();
-                if (trimmedUrl && urlRegex.test(trimmedUrl)) {
-                    validUrls.push(trimmedUrl);
-                } else if (trimmedUrl) {
-                    invalidUrls.push(trimmedUrl);
-                }
-            });
-
-            // If there are invalid URLs, show error and don't save
-            if (invalidUrls.length > 0) {
-                req.flash('error', `Invalid playlist URL format detected: ${invalidUrls.join(', ')}<br>Please enter valid playlist URLs starting with http:// or https:// (e.g., https://example.com/playlist.m3u)`);
-                return res.redirect('/mylist');
-            }
-
-            // If no valid URLs provided
-            if (validUrls.length === 0) {
-                req.flash('error', 'No valid URLs provided. Please enter at least one valid playlist URL.');
-                return res.redirect('/mylist');
-            }
-
-            // Save playlists for both trial and activated devices
-            await PlayList.deleteMany({device_id:device_id});
-            let records = [];
-            validUrls.map(item=>{
-                records.push({
-                    device_id:device_id,
-                    url:item,
-                    created_time:moment().format('Y-MM-DD')
-                })
-            });
-
-            await PlayList.insertMany(records);
-
-            // Check device activation status after saving playlists
-            if(device.is_trial == 1) {
-                // Device is in trial mode - show success with trial message
-                req.flash('success','The MAC address (' + mac_address + ') is currently in trial mode. You can activate it before the trial period ends on ' + device.expire_date + '. Your playlist has been uploaded successfully.');
-                return res.redirect('/activation');
-            } else if(device.is_trial == 0) {
-                // Device is not activated - redirect to activation
-                req.flash('error','Your app is not activated. You can activate it now.');
-                return res.redirect('/activation');
-            } else {
-                // Activated device (is_trial == 2)
-                req.flash('success','Playlists uploaded successfully');
-                return res.redirect('/mylist');
-            }
-
+        // Check device activation status after saving playlists
+        if(device.is_trial == 1) {
+            // Device is in trial mode - show success with trial message
+            req.flash('success','The MAC address (' + mac_address + ') is currently in trial mode. You can activate it before the trial period ends on ' + device.expire_date + '. Your playlist has been uploaded successfully.');
+            return res.redirect('/activation');
+        } else if(device.is_trial == 0) {
+            // Device is not activated - redirect to activation
+            req.flash('error','Your app is not activated. You can activate it now.');
+            return res.redirect('/activation');
         } else {
-            req.flash('error','Sorry, recaptcha is not correct<br>Please Finish Recaptcha first and try again');
+            // Activated device (is_trial == 2)
+            req.flash('success','Playlists uploaded successfully');
             return res.redirect('/mylist');
         }
 
@@ -338,79 +321,52 @@ exports.savePlaylists=async(req,res)=>{
     }
 }
 exports.deletePlayList=(req,res)=>{
-    let {delete_mac_address,recaptcha_token}=req.body;
-    let secretKey =settings.google_recaptcha_secret_key;
-    let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
-    axios.post(verificationURL).then(
-        response=>{
-            let data=response.data;
-            if(data.success && data.score>=0.5){
-                let mac_address=delete_mac_address.toLowerCase();
-                Device.findOne({mac_address:mac_address}).then(
-                    device=>{
-                        if(!device){
-                            req.flash('error','Sorry. Device does not exist');
-                            return res.redirect('/mylist');
-                        }
-                        PlayList.deleteMany({device_id:device._id}).then(()=>{
-                            req.flash('success','Your playlists removed successfully');
-                            return res.redirect('/mylist');
-                        })
-                    }
-                )
-            }else{
-                req.flash('error','Sorry, recaptcha is not correct');
+    let {delete_mac_address}=req.body;
+    let mac_address=delete_mac_address.toLowerCase();
+    Device.findOne({mac_address:mac_address}).then(
+        device=>{
+            if(!device){
+                req.flash('error','Sorry. Device does not exist');
                 return res.redirect('/mylist');
             }
-        },
-        error=>{
-            req.flash('error','Sorry, recaptcha is not correct');
-            return res.redirect('/mylist');
+            PlayList.deleteMany({device_id:device._id}).then(()=>{
+                req.flash('success','Your playlists removed successfully');
+                return res.redirect('/mylist');
+            })
         }
     )
 }
 exports.updatePinCode=async (req,res)=>{
-    let {recaptcha_token,mac_address,pin_code}=req.body;
-    let secretKey =settings.google_recaptcha_secret_key;
-    let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
-    axios.post(verificationURL).then(
-        async response=>{
-            let data=response.data;
-            if(data.success && data.score>=0.5){
-                mac_address=mac_address.toLowerCase();
-                let device=await Device.findOne({mac_address:mac_address})
-                if(!device){
-                    req.flash('error','Sorry, device does not exist');
-                    return res.redirect('/mylist');
-                }
-                if(device.lock==1){
-                    req.flash('error','Sorry, your device is locked now. <br> Please unlock your device in app settings');
-                    return res.redirect('/mylist');
-                }
-
-                // Check device activation status
-                if(device.is_trial==1){
-                    req.flash('success','This MAC address (' + mac_address + ') is in trial mode. You can activate it now before the trial ends on ' + device.expire_date + '.');
-                    return res.redirect('/activation');
-                } else if(device.is_trial==0){
-                    req.flash('error','Your app is not activated. You can activate it now.');
-                    return res.redirect('/activation');
-                }
-
-                device.parent_pin=pin_code || '0000';
-                await device.save();
-                req.flash('success','Parent pin code updated successfully');
-                return res.redirect('/mylist');
-            }else {
-                req.flash('error','Sorry, recaptcha is not correct<br>Please Finish Recaptcha first and try again');
-                return res.redirect('/mylist');
-            }
-        },
-        error=>{
-            req.flash('error','Sorry, recaptcha is not correct');
+    let {mac_address,pin_code}=req.body;
+    try {
+        mac_address=mac_address.toLowerCase();
+        let device=await Device.findOne({mac_address:mac_address})
+        if(!device){
+            req.flash('error','Sorry, device does not exist');
             return res.redirect('/mylist');
         }
-    )
+        if(device.lock==1){
+            req.flash('error','Sorry, your device is locked now. <br> Please unlock your device in app settings');
+            return res.redirect('/mylist');
+        }
+
+        // Check device activation status
+        if(device.is_trial==1){
+            req.flash('success','This MAC address (' + mac_address + ') is in trial mode. You can activate it now before the trial ends on ' + device.expire_date + '.');
+            return res.redirect('/activation');
+        } else if(device.is_trial==0){
+            req.flash('error','Your app is not activated. You can activate it now.');
+            return res.redirect('/activation');
+        }
+
+        device.parent_pin=pin_code || '0000';
+        await device.save();
+        req.flash('success','Parent pin code updated successfully');
+        return res.redirect('/mylist');
+    } catch(error) {
+        req.flash('error','Sorry, something went wrong. Please try again.');
+        return res.redirect('/mylist');
+    }
 }
 
 exports.showYoutubeList=async(req,res)=>{
@@ -419,7 +375,6 @@ exports.showYoutubeList=async(req,res)=>{
     keys.map(key => {
         data[key] = settings[key] ? settings[key] : ''
     })
-    let recaptcha_site_key=settings.google_recaptcha_site_key;
     let title = data.youtubelist_meta_title;
     let keyword = data.youtubelist_meta_keyword;
     let description = data.youtubelist_meta_content;
@@ -427,54 +382,36 @@ exports.showYoutubeList=async(req,res)=>{
         title: title, keyword: keyword, description: description
     }
     let mylist_content=await YoutubeListContent.findOne();
-    res.render('frontend/pages/youtube_list', {menu: 'youtube-list',...meta_data,mylist_content:mylist_content,recaptcha_site_key:recaptcha_site_key});
+    res.render('frontend/pages/youtube_list', {menu: 'youtube-list',...meta_data,mylist_content:mylist_content});
 }
 exports.saveYoutubeLists=(req,res)=>{
     let {
         names,
         playlist_ids,
-        mac_address,
-        recaptcha_token
+        mac_address
     }=req.body;
-    let secretKey =settings.google_recaptcha_secret_key;
-    let verificationURL = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + recaptcha_token + "&remoteip=" + req.headers['x-forwarded-for'];
-    axios.post(verificationURL).then(
-        response=>{
-            let data=response.data;
-            if(data.success && data.score>=0.5){
-                mac_address=mac_address.toLowerCase();
-                Device.findOne({mac_address:mac_address}).then(device=>{
-                    if(!device) {
-                        req.flash('error','Sorry, Device Not Found');
-                        return res.redirect('/mylist');
-                    }
-                    let device_id=device._id;
-                    YoutubeList.deleteMany({device_id:device_id}).then(()=>{
-                        let insert_records=[];
-                        playlist_ids.map((item,index)=>{
-                            insert_records.push({
-                                device_id:device_id,
-                                playlist_id:playlist_ids[index],
-                                playlist_name:names[index]
-                            })
-                        })
-                        YoutubeList.insertMany(insert_records).then(()=>{
-                            req.flash('success','Your youtube playlists saved successfully');
-                            return res.redirect('/youtube-list');
-                        })
-                    })
-                })
-            }
-            else{
-                req.flash('error','Sorry, recaptcha is not correct<br>Please Finish Recaptcha first and try again');
-                return res.redirect('/youtube-list');
-            }
-        },
-        error=>{
-            req.flash('error','Sorry, recaptcha is not correct');
-            return res.redirect('/youtube-list');
+    mac_address=mac_address.toLowerCase();
+    Device.findOne({mac_address:mac_address}).then(device=>{
+        if(!device) {
+            req.flash('error','Sorry, Device Not Found');
+            return res.redirect('/mylist');
         }
-    )
+        let device_id=device._id;
+        YoutubeList.deleteMany({device_id:device_id}).then(()=>{
+            let insert_records=[];
+            playlist_ids.map((item,index)=>{
+                insert_records.push({
+                    device_id:device_id,
+                    playlist_id:playlist_ids[index],
+                    playlist_name:names[index]
+                })
+            })
+            YoutubeList.insertMany(insert_records).then(()=>{
+                req.flash('success','Your youtube playlists saved successfully');
+                return res.redirect('/youtube-list');
+            })
+        })
+    })
 }
 
 

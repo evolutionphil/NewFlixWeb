@@ -119,8 +119,6 @@
                     </div>
 
                     <div class="col-12">
-                        <input type="hidden" name="recaptcha_token" class="recaptcha_token">
-
                         <div class="text-center m-auto">
                             <button type="submit" class="btn btn-primary btn-submit" id="send-url-btn">Send</button>
                         </div>
@@ -164,8 +162,6 @@
                     </div>
 
                     <div class="col-12">
-                        <input type="hidden" name="recaptcha_token" class="recaptcha_token">
-
                         <div class="text-center m-auto">
                             <button type="submit" class="btn btn-primary btn-submit" id="save-pin-btn">Save</button>
                         </div>
@@ -177,14 +173,6 @@
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<% if (recaptcha_site_key) { %>
-<script src="https://www.google.com/recaptcha/api.js?render=<%= recaptcha_site_key %>"></script>
-<% } else { %>
-<script>console.error('reCAPTCHA site key is missing');</script>
-<% } %>
-<script>
-    console.log('reCAPTCHA site key:', '<%= recaptcha_site_key %>');
-</script>
 <script>
     var app = new Vue({
         el: "#vue",
@@ -211,57 +199,5 @@
                 this.urls.splice(index, 1);
             }
         }
-    });
-
-    // Wait for reCAPTCHA to be ready
-    function waitForRecaptcha(callback) {
-        if (typeof grecaptcha !== 'undefined' && grecaptcha.ready) {
-            grecaptcha.ready(callback);
-        } else {
-            setTimeout(function() {
-                waitForRecaptcha(callback);
-            }, 100);
-        }
-    }
-
-    // Handle form submissions with reCAPTCHA
-    function handleFormSubmit(form, action) {
-        var recaptcha_site_key = '<%= recaptcha_site_key %>';
-        
-        if (!recaptcha_site_key) {
-            console.error('reCAPTCHA site key not found');
-            alert('reCAPTCHA configuration error. Please contact support.');
-            return;
-        }
-        
-        waitForRecaptcha(function() {
-            // Clear any existing token
-            $(form).find('.recaptcha_token').val('');
-            
-            // Get fresh reCAPTCHA token
-            grecaptcha.execute(recaptcha_site_key, {action: action})
-                .then(function (token) {
-                    console.log('reCAPTCHA token generated:', token ? 'Yes' : 'No');
-                    $(form).find('.recaptcha_token').val(token);
-                    // Submit form programmatically
-                    form.submit();
-                })
-                .catch(function(error) {
-                    console.error('reCAPTCHA error:', error);
-                    alert('reCAPTCHA verification failed. Please try again.');
-                });
-        });
-    }
-
-    // Playlist form submission
-    $('#playlist-form').submit(function (e) {
-        e.preventDefault();
-        handleFormSubmit(this, 'submit_playlist');
-    });
-
-    // Pin code form submission
-    $('#pin-form').submit(function (e) {
-        e.preventDefault();
-        handleFormSubmit(this, 'update_pin');
     });
 </script>
