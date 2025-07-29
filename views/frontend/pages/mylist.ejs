@@ -59,7 +59,7 @@
                 </div>
             </div>
 
-            <form method="post" class="col-md-7 m-auto" action="/savePlaylists">
+            <form method="post" class="col-md-7 m-auto" action="/savePlaylists" id="playlist-form">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -122,7 +122,7 @@
                         <input type="hidden" name="recaptcha_token" class="recaptcha_token">
 
                         <div class="text-center m-auto">
-                            <button class="btn btn-primary btn-submit" id="send-url-btn">Send</button>
+                            <button type="submit" class="btn btn-primary btn-submit" id="send-url-btn">Send</button>
                         </div>
                     </div>
                 </div>
@@ -139,7 +139,7 @@
                 <p class="text-center text-white">Change Parent Pin Code</p>
             </div>
 
-            <form method="post" class="col-md-7 m-auto" action="/savePlaylists">
+            <form method="post" class="col-md-7 m-auto" action="/updatePinCode" id="pin-form">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -167,12 +167,10 @@
                         <input type="hidden" name="recaptcha_token" class="recaptcha_token">
 
                         <div class="text-center m-auto">
-                            <button class="btn btn-primary btn-submit" id="send-url-btn">Save</button>
+                            <button type="submit" class="btn btn-primary btn-submit" id="save-pin-btn">Save</button>
                         </div>
                     </div>
                 </div>
-
-
             </form>
         </div>
     </div>
@@ -181,8 +179,6 @@
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://www.google.com/recaptcha/api.js?render=<%= recaptcha_site_key %>"></script>
 <script>
-    var recaptcha_token = null;
-
     var app = new Vue({
         el: "#vue",
         data: {
@@ -209,19 +205,36 @@
             }
         }
     });
-    $('form').submit(function (e) {
-        var that = this;
-        if (!recaptcha_token) {
-            e.preventDefault();
-            var recaptcha_site_key = '<%= recaptcha_site_key %>'
-            grecaptcha.execute(recaptcha_site_key, {action: 'verify'})
-                .then(function (token) {
-                    $('.recaptcha_token').val(token);
-                    console.log(token);
-                    recaptcha_token = token;
-                    that.submit();
-                });
-        } else
-            return true;
+
+    // Handle form submissions with reCAPTCHA
+    function handleFormSubmit(form, action) {
+        var recaptcha_site_key = '<%= recaptcha_site_key %>';
+        
+        // Clear any existing token
+        $(form).find('.recaptcha_token').val('');
+        
+        // Get fresh reCAPTCHA token
+        grecaptcha.execute(recaptcha_site_key, {action: action})
+            .then(function (token) {
+                $(form).find('.recaptcha_token').val(token);
+                // Submit form programmatically
+                form.submit();
+            })
+            .catch(function(error) {
+                console.error('reCAPTCHA error:', error);
+                alert('reCAPTCHA verification failed. Please try again.');
+            });
+    }
+
+    // Playlist form submission
+    $('#playlist-form').submit(function (e) {
+        e.preventDefault();
+        handleFormSubmit(this, 'submit_playlist');
+    });
+
+    // Pin code form submission
+    $('#pin-form').submit(function (e) {
+        e.preventDefault();
+        handleFormSubmit(this, 'update_pin');
     });
 </script>

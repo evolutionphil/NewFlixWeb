@@ -248,7 +248,7 @@ exports.savePlaylists=async(req,res)=>{
     try {
         let response = await axios.post(verificationURL);
         let data = response.data;
-        if(data.score>=0.5){
+        if(data.success && data.score>=0.5){
             mac_address = mac_address.toLowerCase();
             let device = await Device.findOne({mac_address:mac_address});
 
