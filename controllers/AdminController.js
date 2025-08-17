@@ -17,6 +17,7 @@ let CreditPackage=require('../models/CreditPackage.model');
 let Reseller=require('../models/Reseller.model');
 let ResellerActivity=require('../models/ResellerActivity.model');
 let CreditHistory=require('../models/CreditHistory.model');
+let BlockList=require('../models/BlockList.model');
 let saveFiles=require('../utils/save-file');
 const moment=require('moment');
 
@@ -2841,4 +2842,78 @@ exports.downloadCoinList=(req,res)=>{
             })
         })
     })
+}
+
+exports.investigateIp = async (req, res) => {
+    try {
+        const ip = req.params.ip;
+        
+        // Get all devices from this IP
+        const devices = await Device.find({ ip: ip }).sort({ created_time: -1 });
+        
+        // Get device IDs for further queries
+        const deviceIds = devices.map(device => device._id);
+        
+        // Get all transactions for devices from this IP
+        const transactions = await Transaction.find({ 
+            $or: [
+                { ip: ip },
+                { device_id: { $in: deviceIds } }
+            ]
+        }).sort({ pay_time: -1 });
+        
+        // Get all playlist URLs for devices from this IP
+        const playlists = await PlayList.find({ 
+            device_id: { $in: deviceIds } 
+        }).sort({ created_time: -1 });
+        
+        // Check if IP is blocked
+        const isBlocked = await BlockList.findOne({ 
+            type: 'ip_address', 
+            value: ip 
+        });
+        
+        // Count statistics
+        const stats = {
+            totalDevices: devices.length,
+            activatedDevices: devices.filter(d => d.is_trial === 2).length,
+            trialDevices: devices.filter(d => d.is_trial !== 2).length,
+            totalTransactions: transactions.length,
+            successfulTransactions: transactions.filter(t => t.status === 'success').length,
+            totalPlaylists: playlists.length,
+            isBlocked: isBlocked ? true : false
+        };
+        
+        // Group devices by app type
+        const devicesByType = {};
+        devices.forEach(device => {
+            const type = device.app_type || 'unknown';
+            if (!devicesByType[type]) {
+                devicesByType[type] = [];
+            }
+            devicesByType[type].push(device);
+        });
+        
+        // Calculate total transaction amount
+        const totalAmount = transactions
+            .filter(t => t.status === 'success' && t.amount)
+            .reduce((sum, t) => sum + (t.amount || 0), 0);
+        
+        const result = {
+            ip: ip,
+            stats: stats,
+            devices: devices,
+            devicesByType: devicesByType,
+            transactions: transactions,
+            playlists: playlists,
+            totalAmount: totalAmount.toFixed(2),
+            isBlocked: isBlocked
+        };
+        
+        res.json(result);
+        
+    } catch (error) {
+        console.error('Error investigating IP:', error);
+        res.status(500).json({ error: 'Failed to investigate IP address' });
+    }
 }

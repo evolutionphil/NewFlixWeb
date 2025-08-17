@@ -146,6 +146,7 @@ router.post('/playlist/getPlaylists',adminController.getPlaylists);
 
 router.get('/ip-summary',adminController.showIpSummary);
 router.post('/get-ip-summary',adminController.getIpSummary);
+router.get('/investigate-ip/:ip', AdminController.investigateIp);
 
 router.get('/playlist-summary',adminController.showPlaylistSummary);
 router.post('/get-playlist-summary',adminController.getPlaylistSummary);
