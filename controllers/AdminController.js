@@ -2239,13 +2239,18 @@ exports.getIpSummary = async (req, res) => {
         total_registered_devices: columnSortOrder === 'asc' ? 1 : -1
     }
 
+    if (columnName === 'activated_devices') sort_filter = {
+        activated_devices: columnSortOrder === 'asc' ? 1 : -1
+    }
+
     playlists = await Device.aggregate([
         {
             $match: filter_condition
         },
         {
             $project: {
-                ip: 1
+                ip: 1,
+                is_trial: 1
             }
         },
         {
@@ -2253,6 +2258,11 @@ exports.getIpSummary = async (req, res) => {
                 _id: '$ip',
                 total_registered_devices: {
                     $sum: 1
+                },
+                activated_devices: {
+                    $sum: {
+                        $cond: [{ $eq: ['$is_trial', 2] }, 1, 0]
+                    }
                 }
             }
         },
@@ -2303,6 +2313,7 @@ exports.getIpSummary = async (req, res) => {
             ip: item._id,
             is_blocked: item.is_blocked ? 'Yes' : 'No',
             total_registered_devices: item.total_registered_devices || 0,
+            activated_devices: item.activated_devices || 0,
             action: action
         }
 
