@@ -80,6 +80,7 @@
                         <tr>
                             <th>IP Address</th>
                             <th>Total Registered Devices</th>
+                            <th>Activated Devices</th>
                             <th>Is Blocked</th>
                         </tr>
                     </thead>
@@ -104,6 +105,7 @@
     var columns = [
         {data: 'ip', sortable: true},
         {data: 'total_registered_devices'},
+        {data: 'activated_devices'},
         {data: 'is_blocked'},
     ];
 
@@ -223,7 +225,21 @@
                     return json.data;
                 }
             },
-            'columns': columns
+            'columns': columns,
+            'columnDefs': [
+                {
+                    'targets': 0, // IP Address column
+                    'render': function(data, type, row) {
+                        return '<a href="/admin/playlist?filter_ip=' + data + '" target="_blank" style="color: #007bff; text-decoration: underline;">' + data + '</a>';
+                    }
+                },
+                {
+                    'targets': 2, // Activated Devices column
+                    'render': function(data, type, row) {
+                        return '<a href="/admin/playlist?filter_ip=' + row.ip + '&show_activated=true&show_trial=false" target="_blank" style="color: #28a745; text-decoration: underline;">' + data + '</a>';
+                    }
+                }
+            ]
         });
 
         // Add selection change event listener

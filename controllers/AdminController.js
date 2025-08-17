@@ -597,18 +597,18 @@ exports.saveLanguageWord=(req,res)=>{
 exports.translateWords = async (req, res) => {
     try {
         const { words, targetLanguageCode, languageId } = req.body;
-        
+
         const translations = [];
-        
+
         // Process each word - just copy English text for empty fields
         for (const word of words) {
             let translatedText = word.currentValue; // Use existing value if already filled
-            
+
             // Only fill empty fields with the English word as placeholder
             if (!word.currentValue || word.currentValue.trim() === '') {
                 translatedText = word.name; // Use English word as fallback
             }
-            
+
             translations.push({
                 wordId: word.id,
                 originalText: word.name,
@@ -637,9 +637,9 @@ exports.fillAllLanguagesWithEnglish = async (req, res) => {
         const languages = await Language.find();
         // Get all words
         const words = await Word.find();
-        
+
         let totalUpdated = 0;
-        
+
         // Process each language
         for (const language of languages) {
             // Get existing language words for this language
@@ -648,14 +648,14 @@ exports.fillAllLanguagesWithEnglish = async (req, res) => {
             existingLanguageWords.forEach(lw => {
                 existingWordMap[lw.word_id] = lw;
             });
-            
+
             // Create or update language words
             const languageWordsToInsert = [];
             const languageWordsToUpdate = [];
-            
+
             for (const word of words) {
                 const existingLangWord = existingWordMap[word._id];
-                
+
                 if (!existingLangWord) {
                     // Create new language word with English text
                     languageWordsToInsert.push({
@@ -673,21 +673,21 @@ exports.fillAllLanguagesWithEnglish = async (req, res) => {
                     totalUpdated++;
                 }
             }
-            
+
             // Insert new language words
             if (languageWordsToInsert.length > 0) {
                 await LanguageWord.insertMany(languageWordsToInsert);
             }
-            
+
             // Update existing empty language words
             for (const updateData of languageWordsToUpdate) {
                 await LanguageWord.findByIdAndUpdate(updateData._id, { value: updateData.value });
             }
         }
-        
+
         // Update settings cache
         getSettings();
-        
+
         res.json({
             status: 'success',
             message: `Successfully filled ${totalUpdated} empty language fields with English text across ${languages.length} languages.`,
@@ -867,7 +867,7 @@ exports.showAdverts=(req,res)=>{
             adverts=JSON.parse(data.value);
             for(let i=0;i<adverts.length;i++){
                 if(!adverts[i].url){
-                    adverts[i].url='https://dummyimage.com/1920x1080/fff/aaa';
+                    adverts[i].url='https://dummyimage.com/500x300/fff/aaa';
                 }
                 adverts[i].origin_url=adverts[i].url;
             }
@@ -1756,7 +1756,7 @@ exports.saveOpenSubtitlesSettings=(req,res)=>{
     let input=req.body;
     let keys=['opensubtitles_api_key','opensubtitles_username','opensubtitles_password'];
     let {api_key, username, password}=input;
-    
+
     let insert_data=[];
     insert_data.push({
         key:'opensubtitles_api_key',
@@ -1770,7 +1770,7 @@ exports.saveOpenSubtitlesSettings=(req,res)=>{
         key:'opensubtitles_password',
         value:password
     })
-    
+
     settings.opensubtitles_api_key=api_key;
     settings.opensubtitles_username=username;
     settings.opensubtitles_password=password;
@@ -1800,7 +1800,7 @@ exports.saveGoogleSettings=(req,res)=>{
     let input=req.body;
     let keys=['google_search_api_key','google_search_engine_id','google_maps_api_key','google_analytics_id','google_recaptcha_site_key','google_recaptcha_secret_key','google_oauth_client_id','google_oauth_client_secret'];
     let {search_api_key, search_engine_id, maps_api_key, analytics_id, recaptcha_site_key, recaptcha_secret_key, oauth_client_id, oauth_client_secret}=input;
-    
+
     let insert_data=[];
     insert_data.push({
         key:'google_search_api_key',
@@ -1834,7 +1834,7 @@ exports.saveGoogleSettings=(req,res)=>{
         key:'google_oauth_client_secret',
         value:oauth_client_secret
     })
-    
+
     settings.google_search_api_key=search_api_key;
     settings.google_search_engine_id=search_engine_id;
     settings.google_maps_api_key=maps_api_key;
@@ -1959,6 +1959,7 @@ exports.getPlaylists=async (req,res)=>{
         date_filter,
         date_from,
         date_to,
+        filter_ip, // Added for IP filtering
         draw,
         length,
         start,
@@ -2078,6 +2079,13 @@ exports.getPlaylists=async (req,res)=>{
         if(Object.keys(dateCondition).length > 0) {
             filter_condition = combineFilterCondition(filter_condition, dateCondition);
         }
+    }
+
+    // IP filtering
+    if(filter_ip && filter_ip !== '') {
+        filter_condition = combineFilterCondition(filter_condition, {
+            ip: filter_ip
+        });
     }
     let select_field={_id:1,mac_address:1,app_type:1,is_trial:1,created_time:1,expire_date:1, ip: 1};
     let totalRecords=await Device.countDocuments(filter_condition);
@@ -2495,6 +2503,7 @@ exports.getPlaylistSummary = async (req, res) => {
 //                 reject();
 //             }
 //             console.log('transactions getting finished', result.length);
+//             console.log("transactions=",result);
 //             resolve(result);
 //         })
 //     }))

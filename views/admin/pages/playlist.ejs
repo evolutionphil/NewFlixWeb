@@ -74,6 +74,14 @@
                                 <input type="date" id="date_to" class="form-control" style="background-color:#1e293b;color:#fff;border:1px solid #3e4651;">
                             </div>
                         </div>
+                        <h4 class="example-title"
+                            style="color:#fff;margin-top:20px"
+                        >
+                            Filter by IP Address
+                        </h4>
+                        <div class="form-group">
+                            <input type="text" id="filter_ip" class="form-control" style="background-color:#1e293b;color:#fff;border:1px solid #3e4651;" placeholder="Enter IP Address">
+                        </div>
                     </div>
                 </div>
                 <div class="list-wrapper">
@@ -148,7 +156,9 @@
 
     var columns = [
         {data: 'mac_address', sortable: false},
-        {data: 'ip', sortable: true},
+        {data: 'ip', sortable: true, render: function (data, type, row) {
+            return '<a href="#" onclick="filterByIp(\'' + data + '\'); return false;">' + data + '</a>';
+        }},
         {data: 'app_type', sortable: true},
         {data: 'created_time', sortable: true},
         {data: 'expire_date', sortable: true},
@@ -178,9 +188,10 @@
                     show_tvos:$('#show_tvOS').prop('checked'),
                     show_activated:$('#show_activated').prop('checked'),
                     show_trial:$('#show_trial').prop('checked'),
-                    date_filter:$('#date_filter').val(),
-                    date_from:$('#date_from').val(),
-                    date_to:$('#date_to').val()
+                    date_filter: $('#date_filter').val(),
+                    date_from: $('#date_from').val(),
+                    date_to: $('#date_to').val(),
+                    filter_ip: $('#filter_ip').val()
                 },
                 "dataSrc": function ( json ) {
                     return json.data;
@@ -276,4 +287,13 @@
             updateDataTable();
         }
     })
+
+    $('#filter_ip').on('keyup', function() {
+        updateDataTable();
+    });
+
+    function filterByIp(ip_address) {
+        $('#filter_ip').val(ip_address);
+        updateDataTable();
+    }
 </script>
