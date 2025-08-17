@@ -1,34 +1,73 @@
 const mongoose = require('mongoose');
+
 const Schema = mongoose.Schema;
+
 let Transaction = new Schema({
-    device_id:{
-        type:String
+    device_id: {
+        type: String,
+        required: true
     },
-    payment_id:{
-        type:String
+    mac_address: {
+        type: String,
+        required: false
     },
-    payment_type:String,
-    amount:{
-        type:Number
+    app_type: {
+        type: String,
+        required: false
     },
-    status:{
-        type:String,
-        default:'pending'
+    payment_type: {
+        type: String,
+        required: true
     },
-    email:String,
-    pay_time:{
-        type:String
+    status: {
+        type: String,
+        required: true
     },
-    status_url:{
-        type:String,
-        default:''
+    email: {
+        type: String,
+        required: false
     },
-    created_time:String,
-    ip:String,
-    user_agent:String,
-    mac_address:String,
-    app_type:String
+    pay_time: {
+        type: String,
+        required: false
+    },
+    amount: {
+        type: Number,
+        required: false
+    },
+    ip: {
+        type: String,
+        required: false
+    },
+    user_agent: {
+        type: String,
+        required: false
+    },
+    payment_id: {
+        type: String,
+        required: false
+    },
+    created_time: {
+        type: String,
+        required: false
+    },
+    // Admin activation tracking fields
+    admin_activation_ip: {
+        type: String,
+        required: false
+    },
+    admin_activation_domain: {
+        type: String,
+        required: false
+    },
+    admin_activation_url: {
+        type: String,
+        required: false
+    },
+    admin_activation_source: {
+        type: String,
+        required: false
+    }
 });
-Transaction.index({pay_time:1})
-Transaction.index({pay_time:-1})
+
 module.exports = mongoose.model('Transaction', Transaction);

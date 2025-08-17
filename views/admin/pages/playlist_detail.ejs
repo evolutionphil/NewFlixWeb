@@ -64,6 +64,12 @@
                 <span class="detail-item-content">
                     <%transactions.map(transaction=>{%>
                         $<%=transaction.amount%> <%=transaction.status%><br>
+                        Payment ID: <%=transaction.payment_id%><br>
+                        IP: <%=transaction.ip%><br>
+                        User Agent: <%=transaction.user_agent%><br>
+                        Admin IP: <%=transaction.admin_activation_ip || 'N/A'%> <br>
+                        Admin Domain: <%=transaction.admin_activation_domain || 'N/A'%> <br>
+                        Admin Source: <%=transaction.admin_activation_source || 'N/A'%> <br>
                     <%})%>
                 </span>
             </div>
@@ -182,9 +188,3 @@
         }
     </script>
 </div>
-
-
-
-
-
-

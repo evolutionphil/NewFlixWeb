@@ -115,13 +115,16 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th>Mac Address</th>
-                                    <th>App Type</th>
-                                    <th>Pay Amount</th>
-                                    <th>Payment Time</th>
-                                    <th>Payment Type</th>
-                                    <th>IP Address</th>
+                                    <th>IP</th>
                                     <th>User Agent</th>
+                                    <th>App Type</th>
+                                    <th>Pay Time</th>
+                                    <th>Payment Type</th>
+                                    <th>Amount</th>
                                     <th>Payment ID</th>
+                                    <th>Admin IP</th>
+                                    <th>Admin Domain</th>
+                                    <th>Admin Source</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -149,13 +152,16 @@
     })
     var columns=[
         { data: 'mac_address',sortable:true },
-        { data: 'app_type',sortable:true },
-        { data:'amount',sortable:true},
-        { data: 'pay_time',sortable:true},
-        { data: 'payment_type',sortable:true},
         { data: 'ip',sortable:true},
         { data: 'user_agent',sortable:true},
-        { data: 'payment_id',sortable:true}
+        { data: 'app_type',sortable:true },
+        { data: 'pay_time',sortable:true},
+        { data: 'payment_type',sortable:true},
+        { data:'amount',sortable:true},
+        { data: 'payment_id',sortable:true},
+        { "data": "admin_activation_ip" },
+        { "data": "admin_activation_domain" },
+        { "data": "admin_activation_source" }
     ]
 
     $(document).ready(function () {

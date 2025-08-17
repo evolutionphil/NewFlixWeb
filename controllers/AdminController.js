@@ -458,7 +458,7 @@ exports.getTransactions=async (req,res)=>{
 
 
     let result_data=transactions;
-    let obj_keys=['mac_address','ip','user_agent','app_type','pay_time','payment_type','amount','payment_id'];
+    let obj_keys=['mac_address','ip','user_agent','app_type','pay_time','payment_type','amount','payment_id','admin_activation_ip','admin_activation_domain','admin_activation_url','admin_activation_source'];
     for(let i=0;i<result_data.length;i++){
         let item=result_data[i];
         obj_keys.map(key=>{
@@ -2835,6 +2835,13 @@ exports.activatePlaylist=async(req,res)=>{
     Device.findById(playlist_id).then(async play_list=>{
         let today=moment();
         let user=await req.user;
+        
+        // Extract activation source details
+        const adminActivationIp = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null);
+        const adminActivationDomain = req.get('Host') || '';
+        const adminActivationUrl = req.protocol + '://' + req.get('Host') + req.originalUrl;
+        const adminActivationSource = req.get('Referer') ? 'web_admin_panel' : 'api_direct';
+        
         if(action==1){
             let current_expire_date=today.format('Y-MM-DD');
             if(play_list.expire_date>current_expire_date)
@@ -2844,7 +2851,7 @@ exports.activatePlaylist=async(req,res)=>{
             expire_date=moment(current_expire_date).add(5000,'M').format('Y-MM-DD');
             play_list.expire_date=expire_date;
             
-            // Log admin activation
+            // Log admin activation with enhanced tracking
             let adminActivationLog = new Transaction({
                 device_id: playlist_id,
                 mac_address: play_list.mac_address,
@@ -2854,9 +2861,13 @@ exports.activatePlaylist=async(req,res)=>{
                 email: user.email,
                 pay_time: moment().utc().format('Y-MM-DD HH:mm:ss'),
                 amount: 0,
-                ip: req.ip || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null),
+                ip: adminActivationIp,
                 user_agent: req.get('User-Agent') || '',
-                created_time: moment().utc().format('Y-MM-DD HH:mm:ss')
+                created_time: moment().utc().format('Y-MM-DD HH:mm:ss'),
+                admin_activation_ip: adminActivationIp,
+                admin_activation_domain: adminActivationDomain,
+                admin_activation_url: adminActivationUrl,
+                admin_activation_source: adminActivationSource
             });
             
             await adminActivationLog.save();
@@ -2873,7 +2884,7 @@ exports.activatePlaylist=async(req,res)=>{
             play_list.expire_date=expire_date;
             play_list.is_trial=1;
             
-            // Log admin deactivation
+            // Log admin deactivation with enhanced tracking
             let adminDeactivationLog = new Transaction({
                 device_id: playlist_id,
                 mac_address: play_list.mac_address,
@@ -2883,9 +2894,13 @@ exports.activatePlaylist=async(req,res)=>{
                 email: user.email,
                 pay_time: moment().utc().format('Y-MM-DD HH:mm:ss'),
                 amount: 0,
-                ip: req.ip || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null),
+                ip: adminActivationIp,
                 user_agent: req.get('User-Agent') || '',
-                created_time: moment().utc().format('Y-MM-DD HH:mm:ss')
+                created_time: moment().utc().format('Y-MM-DD HH:mm:ss'),
+                admin_activation_ip: adminActivationIp,
+                admin_activation_domain: adminActivationDomain,
+                admin_activation_url: adminActivationUrl,
+                admin_activation_source: adminActivationSource
             });
             
             await adminDeactivationLog.save();
