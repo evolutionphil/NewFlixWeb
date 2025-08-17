@@ -3,8 +3,7 @@ const Schema = mongoose.Schema;
 let DeviceModel = new Schema({
     mac_address:{
         type:String,
-        unique: true,
-        index: true
+        unique: true
     },
     app_device_id:{
         type: String,
@@ -16,7 +15,6 @@ let DeviceModel = new Schema({
     is_trial:{
         type:Number,
         default:0, // 0=> Trial, 1=>Activated
-        index: true
     },
     ip:String,
     pin_code:{
@@ -27,23 +25,12 @@ let DeviceModel = new Schema({
         type:Number,
         default:0
     },
-    created_time:{
-        type:String,
-        index: true
-    },
-    app_type:{
-        type:String,
-        index: true
-    },
+    created_time:String,
+    app_type:String,
     from_old_quzu:{  // 0=>not from old quzu, 1=>inserted from old quzu, 2=>updated from old quzu
         type:Number,
         default:0
     },
     version:String
 });
-
-// Add compound indexes for better query performance
-DeviceModel.index({ mac_address: 1, is_trial: 1 });
-DeviceModel.index({ created_time: 1, is_trial: 1 });
-
 module.exports = DeviceModel;
