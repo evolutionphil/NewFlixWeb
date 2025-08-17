@@ -1961,6 +1961,7 @@ exports.getPlaylists=async (req,res)=>{
         date_from,
         date_to,
         filter_ip, // Added for IP filtering
+        show_no_transactions, // Added for no transactions filter
         draw,
         length,
         start,
@@ -2088,6 +2089,27 @@ exports.getPlaylists=async (req,res)=>{
             ip: filter_ip
         });
     }
+
+    // Filter for devices without transactions
+    if(show_no_transactions === 'true') {
+        // Get all device IDs that have transactions
+        const devicesWithTransactions = await Transaction.distinct('device_id');
+        
+        // Convert string IDs to ObjectIds for comparison
+        const deviceObjectIds = devicesWithTransactions.map(id => {
+            try {
+                return new ObjectID(id);
+            } catch (e) {
+                return null;
+            }
+        }).filter(id => id !== null);
+        
+        // Exclude devices that have transactions
+        filter_condition = combineFilterCondition(filter_condition, {
+            _id: { $nin: deviceObjectIds }
+        });
+    }
+
     let select_field={_id:1,mac_address:1,app_type:1,is_trial:1,created_time:1,expire_date:1, ip: 1};
     let totalRecords=await Device.countDocuments(filter_condition);
     let playlists,sort_filter={};
@@ -2100,17 +2122,73 @@ exports.getPlaylists=async (req,res)=>{
     if(columnName=='created_time')
         sort_filter={created_time:columnSortOrder==='asc' ? 1 : -1}
     playlists=await Device.find(filter_condition,select_field).skip(start).limit(length).sort(sort_filter);
+    
+    // Get activation source for each device
+    let deviceIds = playlists.map(p => p._id.toString());
+    let activationTransactions = await Transaction.find({
+        device_id: { $in: deviceIds },
+        $or: [
+            { payment_type: 'admin_activation' },
+            { payment_type: 'paypal' },
+            { payment_type: 'stripe' },
+            { payment_type: 'mollie' },
+            { payment_type: 'crypto' }
+        ],
+        status: 'success'
+    }).sort({ pay_time: -1 });
+    
+    // Create a map of device to latest activation transaction
+    let activationMap = {};
+    activationTransactions.forEach(trans => {
+        if (!activationMap[trans.device_id]) {
+            activationMap[trans.device_id] = trans;
+        }
+    });
+    
     let result_data=[];
     playlists.map(item=>{
         let action='<button class="btn btn-sm btn-danger btn-deactivate" data-playlist_id="'+item._id+'">Deactivate</button>';
         if(item.is_trial!=2){
             action='<button class="btn btn-sm btn-success btn-activate" data-playlist_id="'+item.id+'">Activate</button>';
         }
+        
+        // Determine activation source
+        let activation_source = 'Unknown';
+        if(item.is_trial !== 2) {
+            activation_source = 'Not Activated';
+        } else {
+            let lastActivation = activationMap[item._id.toString()];
+            if(lastActivation) {
+                switch(lastActivation.payment_type) {
+                    case 'admin_activation':
+                        activation_source = `Admin (${lastActivation.email})`;
+                        break;
+                    case 'paypal':
+                        activation_source = 'PayPal Payment';
+                        break;
+                    case 'stripe':
+                        activation_source = 'Stripe Payment';
+                        break;
+                    case 'mollie':
+                        activation_source = 'Mollie Payment';
+                        break;
+                    case 'crypto':
+                        activation_source = 'Crypto Payment';
+                        break;
+                    default:
+                        activation_source = 'Payment';
+                }
+            } else {
+                activation_source = 'Legacy Activation';
+            }
+        }
+        
         let temp={
             _id:item._id,
             mac_address:item.mac_address,
             ip:item.ip || '',
             app_type:item.app_type ? item.app_type: '',
+            activation_source:activation_source,
             expire_date:item.expire_date,
             created_time:item.created_time,
             action:action
@@ -2759,6 +2837,7 @@ exports.activatePlaylist=async(req,res)=>{
     let {playlist_id,action}=req.body;
     Device.findById(playlist_id).then(async play_list=>{
         let today=moment();
+        let user=await req.user;
         if(action==1){
             let current_expire_date=today.format('Y-MM-DD');
             if(play_list.expire_date>current_expire_date)
@@ -2767,6 +2846,24 @@ exports.activatePlaylist=async(req,res)=>{
             play_list.is_trial=2;
             expire_date=moment(current_expire_date).add(5000,'M').format('Y-MM-DD');
             play_list.expire_date=expire_date;
+            
+            // Log admin activation
+            let adminActivationLog = new Transaction({
+                device_id: playlist_id,
+                mac_address: play_list.mac_address,
+                app_type: play_list.app_type,
+                payment_type: 'admin_activation',
+                status: 'success',
+                email: user.email,
+                pay_time: moment().utc().format('Y-MM-DD HH:mm:ss'),
+                amount: 0,
+                ip: req.ip || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null),
+                user_agent: req.get('User-Agent') || '',
+                created_time: moment().utc().format('Y-MM-DD HH:mm:ss')
+            });
+            
+            await adminActivationLog.save();
+            
             play_list.save().then(()=>{
                 res.json({
                     status: 'success',
@@ -2778,6 +2875,24 @@ exports.activatePlaylist=async(req,res)=>{
             let expire_date=today.subtract(1,'d').format('Y-MM-DD');
             play_list.expire_date=expire_date;
             play_list.is_trial=1;
+            
+            // Log admin deactivation
+            let adminDeactivationLog = new Transaction({
+                device_id: playlist_id,
+                mac_address: play_list.mac_address,
+                app_type: play_list.app_type,
+                payment_type: 'admin_deactivation',
+                status: 'success',
+                email: user.email,
+                pay_time: moment().utc().format('Y-MM-DD HH:mm:ss'),
+                amount: 0,
+                ip: req.ip || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null),
+                user_agent: req.get('User-Agent') || '',
+                created_time: moment().utc().format('Y-MM-DD HH:mm:ss')
+            });
+            
+            await adminDeactivationLog.save();
+            
             play_list.save().then(()=>{
                 res.json({
                     status: 'success',

@@ -82,6 +82,26 @@
                         <div class="form-group">
                             <input type="text" id="filter_ip" class="form-control" style="background-color:#1e293b;color:#fff;border:1px solid #3e4651;" placeholder="Enter IP Address">
                         </div>
+                        <div class="form-group col-md-6">
+                            <label>Date Filter:</label>
+                            <select class="form-control" id="date_filter">
+                                <option value="all">All Dates</option>
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="last_week">Last 7 Days</option>
+                                <option value="last_month">Last 30 Days</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>&nbsp;</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="show_no_transactions" value="true">
+                                <label class="form-check-label" for="show_no_transactions">
+                                    Show devices without transactions only
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="list-wrapper">
@@ -89,11 +109,12 @@
                 <table class="table" id="item-list-table">
                     <thead class="table-dark">
                         <tr>
-                            <th>Mac Address</th>
+                            <th>MAC Address</th>
                             <th>IP Address</th>
                             <th>App Type</th>
-                            <th>Created Time</th>
+                            <th>Activation Source</th>
                             <th>Expire Date</th>
+                            <th>Created Time</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -160,8 +181,9 @@
             return '<a href="#" onclick="filterByIp(\'' + data + '\'); return false;">' + data + '</a>';
         }},
         {data: 'app_type', sortable: true},
-        {data: 'created_time', sortable: true},
+        { data: "activation_source" },
         {data: 'expire_date', sortable: true},
+        {data: 'created_time', sortable: true},
         {data: 'action', sortable: false}
     ];
 
@@ -179,19 +201,25 @@
             pageLength: 50,
             'ajax':{
                 url:site_url+"/admin/playlist/getPlaylists",
-                data:{
-                    show_samsung:$('#show_samsung').prop('checked'),
-                    show_android:$('#show_android').prop('checked'),
-                    show_lg:$('#show_lg').prop('checked'),
-                    show_ios:$('#show_ios').prop('checked'),
-                    show_macos:$('#show_macOS').prop('checked'),
-                    show_tvos:$('#show_tvOS').prop('checked'),
-                    show_activated:$('#show_activated').prop('checked'),
-                    show_trial:$('#show_trial').prop('checked'),
-                    date_filter: $('#date_filter').val(),
-                    date_from: $('#date_from').val(),
-                    date_to: $('#date_to').val(),
-                    filter_ip: $('#filter_ip').val()
+                data:function(data){
+                    data.show_samsung = $('#show_samsung').prop('checked');
+                    data.show_android = $('#show_android').prop('checked');
+                    data.show_lg = $('#show_lg').prop('checked');
+                    data.show_ios = $('#show_ios').prop('checked');
+                    data.show_macos = $('#show_macOS').prop('checked');
+                    data.show_tvos = $('#show_tvOS').prop('checked');
+                    data.show_activated = $('#show_activated').prop('checked');
+                    data.show_trial = $('#show_trial').prop('checked');
+                    let date_filter = $('#date_filter').val();
+                    let date_from = $('#date_from').val();
+                    let date_to = $('#date_to').val();
+                    let filter_ip = $('#filter_ip').val();
+                    let show_no_transactions = $('#show_no_transactions').is(':checked');
+                    data.date_filter = date_filter;
+                    data.date_from = date_from;
+                    data.date_to = date_to;
+                    data.filter_ip = filter_ip;
+                    data.show_no_transactions = show_no_transactions;
                 },
                 "dataSrc": function ( json ) {
                     return json.data;
@@ -296,4 +324,12 @@
         $('#filter_ip').val(ip_address);
         updateDataTable();
     }
+
+    $('#filter_ip').change(function(){
+                    oTable.draw();
+                });
+
+                $('#show_no_transactions').change(function(){
+                    oTable.draw();
+                });
 </script>
