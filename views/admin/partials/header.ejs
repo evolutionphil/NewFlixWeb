@@ -274,6 +274,12 @@
                             <span class="site-menu-title">Transactions</span>
                         </a>
                     </li>
+                    <li class="site-menu-item <%= menu=='old-devices' ? 'active' : ''%>">
+                        <a href="/admin/old-devices">
+                            <i class="site-menu-icon fas fa-trash-alt" aria-hidden="true"></i>
+                            <span class="site-menu-title">Remove Old Devices</span>
+                        </a>
+                    </li>
                     <li class="site-menu-item <%= menu=='reseller-activations' ? 'active' : ''%>">
                         <a href="/admin/reseller-activations">
                             <i class="site-menu-icon fas fa-tasks" ></i>
@@ -327,6 +333,12 @@
                         <a href="/admin/showOtherAppIpAddress">
                             <i class="site-menu-icon fas fa-tasks" aria-hidden="true"></i>
                             <span class="site-menu-title">Other App Server IPS</span>
+                        </a>
+                    </li>
+                    <li class="site-menu-item <%= menu=='monitoring' ? 'active' : ''%>">
+                        <a href="/admin/monitoring">
+                            <i class="site-menu-icon fas fa-chart-line" aria-hidden="true"></i>
+                            <span class="site-menu-title">Monitoring</span>
                         </a>
                     </li>
 
