@@ -3044,3 +3044,125 @@ exports.investigateIp = async (req, res) => {
         res.status(500).json({ error: 'Failed to investigate IP address' });
     }
 }
+
+exports.showOldDevices = (req, res) => {
+    res.render('admin/pages/old-devices', {
+        menu: 'old-devices', 
+        layout: './admin/partials/layout'
+    })
+}
+
+exports.getOldDevices = async (req, res) => {
+    let {
+        show_samsung,
+        show_ios,
+        show_android,
+        show_lg,
+        show_tvos,
+        show_macos,
+        draw,
+        length,
+        start,
+        order,
+        columns,
+        search,
+    } = req.body;
+
+    start = parseInt(start);
+    length = parseInt(length);
+    let columnIndex = order[0].column;
+    let columnName = columns[columnIndex].data;
+    let columnSortOrder = order[0].dir;
+    let searchValue = search.value;
+
+    // Calculate date 2 months ago
+    const twoMonthsAgo = moment().subtract(2, 'months').format('Y-MM-DD HH:mm');
+
+    let filter_condition = {
+        is_trial: { $ne: 2 }, // Only trial devices (not activated)
+        created_time: { $lt: twoMonthsAgo } // Older than 2 months
+    };
+
+    if (show_android === false || show_android === 'false')
+        filter_condition = combineFilterCondition(filter_condition, { app_type: { $ne: 'android' } });
+    if (show_samsung === false || show_samsung === 'false')
+        filter_condition = combineFilterCondition(filter_condition, { app_type: { $ne: 'samsung' } });
+    if (show_ios === false || show_ios === 'false')
+        filter_condition = combineFilterCondition(filter_condition, { app_type: { $ne: 'iOS' } });
+    if (show_lg === false || show_lg === 'false')
+        filter_condition = combineFilterCondition(filter_condition, { app_type: { $ne: 'lg' } });
+    if (!show_tvos || show_tvos === 'false')
+        filter_condition = combineFilterCondition(filter_condition, { app_type: { $ne: 'tvOS' } });
+    if (!show_macos || show_macos === 'false') {
+        filter_condition = combineFilterCondition(filter_condition, { app_type: { $ne: 'macOS' } });
+    }
+
+    if (searchValue != null && searchValue !== '') {
+        filter_condition = combineFilterCondition(filter_condition, {
+            $or: [
+                { mac_address: { $regex: searchValue, $options: "i" } },
+                { ip: { $regex: searchValue, $options: "i" } },
+                { app_type: { $regex: searchValue, $options: "i" } }
+            ]
+        });
+    }
+
+    let select_field = { _id: 1, mac_address: 1, app_type: 1, is_trial: 1, created_time: 1, expire_date: 1, ip: 1 };
+    let totalRecords = await Device.countDocuments(filter_condition);
+    let sort_filter = {};
+
+    if (columnName === 'app_type')
+        sort_filter = { app_type: columnSortOrder === 'asc' ? 1 : -1 }
+    if (columnName === 'ip')
+        sort_filter = { ip: columnSortOrder === 'asc' ? 1 : -1 }
+    if (columnName === 'expire_date')
+        sort_filter = { expire_date: columnSortOrder === 'asc' ? 1 : -1 }
+    if (columnName === 'created_time')
+        sort_filter = { created_time: columnSortOrder === 'asc' ? 1 : -1 }
+
+    let devices = await Device.find(filter_condition, select_field).skip(start).limit(length).sort(sort_filter);
+
+    let result_data = [];
+    devices.map(item => {
+        let temp = {
+            _id: item._id,
+            mac_address: item.mac_address,
+            ip: item.ip || '',
+            app_type: item.app_type ? item.app_type : '',
+            expire_date: item.expire_date,
+            created_time: item.created_time,
+            days_old: moment().diff(moment(item.created_time), 'days')
+        }
+        result_data.push(temp);
+    })
+
+    res.json({ data: result_data, draw: draw, iTotalDisplayRecords: totalRecords, iTotalRecords: totalRecords });
+}
+
+exports.removeOldDevices = async (req, res) => {
+    try {
+        const { device_ids } = req.body;
+        
+        if (!device_ids || device_ids.length === 0) {
+            return res.json({ status: 'error', message: 'No devices selected' });
+        }
+
+        // Remove devices
+        await Device.deleteMany({ _id: { $in: device_ids } });
+        
+        // Remove associated playlists
+        await PlayList.deleteMany({ device_id: { $in: device_ids } });
+        
+        // Remove associated transactions (optional - you might want to keep for audit)
+        // await Transaction.deleteMany({ device_id: { $in: device_ids } });
+
+        res.json({ 
+            status: 'success', 
+            message: `Successfully removed ${device_ids.length} old devices and their associated data` 
+        });
+        
+    } catch (error) {
+        console.error('Error removing old devices:', error);
+        res.json({ status: 'error', message: 'Failed to remove devices' });
+    }
+}

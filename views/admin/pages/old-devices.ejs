@@ -1,0 +1,210 @@
+
+<div class="page-header">
+    <h1 class="page-title">Old Devices Management</h1>
+    <div class="page-header-actions">
+        <button type="button" class="btn btn-sm btn-icon btn-primary btn-round" onclick="updateDataTable()">
+            <i class="icon wb-refresh" aria-hidden="true"></i>
+        </button>
+    </div>
+</div>
+
+<div class="page-content">
+    <div class="panel">
+        <div class="panel-body">
+            <div class="row mb-20">
+                <div class="col-md-12">
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This page shows trial devices that are older than 2 months. 
+                        These devices have never been activated and can be safely removed to clean up the database.
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-20">
+                <div class="col-md-12">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-success" onclick="selectAll()">Select All</button>
+                        <button type="button" class="btn btn-secondary" onclick="deselectAll()">Deselect All</button>
+                        <button type="button" class="btn btn-danger" onclick="removeSelectedDevices()">Remove Selected</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Filters -->
+            <div class="row mb-20">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="form-label">Platform Filters:</label>
+                        <div class="checkbox-list">
+                            <label class="checkbox checkbox-primary">
+                                <input type="checkbox" id="show_android" checked>
+                                <span class="checkbox-indicator"></span>
+                                Android
+                            </label>
+                            <label class="checkbox checkbox-primary">
+                                <input type="checkbox" id="show_samsung" checked>
+                                <span class="checkbox-indicator"></span>
+                                Samsung
+                            </label>
+                            <label class="checkbox checkbox-primary">
+                                <input type="checkbox" id="show_ios" checked>
+                                <span class="checkbox-indicator"></span>
+                                iOS
+                            </label>
+                            <label class="checkbox checkbox-primary">
+                                <input type="checkbox" id="show_lg" checked>
+                                <span class="checkbox-indicator"></span>
+                                LG
+                            </label>
+                            <label class="checkbox checkbox-primary">
+                                <input type="checkbox" id="show_tvos" checked>
+                                <span class="checkbox-indicator"></span>
+                                tvOS
+                            </label>
+                            <label class="checkbox checkbox-primary">
+                                <input type="checkbox" id="show_macos" checked>
+                                <span class="checkbox-indicator"></span>
+                                macOS
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-striped" id="old-devices-table">
+                <thead>
+                    <tr>
+                        <th width="5%">
+                            <input type="checkbox" id="select-all-checkbox">
+                        </th>
+                        <th>MAC Address</th>
+                        <th>IP Address</th>
+                        <th>Platform</th>
+                        <th>Created Date</th>
+                        <th>Days Old</th>
+                        <th>Expire Date</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let dataTable;
+
+    function updateDataTable() {
+        if (dataTable) {
+            dataTable.destroy();
+        }
+        
+        dataTable = $('#old-devices-table').DataTable({
+            'processing': true,
+            'serverSide': true,
+            'serverMethod': 'post',
+            "order": [[ 4, "asc" ]], // Sort by created date ascending (oldest first)
+            autoFill: false,
+            pageLength: 50,
+            'ajax': {
+                'url': '/admin/get-old-devices',
+                'type': 'POST',
+                'data': function(d) {
+                    d.show_android = $('#show_android').is(':checked');
+                    d.show_samsung = $('#show_samsung').is(':checked');
+                    d.show_ios = $('#show_ios').is(':checked');
+                    d.show_lg = $('#show_lg').is(':checked');
+                    d.show_tvos = $('#show_tvos').is(':checked');
+                    d.show_macos = $('#show_macos').is(':checked');
+                }
+            },
+            'columns': [
+                { 
+                    data: '_id',
+                    render: function(data, type, row) {
+                        return '<input type="checkbox" class="device-checkbox" value="' + data + '">';
+                    },
+                    orderable: false
+                },
+                { data: 'mac_address' },
+                { data: 'ip' },
+                { data: 'app_type' },
+                { data: 'created_time' },
+                { 
+                    data: 'days_old',
+                    render: function(data, type, row) {
+                        return data + ' days';
+                    }
+                },
+                { data: 'expire_date' }
+            ],
+            'language': {
+                'emptyTable': 'No old trial devices found'
+            }
+        });
+    }
+
+    function selectAll() {
+        $('.device-checkbox').prop('checked', true);
+        $('#select-all-checkbox').prop('checked', true);
+    }
+
+    function deselectAll() {
+        $('.device-checkbox').prop('checked', false);
+        $('#select-all-checkbox').prop('checked', false);
+    }
+
+    function removeSelectedDevices() {
+        let selectedDevices = [];
+        $('.device-checkbox:checked').each(function() {
+            selectedDevices.push($(this).val());
+        });
+
+        if (selectedDevices.length === 0) {
+            alert('Please select devices to remove');
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to remove ${selectedDevices.length} old devices? This action cannot be undone.`)) {
+            return;
+        }
+
+        $.ajax({
+            url: '/admin/remove-old-devices',
+            method: 'POST',
+            data: {
+                device_ids: selectedDevices
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    alert(response.message);
+                    updateDataTable();
+                    deselectAll();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('An error occurred while removing devices');
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        updateDataTable();
+
+        // Update table when platform filters change
+        $('#show_android, #show_samsung, #show_ios, #show_lg, #show_tvos, #show_macos').change(function() {
+            updateDataTable();
+        });
+
+        // Handle select all checkbox
+        $('#select-all-checkbox').change(function() {
+            if ($(this).is(':checked')) {
+                selectAll();
+            } else {
+                deselectAll();
+            }
+        });
+    });
+</script>

@@ -151,6 +151,10 @@ router.get('/investigate-ip/:ip', adminController.investigateIp);
 router.get('/playlist-summary',adminController.showPlaylistSummary);
 router.post('/get-playlist-summary',adminController.getPlaylistSummary);
 
+router.get('/old-devices',adminController.showOldDevices);
+router.post('/get-old-devices',adminController.getOldDevices);
+router.post('/remove-old-devices',adminController.removeOldDevices);
+
 router.post('/playlist/activate',adminController.activatePlaylist);
 router.get('/playlist/:id',adminController.showDeviceDetail);
 router.post('/logout', (req, res) => {
