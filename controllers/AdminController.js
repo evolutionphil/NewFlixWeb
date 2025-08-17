@@ -2095,18 +2095,15 @@ exports.getPlaylists=async (req,res)=>{
         // Get all device IDs that have transactions
         const devicesWithTransactions = await Transaction.distinct('device_id');
         
-        // Convert string IDs to ObjectIds for comparison
-        const deviceObjectIds = devicesWithTransactions.map(id => {
-            try {
-                return new ObjectID(id);
-            } catch (e) {
-                return null;
-            }
-        }).filter(id => id !== null);
-        
-        // Exclude devices that have transactions
+        // Exclude devices that have transactions (device_id in Transaction is stored as string)
         filter_condition = combineFilterCondition(filter_condition, {
-            _id: { $nin: deviceObjectIds }
+            _id: { $nin: devicesWithTransactions.map(id => {
+                try {
+                    return typeof id === 'string' ? new ObjectID(id) : id;
+                } catch (e) {
+                    return null;
+                }
+            }).filter(id => id !== null) }
         });
     }
 

@@ -214,7 +214,7 @@
                     let date_from = $('#date_from').val();
                     let date_to = $('#date_to').val();
                     let filter_ip = $('#filter_ip').val();
-                    let show_no_transactions = $('#show_no_transactions').is(':checked');
+                    let show_no_transactions = $('#show_no_transactions').is(':checked') ? 'true' : 'false';
                     data.date_filter = date_filter;
                     data.date_from = date_from;
                     data.date_to = date_to;
