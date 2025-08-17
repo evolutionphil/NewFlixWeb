@@ -106,7 +106,6 @@
             "order": [[ 4, "asc" ]], // Sort by created date ascending (oldest first)
             autoFill: false,
             pageLength: 50,
-            "lengthMenu": [[10, 25, 50, 100, 500, 1000, 5000, 10000], [10, 25, 50, 100, 500, 1000, 5000, 10000]],
             'ajax': {
                 'url': '/admin/get-old-devices',
                 'type': 'POST',
@@ -148,11 +147,13 @@
     function selectAll() {
         $('.device-checkbox').prop('checked', true);
         $('#select-all-checkbox').prop('checked', true);
+        $('#select-all-checkbox').prop('indeterminate', false);
     }
 
     function deselectAll() {
         $('.device-checkbox').prop('checked', false);
         $('#select-all-checkbox').prop('checked', false);
+        $('#select-all-checkbox').prop('indeterminate', false);
     }
 
     function removeSelectedDevices() {
@@ -199,12 +200,28 @@
             updateDataTable();
         });
 
-        // Handle select all checkbox
+        // Handle select all checkbox in header
         $('#select-all-checkbox').change(function() {
             if ($(this).is(':checked')) {
                 selectAll();
             } else {
                 deselectAll();
+            }
+        });
+
+        // Update header checkbox when individual checkboxes change
+        $(document).on('change', '.device-checkbox', function() {
+            var totalCheckboxes = $('.device-checkbox').length;
+            var checkedCheckboxes = $('.device-checkbox:checked').length;
+            
+            if (checkedCheckboxes === 0) {
+                $('#select-all-checkbox').prop('indeterminate', false);
+                $('#select-all-checkbox').prop('checked', false);
+            } else if (checkedCheckboxes === totalCheckboxes) {
+                $('#select-all-checkbox').prop('indeterminate', false);
+                $('#select-all-checkbox').prop('checked', true);
+            } else {
+                $('#select-all-checkbox').prop('indeterminate', true);
             }
         });
     });
