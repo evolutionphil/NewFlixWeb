@@ -68,7 +68,15 @@
                     </div>
 
                     <div class="position-relative" id="payment-items-container">
-                        
+                        <%if(show_paypal==1){%>
+                        <div id="paypal-element"></div>
+                        <%if(show_coin==1 || show_mollie==1 || show_stripe==1){%>
+                            <div id="" class="position-relative or-container">
+                                <div class="or-border"></div>
+                                <div class="or text-center">Or</div>
+                            </div>
+                        <%}%>
+                        <%}%>
                         <%if(show_stripe==1){%>
                         <div class="payment-item-container">
                             <div class="payment-method-item-container">
@@ -192,7 +200,7 @@
 </section>
 
 
-
+<script src="https://js.stripe.com/v3/"></script>
 <script>
     let stripe;
     try{
@@ -248,7 +256,102 @@
     })
 
 
-    // PayPal SDK has been removed
+    // paypal.Buttons({
+    //     // onInit: function(data, actions) {
+    //     //     actions.disable();
+    //     //
+    //     // },
+    //     onClick: function(data,actions) {
+    //         if(!(mac_valid)){
+    //             // showErrorMessage('error','Sorry, Mac address or Email is not valid');
+    //             checkMacEmailValid('mac-address');
+    //             return actions.reject();
+    //         }
+    //         if(!email_valid){
+    //             checkMacEmailValid('email');
+    //             return actions.reject();
+    //         }
+    //         let mac_address=$('#mac-address').val();
+    //         return fetch("/checkMacValid",{
+    //             method:'post',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body:JSON.stringify({
+    //                 mac_address:mac_address
+    //             }),
+    //         }).then(function (res) {
+    //             return res.json();
+    //         }).then(data=>{
+    //             console.log(data);
+    //             if (data.status=='success') {
+    //                 return actions.resolve();
+    //             } else {
+    //                 showErrorMessage('error',data.msg);
+    //                 return actions.reject();
+    //             }
+    //         })
+    //     },
+    //     createOrder: function(data, actions) {
+    //         let mac_address=$('#mac-address').val();
+    //         return fetch(`/paypal/order/create`, {
+    //             method: 'post',
+    //             dataType:'json',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body:JSON.stringify({
+    //                 mac_address:mac_address
+    //             })
+    //         }).then(function(res) {
+    //             if(res.ok){
+    //                 return res.json();
+    //             }else{
+    //                 $('#error-message').text(res.msg).slideDown();
+    //             }
+    //         }).then(
+    //             function(orderData) {
+    //                 console.log(orderData);
+    //                 return orderData.id;
+    //             },
+    //             function (error) {
+    //                 console.log(error);
+    //             }
+    //         );
+    //     },
+    //     // Finalize the transaction
+    //     onApprove: function(data, actions) {
+    //         return fetch(`/paypal/order/capture/${data.orderID}`, {
+    //             method: 'post',
+    //             headers: {
+    //                 'Accept': 'application/json',
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body:JSON.stringify({
+    //                 mac_address:$('#mac-address').val(),
+    //                 email:$('#email').val()
+    //             })
+    //         }).then(function(res) {
+    //             console.log(res);
+    //             return res.json();
+    //         }).then(function(orderData) {
+    //             console.log(orderData);
+    //             var errorDetail = Array.isArray(orderData.details) && orderData.details[0];
+    //             if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
+    //                 return actions.restart();
+    //             }
+    //             if (errorDetail) {
+    //                 var msg = 'Sorry, your transaction could not be processed.';
+    //                 if (errorDetail.description) msg += '\n\n' + errorDetail.description;
+    //                 if (orderData.debug_id) msg += ' (' + orderData.debug_id + ')';
+    //                 showErrorMessage('error', msg);
+    //                 return;
+    //             }
+    //             showErrorMessage('success','Thanks for your payment, your mac address activated now.')
+    //             // alert('Transaction completed by ' + orderData.payer.name.given_name);
+    //         });
+    //     }
+    // }).render('#paypal-element');
     $('#submit-btn').click(function (e) {
         console.log('i ve clicked');
         e.preventDefault();

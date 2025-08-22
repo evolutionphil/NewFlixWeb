@@ -640,7 +640,6 @@ exports.saveActivation=async (req,res)=>{
                             success_url: 'https://'+host_name+'/stripe/success?transaction_id='+transaction._id+'&session_id={CHECKOUT_SESSION_ID}',
                             cancel_url: 'https://'+host_name+'/stripe/cancel?transaction_id='+transaction._id,
                             payment_method_types: ['card'],
-                            locale: 'en',
                             line_items: [
                                 {
                                     name:'Flix IPTV Activation, mac_address:'+mac_address,
