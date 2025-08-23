@@ -448,7 +448,7 @@ exports.createPaypalOrder=(req,res)=>{
     authorization = buff.toString('base64');
     authorization="Basic "+authorization;
     let price=data.price ? data.price : 7.49;
-    let description=`Flix TV Activation, Price=${price}, Mac Address=${mac_address}`
+    let description=`FLIX APP Activation, Price=${price}, Mac Address=${mac_address}`
     axios(
         {
             method:'post',
@@ -617,7 +617,7 @@ exports.saveActivation=async (req,res)=>{
                             currency2: coin_type,
                             amount: parseFloat(price),
                             buyer_email: email,
-                            item_name:'Flix IPTV Activation, Mac Address:'+mac_address,
+                            item_name:'FLIX APP Activation, Mac Address:'+mac_address,
                             success_url: success_url,
                             cancel_url: cancel_url,
                             ipn_url:"https://"+host_name+'/api/crypto-ipn-url/'+transaction_record._id
@@ -642,7 +642,7 @@ exports.saveActivation=async (req,res)=>{
                             payment_method_types: ['card'],
                             line_items: [
                                 {
-                                    name:'Flix IPTV Activation, mac_address:'+mac_address,
+                                    name:'FLIX APP Activation, mac_address:'+mac_address,
                                     quantity:1,
                                     amount:price*100,
                                     currency:'EUR'
