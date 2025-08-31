@@ -512,22 +512,23 @@
                 requestShipping: false, // We don't need shipping for digital goods
             });
 
-            const elements = stripe.elements();
-            prButton = elements.create('paymentRequestButton', {
-                paymentRequest: paymentRequest,
-                style: {
-                    paymentRequestButton: {
-                        theme: 'dark',
-                        height: '50px',
-                        type: 'buy', // Shows "Buy with Apple Pay" instead of generic button
-                    },
-                },
-            });
-
-            // Check if Apple Pay/Google Pay is available
+            // Check if Apple Pay/Google Pay is available FIRST
             paymentRequest.canMakePayment().then(function(result) {
                 console.log('Payment methods available:', result);
                 if (result) {
+                    // Only create and mount the button if payment methods are available
+                    const elements = stripe.elements();
+                    prButton = elements.create('paymentRequestButton', {
+                        paymentRequest: paymentRequest,
+                        style: {
+                            paymentRequestButton: {
+                                theme: 'dark',
+                                height: '50px',
+                                type: 'buy', // Shows "Buy with Apple Pay" instead of generic button
+                            },
+                        },
+                    });
+
                     document.getElementById('payment-request-container').style.display = 'block';
                     document.getElementById('apple-pay-or-container').style.display = 'block';
                     prButton.mount('#payment-request-button');
