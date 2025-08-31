@@ -72,7 +72,9 @@
                         <div id="payment-request-container" style="display: none;" class="payment-item-container">
                             <div class="payment-method-item-container">
                                 <div class="text-center">
-                                    <div id="payment-request-button"></div>
+                                    <h5 class="text-white mb-3">Express Checkout</h5>
+                                    <div id="payment-request-button" style="width: 100%; min-height: 50px;"></div>
+                                    <small class="text-muted mt-2 d-block">Pay securely with Apple Pay or Google Pay</small>
                                 </div>
                             </div>
                         </div>
@@ -488,117 +490,115 @@
     let prButton = null;
 
     if (stripe) {
-        paymentRequest = stripe.paymentRequest({
-            country: 'DE',
-            currency: 'eur',
-            total: {
-                label: 'FLIX APP Activation',
-                amount: parseFloat('<%=price%>') * 100, // Convert to cents
-            },
-            requestPayerName: true,
-            requestPayerEmail: true,
-        });
+        // Wait for DOM to be ready and validation to pass before initializing
+        function initializePaymentRequest() {
+            if (!mac_valid || !email_valid) {
+                return; // Don't initialize until validation passes
+            }
 
-        const elements = stripe.elements();
-        prButton = elements.create('paymentRequestButton', {
-            paymentRequest: paymentRequest,
-            style: {
-                paymentRequestButton: {
-                    theme: 'dark',
-                    height: '40px',
+            paymentRequest = stripe.paymentRequest({
+                country: 'DE', // Germany
+                currency: 'eur',
+                total: {
+                    label: 'FLIX APP Activation',
+                    amount: Math.round(parseFloat('<%=price%>') * 100), // Convert to cents, ensure integer
                 },
-            },
-        });
+                requestPayerName: true,
+                requestPayerEmail: true,
+                requestShipping: false, // We don't need shipping for digital goods
+            });
 
-        // Check if Apple Pay/Google Pay is available
-        paymentRequest.canMakePayment().then(function(result) {
-            if (result) {
-                document.getElementById('payment-request-container').style.display = 'block';
-                prButton.mount('#payment-request-button');
-                console.log('Apple Pay/Google Pay available and mounted');
-            } else {
-                console.log('Apple Pay/Google Pay not available on this device');
-            }
-        }).catch(function(error) {
-            console.log('Error checking payment availability:', error);
-        });
-
-        // Handle payment
-        paymentRequest.on('paymentmethod', async function(ev) {
-            // Validate mac address and email before payment
-            let current_mac = $('#mac-address').val();
-            let current_email = $('#email').val();
-            
-            if (!current_mac || current_mac.length !== 17) {
-                showErrorMessage('error', 'Please enter a valid Mac address');
-                ev.complete('fail');
-                return;
-            }
-            
-            if (!current_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(current_email)) {
-                showErrorMessage('error', 'Please enter a valid email address');
-                ev.complete('fail');
-                return;
-            }
-
-            // Check if mac address is valid for activation
-            try {
-                const macCheckResponse = await fetch('/checkMacValid', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
+            const elements = stripe.elements();
+            prButton = elements.create('paymentRequestButton', {
+                paymentRequest: paymentRequest,
+                style: {
+                    paymentRequestButton: {
+                        theme: 'dark',
+                        height: '50px',
+                        type: 'buy', // Shows "Buy with Apple Pay" instead of generic button
                     },
-                    body: JSON.stringify({
-                        mac_address: current_mac
-                    }),
-                });
-                
-                const macCheckData = await macCheckResponse.json();
-                
-                if (macCheckData.status !== 'success') {
-                    showErrorMessage('error', macCheckData.msg);
-                    ev.complete('fail');
-                    return;
-                }
-            } catch (error) {
-                console.error('Mac validation error:', error);
-                showErrorMessage('error', 'Unable to validate Mac address. Please try again.');
-                ev.complete('fail');
-                return;
-            }
+                },
+            });
 
-            // Create payment intent on your server
-            try {
-                const response = await fetch('/saveActivation', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        mac_address: current_mac,
-                        email: current_email,
-                        payment_type: 'stripe',
-                        payment_method_id: ev.paymentMethod.id
-                    }),
-                });
-
-                const paymentData = await response.json();
-
-                if (paymentData.status === 'success') {
-                    ev.complete('success');
-                    showErrorMessage('success', paymentData.message || 'Payment successful! Your device is now activated.');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
+            // Check if Apple Pay/Google Pay is available
+            paymentRequest.canMakePayment().then(function(result) {
+                console.log('Payment methods available:', result);
+                if (result) {
+                    document.getElementById('payment-request-container').style.display = 'block';
+                    prButton.mount('#payment-request-button');
+                    console.log('Apple Pay/Google Pay button mounted successfully');
+                    
+                    // Add some debug info
+                    if (result.applePay) {
+                        console.log('Apple Pay is available');
+                    }
+                    if (result.googlePay) {
+                        console.log('Google Pay is available');
+                    }
                 } else {
-                    ev.complete('fail');
-                    showErrorMessage('error', paymentData.message || 'Payment failed. Please try again.');
+                    console.log('No payment methods available');
+                    document.getElementById('payment-request-container').style.display = 'none';
                 }
-            } catch (error) {
-                console.error('Payment error:', error);
-                ev.complete('fail');
-                showErrorMessage('error', 'Payment failed. Please try again.');
+            }).catch(function(error) {
+                console.error('Error checking payment availability:', error);
+                document.getElementById('payment-request-container').style.display = 'none';
+            });
+
+            // Handle payment
+            paymentRequest.on('paymentmethod', async function(ev) {
+                console.log('Payment method selected:', ev.paymentMethod);
+                
+                // Get current values
+                let current_mac = $('#mac-address').val();
+                let current_email = $('#email').val();
+                
+                // Create payment intent on your server
+                try {
+                    const response = await fetch('/saveActivation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            mac_address: current_mac,
+                            email: current_email,
+                            payment_type: 'stripe',
+                            payment_method_id: ev.paymentMethod.id
+                        }),
+                    });
+
+                    const paymentData = await response.json();
+
+                    if (paymentData.status === 'success') {
+                        ev.complete('success');
+                        showErrorMessage('success', paymentData.message || 'Payment successful! Your device is now activated.');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        ev.complete('fail');
+                        showErrorMessage('error', paymentData.message || 'Payment failed. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Payment error:', error);
+                    ev.complete('fail');
+                    showErrorMessage('error', 'Payment failed. Please try again.');
+                }
+            });
+        }
+
+        // Initialize payment request when both mac and email are valid
+        function checkAndInitializePayment() {
+            if (mac_valid && email_valid) {
+                initializePaymentRequest();
             }
-        });
+        }
+
+        // Override the existing validation functions to also initialize payment request
+        const originalCheckMacEmailValid = window.checkMacEmailValid;
+        window.checkMacEmailValid = function(key) {
+            originalCheckMacEmailValid(key);
+            setTimeout(checkAndInitializePayment, 100); // Small delay to ensure validation completes
+        };
     }
 </script>
