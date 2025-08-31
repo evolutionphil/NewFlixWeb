@@ -41,6 +41,7 @@
     left: 50%;
     transform: translateX(-50%);
     width: fit-content;
+    z-index: 10;
 }
 .payment-method-item-container[data-payment_type="card"] {
     border-bottom: none;
