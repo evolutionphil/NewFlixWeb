@@ -473,4 +473,82 @@
             })
         }
     }
+
+    // Apple Pay / Google Pay Setup using Stripe Payment Request
+    let paymentRequest = null;
+    let prButton = null;
+
+    if (stripe) {
+        paymentRequest = stripe.paymentRequest({
+            country: 'DE',
+            currency: 'eur',
+            total: {
+                label: 'FLIX APP Activation',
+                amount: parseFloat('<%=price%>') * 100, // Convert to cents
+            },
+            requestPayerName: true,
+            requestPayerEmail: true,
+        });
+
+        const elements = stripe.elements();
+        prButton = elements.create('paymentRequestButton', {
+            paymentRequest: paymentRequest,
+            style: {
+                paymentRequestButton: {
+                    theme: 'dark',
+                    height: '40px',
+                },
+            },
+        });
+
+        // Check if Apple Pay/Google Pay is available
+        paymentRequest.canMakePayment().then(function(result) {
+            if (result) {
+                document.getElementById('payment-request-container').style.display = 'block';
+                prButton.mount('#payment-request-button');
+            }
+        });
+
+        // Handle payment
+        paymentRequest.on('paymentmethod', async function(ev) {
+            if (!mac_valid || !email_valid) {
+                showErrorMessage('error', 'Please enter valid Mac address and email');
+                ev.complete('fail');
+                return;
+            }
+
+            // Create payment intent on your server
+            try {
+                const response = await fetch('/saveActivation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mac_address: $('#mac-address').val(),
+                        email: $('#email').val(),
+                        payment_type: 'stripe',
+                        payment_method_id: ev.paymentMethod.id
+                    }),
+                });
+
+                const paymentData = await response.json();
+
+                if (paymentData.status === 'success') {
+                    ev.complete('success');
+                    showErrorMessage('success', 'Payment successful! Your device is now activated.');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    ev.complete('fail');
+                    showErrorMessage('error', 'Payment failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                ev.complete('fail');
+                showErrorMessage('error', 'Payment failed. Please try again.');
+            }
+        });
+    }
 </script>
