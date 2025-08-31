@@ -521,10 +521,7 @@
                 return;
             }
             
-            console.log('Initializing payment request - mac_valid:', mac_valid, 'email_valid:', email_valid);
-            
             if (!mac_valid || !email_valid) {
-                console.log('Validation not complete, skipping payment request initialization');
                 return;
             }
 
@@ -544,7 +541,6 @@
 
             // Check if Apple Pay/Google Pay is available FIRST
             paymentRequest.canMakePayment().then(function(result) {
-                console.log('Payment methods available:', result);
                 if (result) {
                     // Only create and mount the button if payment methods are available
                     const elements = stripe.elements();
@@ -562,30 +558,17 @@
                     document.getElementById('payment-request-container').style.display = 'block';
                     document.getElementById('apple-pay-or-container').style.display = 'block';
                     prButton.mount('#payment-request-button');
-                    console.log('Apple Pay/Google Pay button mounted successfully');
-                    
-                    // Add some debug info
-                    if (result.applePay) {
-                        console.log('Apple Pay is available');
-                    }
-                    if (result.googlePay) {
-                        console.log('Google Pay is available');
-                    }
                 } else {
-                    console.log('No payment methods available');
                     document.getElementById('payment-request-container').style.display = 'none';
                     document.getElementById('apple-pay-or-container').style.display = 'none';
                 }
             }).catch(function(error) {
-                console.error('Error checking payment availability:', error);
                 document.getElementById('payment-request-container').style.display = 'none';
                 document.getElementById('apple-pay-or-container').style.display = 'none';
             });
 
             // Handle payment
             paymentRequest.on('paymentmethod', async function(ev) {
-                console.log('Payment method selected:', ev.paymentMethod);
-                
                 // Get current values
                 let current_mac = $('#mac-address').val();
                 let current_email = $('#email').val();
@@ -618,7 +601,6 @@
                         showErrorMessage('error', paymentData.message || 'Payment failed. Please try again.');
                     }
                 } catch (error) {
-                    console.error('Payment error:', error);
                     ev.complete('fail');
                     showErrorMessage('error', 'Payment failed. Please try again.');
                 }
