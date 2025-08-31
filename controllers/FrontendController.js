@@ -636,32 +636,103 @@ exports.saveActivation=async (req,res)=>{
                         let stripe1=stripe(stripe_secret_key, {
                             apiVersion: '2020-08-27',
                         });
-                        stripe1.checkout.sessions.create({
-                            success_url: 'https://'+host_name+'/stripe/success?transaction_id='+transaction._id+'&session_id={CHECKOUT_SESSION_ID}',
-                            cancel_url: 'https://'+host_name+'/stripe/cancel?transaction_id='+transaction._id,
-                            payment_method_types: ['card'],
-                            line_items: [
-                                {
-                                    name:'FLIX APP Activation, mac_address:'+mac_address,
-                                    quantity:1,
-                                    amount:price*100,
-                                    currency:'EUR'
+                        
+                        // Check if this is Apple Pay/Google Pay (payment_method_id provided)
+                        if(input.payment_method_id) {
+                            // Handle Apple Pay/Google Pay
+                            try {
+                                const paymentIntent = await stripe1.paymentIntents.create({
+                                    amount: price * 100, // Convert to cents
+                                    currency: 'eur',
+                                    payment_method: input.payment_method_id,
+                                    confirm: true,
+                                    description: `FLIX APP Activation, mac_address:${mac_address}`,
+                                    metadata: {
+                                        mac_address: mac_address,
+                                        email: email,
+                                        transaction_id: transaction._id.toString()
+                                    }
+                                });
+
+                                if (paymentIntent.status === 'succeeded') {
+                                    // Payment successful - activate device
+                                    let expire_date = moment().add(5000, 'M').format('Y-MM-DD');
+                                    
+                                    await Device.findByIdAndUpdate(device._id, {
+                                        expire_date: expire_date,
+                                        is_trial: 2,
+                                    });
+
+                                    transaction.status = 'success';
+                                    transaction.payment_id = paymentIntent.id;
+                                    transaction.ip = getClientIPAddress(req);
+                                    transaction.user_agent = getUserAgent(req.useragent);
+                                    await transaction.save();
+
+                                    // Send confirmation email
+                                    let transaction_time = moment().utc().format('MMMM DD, YYYY hh:mm A');
+                                    let json_body = {
+                                        mac_address: mac_address,
+                                        transaction_id: transaction._id,
+                                        email: email,
+                                        price: price,
+                                        transaction_time: transaction_time,
+                                        expire_date: expire_date,
+                                        payment_type: 'stripe'
+                                    };
+                                    
+                                    try {
+                                        await sendEmail(json_body);
+                                    } catch (e) {
+                                        console.log("Apple Pay send receipt email issue", e);
+                                    }
+
+                                    return res.json({
+                                        status: 'success',
+                                        message: 'Payment successful! Your device is now activated.'
+                                    });
+                                } else {
+                                    return res.json({
+                                        status: 'error',
+                                        message: 'Payment failed. Please try again.'
+                                    });
                                 }
-                            ],
-                        }).then(
-                            response=>{
+                            } catch (error) {
+                                console.log("Apple Pay/Google Pay error:", error);
                                 return res.json({
-                                    status:'success',
-                                    session_id:response.id
-                                })
-                            },
-                            error=>{
-                                console.log("stripe error", error);
-                                return res.json({
-                                    status:'error'
-                                })
+                                    status: 'error',
+                                    message: 'Payment failed. Please try again.'
+                                });
                             }
-                        );
+                        } else {
+                            // Regular Stripe checkout session
+                            stripe1.checkout.sessions.create({
+                                success_url: 'https://'+host_name+'/stripe/success?transaction_id='+transaction._id+'&session_id={CHECKOUT_SESSION_ID}',
+                                cancel_url: 'https://'+host_name+'/stripe/cancel?transaction_id='+transaction._id,
+                                payment_method_types: ['card'],
+                                line_items: [
+                                    {
+                                        name:'FLIX APP Activation, mac_address:'+mac_address,
+                                        quantity:1,
+                                        amount:price*100,
+                                        currency:'EUR'
+                                    }
+                                ],
+                            }).then(
+                                response=>{
+                                    return res.json({
+                                        status:'success',
+                                        session_id:response.id
+                                    })
+                                },
+                                error=>{
+                                    console.log("stripe error", error);
+                                    return res.json({
+                                        status:'error'
+                                    })
+                                }
+                            );
+                        }
                         break;
                 }
             }

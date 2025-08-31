@@ -515,13 +515,54 @@
             if (result) {
                 document.getElementById('payment-request-container').style.display = 'block';
                 prButton.mount('#payment-request-button');
+                console.log('Apple Pay/Google Pay available and mounted');
+            } else {
+                console.log('Apple Pay/Google Pay not available on this device');
             }
+        }).catch(function(error) {
+            console.log('Error checking payment availability:', error);
         });
 
         // Handle payment
         paymentRequest.on('paymentmethod', async function(ev) {
-            if (!mac_valid || !email_valid) {
-                showErrorMessage('error', 'Please enter valid Mac address and email');
+            // Validate mac address and email before payment
+            let current_mac = $('#mac-address').val();
+            let current_email = $('#email').val();
+            
+            if (!current_mac || current_mac.length !== 17) {
+                showErrorMessage('error', 'Please enter a valid Mac address');
+                ev.complete('fail');
+                return;
+            }
+            
+            if (!current_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(current_email)) {
+                showErrorMessage('error', 'Please enter a valid email address');
+                ev.complete('fail');
+                return;
+            }
+
+            // Check if mac address is valid for activation
+            try {
+                const macCheckResponse = await fetch('/checkMacValid', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mac_address: current_mac
+                    }),
+                });
+                
+                const macCheckData = await macCheckResponse.json();
+                
+                if (macCheckData.status !== 'success') {
+                    showErrorMessage('error', macCheckData.msg);
+                    ev.complete('fail');
+                    return;
+                }
+            } catch (error) {
+                console.error('Mac validation error:', error);
+                showErrorMessage('error', 'Unable to validate Mac address. Please try again.');
                 ev.complete('fail');
                 return;
             }
@@ -534,8 +575,8 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        mac_address: $('#mac-address').val(),
-                        email: $('#email').val(),
+                        mac_address: current_mac,
+                        email: current_email,
                         payment_type: 'stripe',
                         payment_method_id: ev.paymentMethod.id
                     }),
@@ -545,13 +586,13 @@
 
                 if (paymentData.status === 'success') {
                     ev.complete('success');
-                    showErrorMessage('success', 'Payment successful! Your device is now activated.');
+                    showErrorMessage('success', paymentData.message || 'Payment successful! Your device is now activated.');
                     setTimeout(() => {
                         window.location.reload();
                     }, 2000);
                 } else {
                     ev.complete('fail');
-                    showErrorMessage('error', 'Payment failed. Please try again.');
+                    showErrorMessage('error', paymentData.message || 'Payment failed. Please try again.');
                 }
             } catch (error) {
                 console.error('Payment error:', error);
