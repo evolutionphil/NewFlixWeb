@@ -68,6 +68,15 @@
                     </div>
 
                     <div class="position-relative" id="payment-items-container">
+                        <!-- Apple Pay / Google Pay Button -->
+                        <div id="payment-request-container" style="display: none;" class="payment-item-container">
+                            <div class="payment-method-item-container">
+                                <div class="text-center">
+                                    <div id="payment-request-button"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <%if(show_paypal==1){%>
                         <div id="paypal-element"></div>
                         <%if(show_coin==1 || show_mollie==1 || show_stripe==1){%>
