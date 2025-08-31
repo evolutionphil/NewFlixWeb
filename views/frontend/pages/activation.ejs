@@ -262,12 +262,24 @@
     })
     $('#email').change(function () {
         checkMacEmailValid('email');
+        // Check and initialize payment request after email validation
+        setTimeout(() => {
+            if (mac_valid && email_valid && stripe && !paymentRequestInitialized) {
+                initializePaymentRequest();
+            }
+        }, 100);
     })
     $('#mac-address').keyup(function () {
         checkMacEmailValid('mac-address');
     })
     $('#email').keyup(function () {
         checkMacEmailValid('email');
+        // Check and initialize payment request after email validation
+        setTimeout(() => {
+            if (mac_valid && email_valid && stripe && !paymentRequestInitialized) {
+                initializePaymentRequest();
+            }
+        }, 100);
     })
 
 
@@ -479,6 +491,13 @@
                         // $('#expire-date-value').text(res.msg);
                         $('#mac-invalid-info-container').hide();
                         $('#mac-valid-info-container').slideDown();
+                        
+                        // Check and initialize payment request after successful MAC validation
+                        setTimeout(() => {
+                            if (mac_valid && email_valid && stripe && !paymentRequestInitialized) {
+                                initializePaymentRequest();
+                            }
+                        }, 500);
                     }else{
                         $('#mac-valid-info-container').hide();
                         $('#mac-invalid-info-container').text(res.msg).slideDown();
@@ -492,13 +511,24 @@
     // Apple Pay / Google Pay Setup using Stripe Payment Request
     let paymentRequest = null;
     let prButton = null;
+    let paymentRequestInitialized = false;
 
     if (stripe) {
-        // Wait for DOM to be ready and validation to pass before initializing
+        // Initialize payment request only when both validations pass
         function initializePaymentRequest() {
-            if (!mac_valid || !email_valid) {
-                return; // Don't initialize until validation passes
+            // Prevent multiple initializations
+            if (paymentRequestInitialized) {
+                return;
             }
+            
+            console.log('Initializing payment request - mac_valid:', mac_valid, 'email_valid:', email_valid);
+            
+            if (!mac_valid || !email_valid) {
+                console.log('Validation not complete, skipping payment request initialization');
+                return;
+            }
+
+            paymentRequestInitialized = true;
 
             paymentRequest = stripe.paymentRequest({
                 country: 'DE', // Germany
@@ -594,19 +624,5 @@
                 }
             });
         }
-
-        // Initialize payment request when both mac and email are valid
-        function checkAndInitializePayment() {
-            if (mac_valid && email_valid) {
-                initializePaymentRequest();
-            }
-        }
-
-        // Override the existing validation functions to also initialize payment request
-        const originalCheckMacEmailValid = window.checkMacEmailValid;
-        window.checkMacEmailValid = function(key) {
-            originalCheckMacEmailValid(key);
-            setTimeout(checkAndInitializePayment, 100); // Small delay to ensure validation completes
-        };
     }
 </script>
