@@ -69,14 +69,18 @@
 
                     <div class="position-relative" id="payment-items-container">
                         <!-- Apple Pay / Google Pay Button -->
-                        <div id="payment-request-container" style="display: none;" class="payment-item-container">
-                            <div class="payment-method-item-container" style="background: transparent; color: #fff; position: relative; top: 0; transform: none; left: 0;">
-                                <div class="text-center">
-                                    <h5 class="text-white mb-3">Express Checkout</h5>
-                                    <div id="payment-request-button" style="width: 100%; min-height: 50px;"></div>
-                                    <small class="text-muted mt-2 d-block">Pay securely with Apple Pay or Google Pay</small>
-                                </div>
+                        <div id="payment-request-container" style="display: none; margin-bottom: 20px;">
+                            <div style="background: #1a1f2e; border: 1px solid #353b4a; border-radius: 10px; padding: 20px; text-align: center;">
+                                <h5 class="text-white mb-3">Express Checkout</h5>
+                                <div id="payment-request-button" style="width: 100%; min-height: 50px;"></div>
+                                <small class="text-muted mt-2 d-block">Pay securely with Apple Pay or Google Pay</small>
                             </div>
+                        </div>
+                        
+                        <!-- Or separator for Apple Pay -->
+                        <div id="apple-pay-or-container" style="display: none;" class="position-relative or-container">
+                            <div class="or-border"></div>
+                            <div class="or text-center">Or</div>
                         </div>
                         
                         <%if(show_paypal==1){%>
@@ -525,6 +529,7 @@
                 console.log('Payment methods available:', result);
                 if (result) {
                     document.getElementById('payment-request-container').style.display = 'block';
+                    document.getElementById('apple-pay-or-container').style.display = 'block';
                     prButton.mount('#payment-request-button');
                     console.log('Apple Pay/Google Pay button mounted successfully');
                     
@@ -538,10 +543,12 @@
                 } else {
                     console.log('No payment methods available');
                     document.getElementById('payment-request-container').style.display = 'none';
+                    document.getElementById('apple-pay-or-container').style.display = 'none';
                 }
             }).catch(function(error) {
                 console.error('Error checking payment availability:', error);
                 document.getElementById('payment-request-container').style.display = 'none';
+                document.getElementById('apple-pay-or-container').style.display = 'none';
             });
 
             // Handle payment
