@@ -80,55 +80,18 @@
                         <%if(show_stripe==1){%>
                         <div class="payment-item-container">
                             <div class="payment-method-item-container">
-                                <i class="fab fa-cc-stripe" style="color: #635bff; margin-right: 8px;"></i>
                                 Pay with Stripe
                             </div>
                             <div class="text-center mt-10 mb-10">
                                 <button class="btn btn-primary" id="submit-btn-stripe">Pay Now</button>
                             </div>
                         </div>
-                        <%if(show_coin==1 || show_mollie==1){%>
-                            <div class="position-relative or-container">
-                                <div class="or-border"></div>
-                                <div class="or text-center">Or</div>
-                            </div>
-                        <%}%>
-                        <%}%>
-                        
-                        <!-- Google Pay -->
-                        <div class="payment-item-container">
-                            <div class="payment-method-item-container">
-                                <i class="fab fa-google-pay" style="color: #4285F4; margin-right: 8px;"></i>
-                                Pay with Google Pay
-                            </div>
-                            <div class="text-center mt-10 mb-10">
-                                <button class="btn btn-success" id="submit-btn-googlepay">Pay Now</button>
-                            </div>
-                        </div>
-                        
-                        <%if(show_coin==1 || show_mollie==1){%>
-                            <div class="position-relative or-container">
-                                <div class="or-border"></div>
-                                <div class="or text-center">Or</div>
-                            </div>
-                        <%}%>
-                        
-                        <!-- Apple Pay -->
-                        <div class="payment-item-container">
-                            <div class="payment-method-item-container">
-                                <i class="fab fa-apple-pay" style="color: #000; margin-right: 8px;"></i>
-                                Pay with Apple Pay
-                            </div>
-                            <div class="text-center mt-10 mb-10">
-                                <button class="btn btn-dark" id="submit-btn-applepay">Pay Now</button>
-                            </div>
-                        </div>
-                        
                         <%if(show_coin==1){%>
                             <div class="position-relative or-container">
                                 <div class="or-border"></div>
                                 <div class="or text-center">Or</div>
                             </div>
+                        <%}%>
                         <%}%>
                         <%if(show_mollie==1){%>
                         <div class="payment-item-container">
@@ -438,26 +401,6 @@
                 }
             }
         })
-    })
-    
-    $('#submit-btn-googlepay').click(function (e) {
-        console.log('Google Pay clicked');
-        e.preventDefault();
-        if(!email_valid){
-            checkMacEmailValid('email');
-            return;
-        }
-        showErrorMessage('info', 'Google Pay integration coming soon!');
-    })
-    
-    $('#submit-btn-applepay').click(function (e) {
-        console.log('Apple Pay clicked');
-        e.preventDefault();
-        if(!email_valid){
-            checkMacEmailValid('email');
-            return;
-        }
-        showErrorMessage('info', 'Apple Pay integration coming soon!');
     })
     function checkOut() {
         if(payment_type!='stripe'){
