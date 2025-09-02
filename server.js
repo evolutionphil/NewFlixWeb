@@ -32,7 +32,11 @@ const PORT=5000;
 
 // Removed Socket.IO setup - monitoring now uses regular HTTP requests
 
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true,
+    optionsSuccessStatus: 200
+}));
 app.use(bodyParser.urlencoded({
     extended: true,
     limit: "400mb",
