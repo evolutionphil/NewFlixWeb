@@ -10,4 +10,130 @@
         <a href="/terms&conditions" class="text-muted mx-2">Terms of Use</a>
         <a href="/privacy-policy" class="text-muted mx-2">Privacy Policies</a>
     </div>
+
+    <!-- Hidden Social Sharing Buttons for SEO and Social Media Crawlers -->
+    <div class="social-sharing-seo" style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; visibility: hidden;">
+        <h3>Share This Page on Social Media</h3>
+        <p>Share this professional streaming platform with your network on social media platforms.</p>
+        
+        <%
+            // Get current page URL for sharing
+            let currentUrl = typeof canonicalUrl !== 'undefined' ? canonicalUrl : 
+                (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/` : 'https://flixapp.net/');
+            let shareTitle = typeof title !== 'undefined' ? title : 'Flix IPTV - Professional Streaming Platform';
+            let shareDescription = typeof description !== 'undefined' ? description : 'Professional IPTV streaming platform with 7-day free trial. Upload your playlist and enjoy premium streaming experience.';
+            
+            // Encode URLs for sharing
+            let encodedUrl = encodeURIComponent(currentUrl);
+            let encodedTitle = encodeURIComponent(shareTitle);
+            let encodedDescription = encodeURIComponent(shareDescription);
+        %>
+        
+        <!-- Facebook Share -->
+        <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodedUrl %>" 
+           target="_blank" 
+           rel="noopener"
+           aria-label="Share on Facebook">
+            Share on Facebook - Professional Streaming Platform
+        </a>
+        
+        <!-- Twitter Share -->
+        <a href="https://twitter.com/intent/tweet?url=<%= encodedUrl %>&text=<%= encodedTitle %>&hashtags=IPTV,streaming,playlist,professional"
+           target="_blank"
+           rel="noopener" 
+           aria-label="Share on Twitter">
+            Share on Twitter - IPTV Streaming Platform
+        </a>
+        
+        <!-- LinkedIn Share -->
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=<%= encodedUrl %>"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on LinkedIn">
+            Share on LinkedIn - Professional Streaming Technology
+        </a>
+        
+        <!-- Reddit Share -->
+        <a href="https://reddit.com/submit?url=<%= encodedUrl %>&title=<%= encodedTitle %>"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on Reddit">
+            Share on Reddit - Streaming Platform Discussion
+        </a>
+        
+        <!-- Telegram Share -->
+        <a href="https://t.me/share/url?url=<%= encodedUrl %>&text=<%= encodedTitle %>"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on Telegram">
+            Share on Telegram - IPTV Streaming Service
+        </a>
+        
+        <!-- WhatsApp Share -->
+        <a href="https://wa.me/?text=<%= encodedTitle %>%20<%= encodedUrl %>"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on WhatsApp">
+            Share on WhatsApp - Professional Streaming App
+        </a>
+        
+        <!-- Pinterest Share -->
+        <a href="https://pinterest.com/pin/create/button/?url=<%= encodedUrl %>&description=<%= encodedDescription %>"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on Pinterest">
+            Share on Pinterest - Streaming Technology
+        </a>
+        
+        <!-- Tumblr Share -->
+        <a href="https://www.tumblr.com/widgets/share/tool?canonicalUrl=<%= encodedUrl %>&title=<%= encodedTitle %>&caption=<%= encodedDescription %>"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on Tumblr">
+            Share on Tumblr - IPTV Media Platform
+        </a>
+        
+        <!-- VKontakte Share -->
+        <a href="https://vk.com/share.php?url=<%= encodedUrl %>&title=<%= encodedTitle %>&description=<%= encodedDescription %>"
+           target="_blank"
+           rel="noopener"
+           aria-label="Share on VK">
+            Share on VKontakte - Streaming Platform
+        </a>
+        
+        <!-- Email Share -->
+        <a href="mailto:?subject=<%= encodedTitle %>&body=Check out this professional streaming platform: <%= encodedUrl %>"
+           aria-label="Share via Email">
+            Share via Email - Professional IPTV Service
+        </a>
+        
+        <!-- Print Page -->
+        <a href="javascript:window.print()" aria-label="Print this page">
+            Print Page - Streaming Platform Information
+        </a>
+        
+        <!-- Copy Link -->
+        <button onclick="navigator.clipboard.writeText('<%= currentUrl %>')" aria-label="Copy link to clipboard">
+            Copy Link - Share Streaming Platform URL
+        </button>
+        
+        <!-- Social Media Metadata for Enhanced Sharing -->
+        <div class="social-metadata">
+            <span>streaming platform</span>
+            <span>IPTV service</span>
+            <span>playlist management</span>
+            <span>media streaming</span>
+            <span>digital entertainment</span>
+            <span>multi-device support</span>
+            <span>professional streaming</span>
+            <span>playlist upload</span>
+            <span>device activation</span>
+            <span>streaming technology</span>
+            <span>entertainment platform</span>
+            <span>smart TV streaming</span>
+            <span>mobile streaming</span>
+            <span>cross-platform streaming</span>
+            <span>streaming application</span>
+        </div>
+    </div>
 </footer>
