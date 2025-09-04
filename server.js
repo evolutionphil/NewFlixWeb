@@ -54,7 +54,24 @@ app.use(express.json(
 ));
 
 app.use(useragent.express());
-app.use(express.static('public'))
+// Disable caching for development to prevent cached content issues
+app.use(express.static('public', {
+    etag: false,
+    lastModified: false,
+    setHeaders: (res, path) => {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+    }
+}))
+
+// Add cache control to all routes
+app.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
 
 app.set('trust proxy', 2)
 app.get('/ip', (request, response) => response.send(request.ip))
