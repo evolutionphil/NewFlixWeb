@@ -162,7 +162,7 @@ exports.showInstructionDetail = async (req, res) => {
     // Handle missing instruction types gracefully
     if (!instruction) {
         // Return 404 for truly non-existent instruction types
-        if (!['amazonstick', 'android', 'ios', 'windows', 'smarttv', 'samsung', 'lg', 'epg'].includes(kind)) {
+        if (!['amazonstick', 'android', 'ios', 'windows', 'smarttv', 'samsung', 'lg', 'epg', 'apple-tv', 'playlist', 'samsung&lg&android'].includes(kind)) {
             return res.status(404).render('error', { 
                 message: 'Instruction not found',
                 error: { status: 404, stack: 'The requested instruction type does not exist.' }
@@ -225,6 +225,21 @@ function getDeviceSpecificSEO(deviceType) {
             title: 'Flix IPTV Smart TV Setup Guide - Installation Instructions',
             keywords: 'Smart TV IPTV setup, Samsung Smart TV IPTV, LG Smart TV IPTV, Smart TV streaming, TV IPTV app, smart tv iptv player, tizen iptv, webos iptv, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, ss iptv, smart tv streaming',
             description: 'Complete guide to setup Flix IPTV on Smart TVs including Samsung, LG, Sony, and other Smart TV brands. Easy installation instructions for TV streaming.'
+        },
+        'apple-tv': {
+            title: 'Flix IPTV Apple TV Setup Guide - Installation Instructions',
+            keywords: 'Apple TV IPTV setup, tvOS IPTV, Apple TV IPTV app, Apple TV streaming, IPTV Apple TV installation, Apple TV 4K IPTV, Apple TV IPTV player, ibo player apple tv, ibo iptv apple tv, net iptv apple tv, set iptv apple tv, smart iptv apple tv, perfect player apple tv, apple tv iptv guide',
+            description: 'Step-by-step guide to install and configure Flix IPTV on Apple TV. Complete setup instructions for Apple TV 4K and Apple TV HD streaming.'
+        },
+        'playlist': {
+            title: 'Flix IPTV Playlist Management Guide - Setup Instructions',
+            keywords: 'IPTV playlist setup, m3u playlist guide, playlist management, IPTV playlist upload, streaming playlist, m3u8 playlist, playlist configuration, IPTV m3u setup, ibo player playlist, ibo iptv playlist, net iptv playlist, smart iptv playlist, iptv smarters playlist, perfect player playlist, playlist instructions',
+            description: 'Complete guide to manage and setup IPTV playlists. Learn how to upload, configure, and manage M3U playlists for optimal streaming experience.'
+        },
+        'samsung&lg&android': {
+            title: 'Flix IPTV Multi-Device Setup Guide - Samsung, LG & Android',
+            keywords: 'multi device IPTV setup, Samsung LG Android IPTV, cross platform IPTV, Smart TV Android setup, multiple device IPTV, unified IPTV guide, Samsung LG setup, Android TV IPTV, multi platform streaming, ibo player multi device, smart iptv multiple devices, cross platform streaming',
+            description: 'Comprehensive setup guide for Flix IPTV across Samsung Smart TVs, LG Smart TVs, and Android devices. Universal installation instructions for multiple platforms.'
         }
     };
 
