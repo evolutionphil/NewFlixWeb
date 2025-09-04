@@ -596,7 +596,7 @@ app.get('/sitemap.xml', async (req, res) => {
         let instructions = [];
         try {
             const Instruction = require('./models/Instruction.model');
-            instructions = await Instruction.find({}, 'id title updated_at').limit(50);
+            instructions = await Instruction.find({}, 'kind title updated_at').limit(50);
         } catch(e) {
             console.log('Instruction model not found, skipping instructions in sitemap');
         }
@@ -644,7 +644,9 @@ app.get('/sitemap.xml', async (req, res) => {
         
         // Add instruction pages
         instructions.forEach(instruction => {
-            const escapedUrl = `${baseUrl}/instructions/${instruction.id}`.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            // Use kind for SEO-friendly URLs (already implemented in frontend)
+            const urlPath = `/instructions/${instruction.kind}`;
+            const escapedUrl = `${baseUrl}${urlPath}`.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             sitemap += '<url>';
             sitemap += `<loc>${escapedUrl}</loc>`;
             sitemap += `<lastmod>${instruction.updated_at ? new Date(instruction.updated_at).toISOString() : new Date().toISOString()}</lastmod>`;
