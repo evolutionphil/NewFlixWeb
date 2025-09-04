@@ -159,6 +159,25 @@ exports.showInstructionDetail = async (req, res) => {
 
     let instruction = await Instruction.findOne({kind: kind})
 
+    // Handle missing instruction types gracefully
+    if (!instruction) {
+        // Return 404 for truly non-existent instruction types
+        if (!['amazonstick', 'android', 'ios', 'windows', 'smarttv', 'samsung', 'lg', 'epg'].includes(kind)) {
+            return res.status(404).render('error', { 
+                message: 'Instruction not found',
+                error: { status: 404, stack: 'The requested instruction type does not exist.' }
+            });
+        }
+        
+        // Create placeholder instruction for valid types not yet in admin
+        instruction = {
+            kind: kind,
+            content: `<h2>Instructions for ${kind.charAt(0).toUpperCase() + kind.slice(1)}</h2>
+                     <p>Detailed setup instructions for ${kind} will be available soon.</p>
+                     <p>Please check back later or contact support for assistance.</p>`
+        };
+    }
+
     // Device-specific SEO optimization - prioritize device-specific content
     let deviceSEO = getDeviceSpecificSEO(kind);
     
