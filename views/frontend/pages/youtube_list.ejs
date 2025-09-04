@@ -1,12 +1,178 @@
 <link rel="stylesheet" href="/frontend/mylist.css">
 <link rel="stylesheet" href="/frontend/news.css">
+<style>
+.youtube-hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f1419 100%);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+}
 
+.youtube-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    z-index: -1;
+    margin: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.feature-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.step-counter {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 1rem;
+}
+
+.form-section {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.seo-content {
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 4px solid #667eea;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 0 8px 8px 0;
+}
+</style>
+
+<!-- Hero Section with SEO Content -->
+<section class="youtube-hero fancy-card mb-4" style="padding: 3rem 1rem;">
+    <div class="container">
+        <div class="text-center text-white">
+            <h1 class="display-4 mb-3 font-weight-bold">YouTube Playlist Integration for IPTV</h1>
+            <p class="lead mb-4">Seamlessly integrate your favorite YouTube playlists with Flix IPTV streaming service. Enjoy unlimited access to YouTube content across all your IPTV devices.</p>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <p class="mb-0">Transform your IPTV experience by adding custom YouTube playlists. Compatible with Smart TV, Android, iOS, and all major IPTV players including IPTV Smarters, Perfect Player, and VLC.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container mb-5">
+    <div class="text-center mb-4">
+        <h2 class="text-white mb-3">Why Choose YouTube IPTV Integration?</h2>
+        <p class="text-white-50">Experience the best of both worlds - YouTube flexibility with IPTV reliability</p>
+    </div>
+    
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+            </div>
+            <h4 class="text-white mb-2">Multi-Device Support</h4>
+            <p class="text-white-50">Works with Smart TV, Android TV, iOS devices, Samsung, LG, and all popular IPTV players</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+            </div>
+            <h4 class="text-white mb-2">Premium Quality</h4>
+            <p class="text-white-50">HD and 4K streaming with optimized video quality for IPTV players and smart TV apps</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                    <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21a9 9 0 0 0 0-18z"/>
+                </svg>
+            </div>
+            <h4 class="text-white mb-2">Instant Updates</h4>
+            <p class="text-white-50">Your playlists sync automatically with YouTube updates and new video additions</p>
+        </div>
+    </div>
+</section>
+
+<!-- Upload Form Section -->
 <section style="--background-color: #0C1018; --border-color: #473590; --angle: 110deg" class="news-container fancy-card" id="youtube-vue">
     <article class="text-white">
-        <div class="pb-4 news-section-header">
-            <h1 class="text-white pb-1 news-section-title">Youtube Playlist upload for FLIX APP</h1>
-            <h2 class="news-section-subtitle">Upload Your Playlist</h2>
+        <div class="text-center pb-4">
+            <h2 class="text-white pb-1 font-weight-bold">Upload Your YouTube Playlists</h2>
+            <p class="news-section-subtitle text-white-50">Add custom YouTube content to your IPTV experience</p>
         </div>
+        
+        <!-- Instructions -->
+        <div class="seo-content mb-4">
+            <h3 class="h5 text-white mb-3">How to Add YouTube Playlists to IPTV:</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="step-counter">1</span>
+                        <span class="text-white">Enter your device MAC address</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="step-counter">2</span>
+                        <span class="text-white">Add playlist name and YouTube ID</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="step-counter">3</span>
+                        <span class="text-white">Click send to integrate playlists</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="step-counter">4</span>
+                        <span class="text-white">Access via your IPTV player</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="h5 text-white mb-3 text-center">YouTube Playlist Upload Form</h3>
 
         <form method="post" class="col-md-7 m-auto" action="/saveYoutubeLists">
             <div class="row">
@@ -91,7 +257,51 @@
                 </div>
             </div>
         </form>
+        </div>
     </article>
+</section>
+
+<!-- SEO Content Section -->
+<section class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div style="background: rgba(255, 255, 255, 0.02); padding: 2rem; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <h2 class="text-white h4 mb-4">Complete IPTV YouTube Integration Guide</h2>
+                
+                <div class="text-white-50 mb-4">
+                    <p><strong class="text-white">YouTube IPTV Streaming:</strong> Combine the power of YouTube with professional IPTV streaming. Our service supports all major IPTV players including IPTV Smarters Pro, Perfect Player, VLC Media Player, TiviMate, and Smart IPTV apps.</p>
+                    
+                    <p><strong class="text-white">Device Compatibility:</strong> Works seamlessly with Android TV boxes, Samsung Smart TV, LG webOS, iOS devices, Amazon Fire TV, MAG boxes, and any device that supports M3U playlists and IPTV streaming.</p>
+                    
+                    <p><strong class="text-white">IPTV Player Support:</strong> Compatible with popular players like IPTV Smarters, Perfect Player IPTV, VLC IPTV, MX Player, Kodi IPTV addons, TiviMate, IPTV Extreme Pro, Duplex IPTV, OTTPlayer, and Lazy IPTV.</p>
+                </div>
+                
+                <h3 class="text-white h5 mb-3">Popular IPTV YouTube Features:</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="text-white-50">
+                            <li>YouTube TV integration</li>
+                            <li>Custom playlist creation</li>
+                            <li>HD/4K video streaming</li>
+                            <li>Multi-language support</li>
+                            <li>EPG guide compatibility</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="text-white-50">
+                            <li>Smart TV app support</li>
+                            <li>Android/iOS compatibility</li>
+                            <li>M3U playlist generation</li>
+                            <li>Real-time synchronization</li>
+                            <li>Cross-platform streaming</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <p class="text-white-50 mt-4"><strong class="text-white">Getting Started:</strong> Simply enter your device MAC address and YouTube playlist IDs above. Our system will automatically generate IPTV-compatible streams that work with your favorite IPTV applications and smart TV players.</p>
+            </div>
+        </div>
+    </div>
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
