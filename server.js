@@ -609,6 +609,7 @@ app.get('/sitemap.xml', async (req, res) => {
             { url: '/news', priority: '0.8', changefreq: 'daily' },
             { url: '/instructions', priority: '0.8', changefreq: 'weekly' },
             { url: '/faq', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes', priority: '0.8', changefreq: 'weekly' },
             { url: '/contact', priority: '0.6', changefreq: 'monthly' },
             { url: '/terms&conditions', priority: '0.5', changefreq: 'yearly' },
             { url: '/privacy-policy', priority: '0.5', changefreq: 'yearly' },

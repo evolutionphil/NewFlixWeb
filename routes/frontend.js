@@ -14,6 +14,7 @@ router.get('/instructions',frontendController.instructions);
 router.get('/instructions/:kind',frontendController.showInstructionDetail);
 router.get('/activation',frontendController.activation);
 router.get('/contact',frontendController.contact);
+router.get('/codes',frontendController.codes);
 
 router.get('/mylist',frontendController.mylist);
 router.post('/savePlaylists',frontendController.savePlaylists);

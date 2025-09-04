@@ -346,6 +346,54 @@ exports.activation=(req,res)=>{
     });
 }
 
+exports.codes=(req,res)=>{
+    // EPG codes data - sample channels with their codes
+    const epgCodes = [
+        { name: '1+1 International', code: '1p1_int', country: 'Ukraine', category: 'General' },
+        { name: '2+2', code: '2p2', country: 'Ukraine', category: 'General' },
+        { name: 'Animal Planet', code: 'animal_rus', country: 'Russia', category: 'Documentary' },
+        { name: 'BBC Entertainment', code: 'bbc-entertainment', country: 'UK', category: 'Entertainment' },
+        { name: 'BBC News', code: 'bbc-world', country: 'UK', category: 'News' },
+        { name: 'Cartoon Network', code: 'cartoon', country: 'USA', category: 'Kids' },
+        { name: 'Cinema', code: 'park-razvlecheniy', country: 'Russia', category: 'Movies' },
+        { name: 'CNN', code: 'cnn', country: 'USA', category: 'News' },
+        { name: 'Comedy Central', code: 'paramount-comedy', country: 'Russia', category: 'Entertainment' },
+        { name: 'Discovery Channel', code: 'discovery', country: 'International', category: 'Documentary' },
+        { name: 'ESPN', code: 'espn', country: 'USA', category: 'Sports' },
+        { name: 'Eurosport 1', code: 'eurosport', country: 'Europe', category: 'Sports' },
+        { name: 'Fox News', code: 'fox-news', country: 'USA', category: 'News' },
+        { name: 'History Channel', code: 'history', country: 'International', category: 'Documentary' },
+        { name: 'MTV', code: 'mtv-rus', country: 'Russia', category: 'Music' },
+        { name: 'National Geographic', code: 'nat-geo', country: 'International', category: 'Documentary' },
+        { name: 'Nickelodeon', code: 'nickelodeon', country: 'International', category: 'Kids' },
+        { name: 'Sky Sports', code: 'sky-sports', country: 'UK', category: 'Sports' },
+        { name: 'TNT', code: 'tnt', country: 'Russia', category: 'Entertainment' },
+        { name: 'TV1000', code: 'tv1000', country: 'International', category: 'Movies' }
+    ];
+
+    // Get unique countries and categories for filters
+    const countries = [...new Set(epgCodes.map(item => item.country))].sort();
+    const categories = [...new Set(epgCodes.map(item => item.category))].sort();
+
+    let title = 'EPG Codes - Flix IPTV';
+    let keyword = 'EPG codes, electronic program guide, channel codes, IPTV EPG, streaming EPG, TV guide codes, channel identifiers, EPG integration, IPTV channel guide, electronic TV guide, program guide codes, TV listing codes, ibo player epg, smart iptv epg, iptv smarters epg, perfect player epg, tivimate epg, gse iptv epg, m3u epg codes, streaming epg codes, epg xml codes, electronic program guide codes, tv guide integration, iptv epg setup, epg channel mapping, epg data codes, streaming platform epg, digital tv guide, epg configuration codes, iptv epg sources, epg provider codes';
+    let description = 'Find EPG (Electronic Program Guide) codes for your IPTV channels. Browse and search through our comprehensive database of channel codes for easy EPG integration.';
+
+    res.render('frontend/pages/codes',
+        {
+            menu:'codes',
+            title:title, 
+            keyword:keyword,
+            description:description,
+            epgCodes: epgCodes,
+            countries: countries,
+            categories: categories,
+            pageType: 'epg-codes',
+            canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/codes` : 'https://flixapp.net/codes'
+        }
+    );
+}
+
 exports.contact=(req,res)=>{
     let meta_data = {
         title: 'Contact Flix IPTV Support - Expert Customer Service & Technical Help 24/7',
