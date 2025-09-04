@@ -193,36 +193,82 @@
 
 /* Mobile-first payment section positioning */
 @media (max-width: 767px) {
-    /* Move payment form to top on mobile */
-    .mobile-payment-first {
-        order: -1 !important;
+    /* Mobile payment form takes priority within the payment section */
+    .mobile-payment-priority {
+        width: 100% !important;
+        max-width: none !important;
+        margin-bottom: 2rem;
+        padding: 0 !important;
+    }
+    
+    /* Content section after payment on mobile */
+    .mobile-content-order {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 !important;
+    }
+    
+    /* Enhanced payment card for mobile */
+    .payment-card {
+        background: #1a1f2e !important;
+        border: 2px solid #4a90e2 !important;
+        border-radius: 15px !important;
+        padding: 2rem 1.5rem !important;
+        box-shadow: 0 8px 25px rgba(74, 144, 226, 0.2) !important;
         margin-bottom: 2rem;
     }
     
-    /* Ensure payment card is prominently displayed */
-    .payment-card {
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        border: 2px solid #4a5568;
-    }
-    
-    /* Make payment section header more prominent on mobile */
+    /* Payment header styling */
     .payment-card-header h4 {
-        font-size: 1.5rem !important;
-        text-align: center;
-        margin-bottom: 1rem;
+        font-size: 1.8rem !important;
+        text-align: center !important;
+        margin-bottom: 1.5rem !important;
+        color: #4a90e2 !important;
+        font-weight: 700 !important;
     }
     
-    /* Optimize form spacing on mobile */
+    /* Mobile form optimization */
     .payment-card .form-group {
-        margin-bottom: 1.2rem;
+        margin-bottom: 1.5rem;
     }
     
-    /* Make payment buttons more prominent */
+    .payment-card input {
+        font-size: 1.1rem !important;
+        padding: 12px !important;
+        border-radius: 8px !important;
+    }
+    
+    /* Mobile payment buttons */
     .payment-item-container .btn {
         width: 100%;
-        padding: 12px;
-        font-size: 1.1rem;
-        font-weight: 600;
+        padding: 15px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
+    
+    /* Payment section labels */
+    .payment-section-label {
+        font-size: 1.3rem !important;
+        text-align: center;
+        margin-bottom: 1rem;
+        color: #fff !important;
+    }
+    
+    /* Mobile header styling */
+    .mobile-header-order {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .mobile-header-order h1 {
+        font-size: 1.8rem !important;
+        margin-bottom: 0.5rem;
+    }
+    
+    .mobile-header-order p {
+        font-size: 1rem !important;
+        color: #888 !important;
     }
 }

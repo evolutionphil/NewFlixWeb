@@ -1,7 +1,15 @@
 <link rel="stylesheet" href="frontend/activation.css">
 
+<!-- Page Header - Always at Top for Both Desktop and Mobile -->
+<section style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 2rem 0; margin-bottom: 2rem; text-align: center;">
+    <div class="container">
+        <h1 class="text-white font-weight-bold mb-2" style="font-size: 2rem;">Platform Activation</h1>
+        <p class="text-muted mb-0" style="font-size: 1.1rem;">Set up your streaming platform subscription</p>
+    </div>
+</section>
+
 <!-- Professional Hero Section -->
-<section style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 3rem 0; border-radius: 20px; margin-bottom: 2rem;">
+<section class="hero-section" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 3rem 0; border-radius: 20px; margin-bottom: 2rem;">
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; text-align: center;">
         <h1 style="color: #ffffff; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
             Professional Streaming Platform Activation
@@ -13,7 +21,7 @@
 </section>
 
 <!-- Professional Features Section -->
-<section style="background: rgba(255, 255, 255, 0.02); padding: 2rem; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 2rem;">
+<section class="features-section" style="background: rgba(255, 255, 255, 0.02); padding: 2rem; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 2rem;">
     <div class="row">
         <div class="col-md-4 mb-3">
             <div style="text-align: center;">
@@ -61,20 +69,15 @@
     <p style="color: transparent; font-size: 1px; line-height: 1px;">Professional streaming platform activation service, secure payment processing, instant device activation, subscription management, streaming application registration, multi-device support, digital entertainment platform activation, streaming technology subscription, payment gateway integration, device registration service, streaming platform licensing, activation code generation, subscription billing system.</p>
 </div>
 
-<section style="--background-color: #06080C; --border-color: #473590; --angle: 112deg" class="news-container fancy-card">
-    <div class="pb-4 news-section-header">
+<section style="--background-color: #06080C; --border-color: #473590; --angle: 112deg" class="news-container fancy-card mobile-content-wrapper">
+    <div class="pb-4 news-section-header mobile-header-order">
         <h1 class="text-white news-section-title">Platform Activation</h1>
         <p class="news-section-subtitle">Set up your streaming platform subscription</p>
     </div>
 
     <div class="row">
-    <div class="col-md-6 text-white order-md-1 order-2">
-        <%if(activation_content){%>
-            <%- activation_content.contents %>
-        <%}%>
-    </div>
-
-    <form class="col-md-6 order-md-2 order-1 mobile-payment-first" method="post" action="/saveActivation" id="form">
+    <!-- Payment Form - Mobile First -->
+    <form class="col-md-6 order-md-2 order-1 mobile-payment-priority" method="post" action="/saveActivation" id="form">
         <div class="payment-card">
                 <div class="payment-card-header">
                     <h4 class="text-white">Payment</h4>
@@ -272,6 +275,13 @@
                 </div>
         </div>
     </form>
+    
+    <!-- Content Section - Mobile Second -->
+    <div class="col-md-6 text-white order-md-1 order-2 mobile-content-order">
+        <%if(activation_content){%>
+            <%- activation_content.contents %>
+        <%}%>
+    </div>
 </div>
 </section>
 
