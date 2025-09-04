@@ -163,10 +163,7 @@ exports.showInstructionDetail = async (req, res) => {
     if (!instruction) {
         // Return 404 for truly non-existent instruction types
         if (!['amazonstick', 'android', 'ios', 'windows', 'smarttv', 'samsung', 'lg', 'epg', 'apple-tv', 'playlist', 'samsung&lg&android'].includes(kind)) {
-            return res.status(404).render('error', { 
-                message: 'Instruction not found',
-                error: { status: 404, stack: 'The requested instruction type does not exist.' }
-            });
+            return res.status(404).send('Instruction not found');
         }
         
         // Create placeholder instruction for valid types not yet in admin
