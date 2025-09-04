@@ -177,5 +177,34 @@
     }
     </script>
     <% } %>
+    
+    <% if (typeof pageType !== 'undefined' && pageType === 'news-listing') { %>
+    <!-- News/Blog Listing Page Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        "name": "<%= title1 %>",
+        "description": "<%= description1 %>",
+        "url": "<%= url1 %>",
+        "publisher": {
+            "@type": "Organization",
+            "name": "Flix IPTV",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "<%= url1.split('/').slice(0,3).join('/') %>/images/logo.png"
+            }
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "Flix IPTV"
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "<%= url1 %>"
+        }
+    }
+    </script>
+    <% } %>
 
 </head>

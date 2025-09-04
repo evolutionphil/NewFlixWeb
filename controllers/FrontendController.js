@@ -28,17 +28,25 @@ const path = require("path");
 
 exports.news=(req,res)=>{
     let keys=['news_meta_title','news_meta_keyword','news_meta_content']
-    let data={}
+    let data={
+        news_meta_title: 'Flix IPTV News - Latest Updates and Announcements',
+        news_meta_keyword: 'IPTV news, Flix IPTV updates, streaming news, IPTV announcements, platform updates, IPTV industry news, streaming platform news, digital streaming updates',
+        news_meta_content: 'Stay updated with the latest Flix IPTV news, platform updates, and streaming industry announcements. Get the latest information about our IPTV streaming service.'
+    }
+    
     keys.map(key => {
-        data[key] = settings[key] ? settings[key] : ''
+        if(settings[key]) {
+            data[key] = settings[key];
+        }
     })
+    
     News.find()
 .sort({_id:-1})
         .exec()
         .then(news=>{
-        let title=data.news_meta_title;
-        let keyword=data.news_meta_keyword;
-        let description=data.news_meta_content;
+        let title=data.news_meta_title || 'Flix IPTV News - Latest Updates';
+        let keyword=data.news_meta_keyword || 'IPTV news, Flix IPTV updates, streaming news';
+        let description=data.news_meta_content || 'Stay updated with the latest Flix IPTV news and platform updates.';
 
         res.render('frontend/pages/news/index',
             {
@@ -47,6 +55,8 @@ exports.news=(req,res)=>{
                 keyword: keyword,
                 description: description,
                 news: news.map(item=>({_id: item._id, title: item.title, content: convert(item.content).substring(0, 80)})),
+                pageType: 'news-listing',
+                canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/news` : 'https://flixiptv.com/news'
             }
         );
     })
