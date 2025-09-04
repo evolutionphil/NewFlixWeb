@@ -573,7 +573,21 @@ app.get('/sitemap.xml', async (req, res) => {
         let news = [];
         try {
             const News = require('./models/News.model');
-            news = await News.find({}, 'id title updated_at').limit(50);
+            news = await News.find({}, 'id title slug updated_at').limit(50);
+            
+            // Auto-generate missing slugs for sitemap
+            for (let article of news) {
+                if (!article.slug && article.title) {
+                    article.slug = article.title
+                        .toLowerCase()
+                        .replace(/[^a-z0-9 -]/g, '') 
+                        .replace(/\s+/g, '-') 
+                        .replace(/-+/g, '-') 
+                        .trim() 
+                        .substring(0, 100);
+                    await article.save();
+                }
+            }
         } catch(e) {
             console.log('News model not found, skipping news in sitemap');
         }
@@ -617,7 +631,9 @@ app.get('/sitemap.xml', async (req, res) => {
         
         // Add news articles
         news.forEach(article => {
-            const escapedUrl = `${baseUrl}/news/${article.id}`.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            // Use slug if available, fallback to ID for backward compatibility
+            const urlPath = article.slug ? `/news/${article.slug}` : `/news/${article.id}`;
+            const escapedUrl = `${baseUrl}${urlPath}`.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             sitemap += '<url>';
             sitemap += `<loc>${escapedUrl}</loc>`;
             sitemap += `<lastmod>${article.updated_at ? new Date(article.updated_at).toISOString() : new Date().toISOString()}</lastmod>`;
