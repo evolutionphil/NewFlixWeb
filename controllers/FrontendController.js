@@ -335,21 +335,13 @@ exports.home=async(req,res)=>{
 
 exports.mylist=async(req,res)=>{
     let keys=['mylist_meta_title','mylist_meta_keyword','mylist_meta_content']
-    let data={
-        mylist_meta_title: 'My List - Playlist Upload - Flix Streaming App',
-        mylist_meta_keyword: 'playlist upload, streaming playlist, M3U playlist, media playlist, streaming service, playlist management, streaming app, media streaming, entertainment platform, streaming platform, device sync, multi-device streaming, cross-platform streaming, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv',
-        mylist_meta_content: 'Upload and manage your streaming playlists with Flix app. Support for M3U playlists with multi-device synchronization across Smart TV, Android, iOS, and streaming platforms.'
-    }
-    
+    let data={}
     keys.map(key => {
-        if(settings[key]) {
-            data[key] = settings[key];
-        }
+        data[key] = settings[key] ? settings[key] : ''
     })
-    
-    let title = data.mylist_meta_title || 'My List - Playlist Upload';
-    let keyword = data.mylist_meta_keyword || 'playlist upload, streaming playlist';
-    let description = data.mylist_meta_content || 'Upload your streaming playlists to Flix app';
+    let title = data.mylist_meta_title;
+    let keyword = data.mylist_meta_keyword;
+    let description = data.mylist_meta_content;
     let meta_data = {
         title: title, keyword: keyword, description: description
     }
