@@ -28,25 +28,17 @@ const path = require("path");
 
 exports.news=(req,res)=>{
     let keys=['news_meta_title','news_meta_keyword','news_meta_content']
-    let data={
-        news_meta_title: 'Flix IPTV News - Latest Updates and Announcements',
-        news_meta_keyword: 'IPTV news, Flix IPTV updates, streaming news, IPTV announcements, platform updates, IPTV industry news, streaming platform news, digital streaming updates, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, iptv pro, ss iptv, streaming news, tv streaming news, cord cutting news, iptv updates, streaming updates',
-        news_meta_content: 'Stay updated with the latest Flix IPTV news, platform updates, and streaming industry announcements. Get the latest information about our IPTV streaming service.'
-    }
-    
+    let data={}
     keys.map(key => {
-        if(settings[key]) {
-            data[key] = settings[key];
-        }
+        data[key] = settings[key] ? settings[key] : ''
     })
-    
     News.find()
 .sort({_id:-1})
         .exec()
         .then(news=>{
-        let title=data.news_meta_title || 'Flix IPTV News - Latest Updates';
-        let keyword=data.news_meta_keyword || 'IPTV news, Flix IPTV updates, streaming news';
-        let description=data.news_meta_content || 'Stay updated with the latest Flix IPTV news and platform updates.';
+        let title=data.news_meta_title;
+        let keyword=data.news_meta_keyword;
+        let description=data.news_meta_content;
 
         res.render('frontend/pages/news/index',
             {
@@ -55,8 +47,6 @@ exports.news=(req,res)=>{
                 keyword: keyword,
                 description: description,
                 news: news.map(item=>({_id: item._id, title: item.title, content: convert(item.content).substring(0, 80)})),
-                pageType: 'news-listing',
-                canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/news` : 'https://flixiptv.com/news'
             }
         );
     })
@@ -82,32 +72,16 @@ exports.showNewsDetail = (req, res) => {
 
 exports.faq=(req,res)=>{
     let keys=['faq_meta_title','faq_meta_keyword','faq_meta_content']
-    let data={
-        faq_meta_title: 'Frequently Asked Questions - Flix IPTV',
-        faq_meta_keyword: 'IPTV FAQ, Flix IPTV help, IPTV questions, streaming help, IPTV support, how to use IPTV, IPTV troubleshooting, IPTV guide, streaming questions, IPTV setup, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, iptv pro, ss iptv, iptv ultimate, xciptv, implayer, televizo, streaming faq, tv streaming help, firestick iptv setup, android tv iptv help, roku iptv guide',
-        faq_meta_content: 'Find answers to frequently asked questions about Flix IPTV streaming service. Get help with setup, troubleshooting, device compatibility, and more.'
-    }
-    
+    let data={}
     keys.map(key => {
-        if(settings[key]) {
-            data[key] = settings[key];
-        }
+        data[key] = settings[key] ? settings[key] : ''
     })
-    
     Faq.find().then(faqs=>{
-        let title=data.faq_meta_title || 'Frequently Asked Questions - Flix IPTV';
-        let keyword=data.faq_meta_keyword || 'IPTV FAQ, Flix IPTV help, IPTV questions, streaming help';
-        let description=data.faq_meta_content || 'Find answers to frequently asked questions about Flix IPTV streaming service.';
+        let title=data.faq_meta_title;
+        let keyword=data.faq_meta_keyword;
+        let description=data.faq_meta_content;
         res.render('frontend/pages/faq',
-            {
-                menu:'faq',
-                title:title, 
-                keyword:keyword,
-                description:description,
-                faqs:faqs,
-                pageType: 'faq',
-                canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/faq` : 'https://flixiptv.com/faq'
-            }
+            {menu:'faq',title:title, keyword:keyword,description:description,faqs:faqs}
         );
     })
 }
@@ -155,98 +129,21 @@ exports.showInstructionDetail = async (req, res) => {
     })
 
     var kind = req.params.kind;
+
     kind = kind.toLocaleLowerCase();
 
     let instruction = await Instruction.findOne({kind: kind})
 
-    // Handle missing instruction types gracefully
-    if (!instruction) {
-        // Return 404 for truly non-existent instruction types
-        if (!['amazonstick', 'android', 'ios', 'windows', 'smarttv', 'samsung', 'lg', 'epg', 'apple-tv', 'playlist', 'samsung&lg&android'].includes(kind)) {
-            return res.status(404).send('Instruction not found');
-        }
-        
-        // Create placeholder instruction for valid types not yet in admin
-        instruction = {
-            kind: kind,
-            content: `<h2>Instructions for ${kind.charAt(0).toUpperCase() + kind.slice(1)}</h2>
-                     <p>Detailed setup instructions for ${kind} will be available soon.</p>
-                     <p>Please check back later or contact support for assistance.</p>`
-        };
-    }
-
-    // Device-specific SEO optimization - prioritize device-specific content
-    let deviceSEO = getDeviceSpecificSEO(kind);
-    
-    // Use device-specific SEO if available, otherwise fall back to admin settings
-    let title = deviceSEO.title || data.instruction_meta_title;
-    let keyword = deviceSEO.keywords || data.instruction_meta_keyword;
-    let description = deviceSEO.description || data.instruction_meta_content;
+    let title = data.instruction_meta_title;
+    let keyword = data.instruction_meta_keyword;
+    let description = data.instruction_meta_content;
 
     let meta_data = {
-        title: title, 
-        keyword: keyword, 
-        description: description,
-        pageType: 'instruction-guide',
-        deviceType: kind,
-        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/instructions/${kind}` : `https://flixiptv.com/instructions/${kind}`
+        title: title, keyword: keyword, description: description
     }
 
     res.render('frontend/pages/instructions/show', {menu: 'instruction', instruction: instruction, ...meta_data});
 }
-
-// Device-specific SEO helper function
-function getDeviceSpecificSEO(deviceType) {
-    const deviceSEOData = {
-        'amazonstick': {
-            title: 'Flix IPTV Setup Guide for Amazon Fire TV Stick - Installation Instructions',
-            keywords: 'Amazon Fire Stick IPTV, Fire TV Stick setup, Flix IPTV Fire Stick, Amazon Fire TV IPTV installation, Fire Stick streaming, Fire TV IPTV player, Fire Stick IPTV guide, Amazon streaming device, Fire TV Stick apps, Fire Stick sideload, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, firestick iptv, amazon fire tv iptv, fire tv streaming',
-            description: 'Complete step-by-step guide to install and setup Flix IPTV on Amazon Fire TV Stick. Learn how to sideload IPTV apps and configure streaming on your Fire Stick device.'
-        },
-        'android': {
-            title: 'Flix IPTV Android Setup Guide - Installation Instructions',
-            keywords: 'Android IPTV setup, Flix IPTV Android, Android TV IPTV, Android streaming, IPTV Android app, mobile IPTV, android iptv player, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, android tv iptv, android streaming apps',
-            description: 'Step-by-step instructions to install and configure Flix IPTV on Android devices. Setup guide for Android phones, tablets, and Android TV boxes.'
-        },
-        'ios': {
-            title: 'Flix IPTV iOS Setup Guide - iPhone/iPad Installation Instructions',
-            keywords: 'iOS IPTV setup, iPhone IPTV, iPad IPTV, Flix IPTV iOS, Apple TV IPTV, iOS streaming, iPhone streaming app, iPad streaming, mobile IPTV iOS, ios iptv player, apple tv iptv, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player',
-            description: 'Complete guide to install and setup Flix IPTV on iPhone, iPad, and Apple TV devices. Learn how to configure IPTV streaming on iOS devices.'
-        },
-        'windows': {
-            title: 'Flix IPTV Windows Setup Guide - PC Installation Instructions',
-            keywords: 'Windows IPTV setup, PC IPTV player, Windows streaming, Flix IPTV Windows, desktop IPTV, windows iptv app, pc streaming software, windows media player, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, vlc iptv, kodi iptv, windows iptv streaming',
-            description: 'Step-by-step guide to install and configure Flix IPTV on Windows PC. Complete setup instructions for Windows desktop IPTV streaming.'
-        },
-        'smarttv': {
-            title: 'Flix IPTV Smart TV Setup Guide - Installation Instructions',
-            keywords: 'Smart TV IPTV setup, Samsung Smart TV IPTV, LG Smart TV IPTV, Smart TV streaming, TV IPTV app, smart tv iptv player, tizen iptv, webos iptv, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, ss iptv, smart tv streaming',
-            description: 'Complete guide to setup Flix IPTV on Smart TVs including Samsung, LG, Sony, and other Smart TV brands. Easy installation instructions for TV streaming.'
-        },
-        'apple-tv': {
-            title: 'Flix IPTV Apple TV Setup Guide - Installation Instructions',
-            keywords: 'Apple TV IPTV setup, tvOS IPTV, Apple TV IPTV app, Apple TV streaming, IPTV Apple TV installation, Apple TV 4K IPTV, Apple TV IPTV player, ibo player apple tv, ibo iptv apple tv, net iptv apple tv, set iptv apple tv, smart iptv apple tv, perfect player apple tv, apple tv iptv guide',
-            description: 'Step-by-step guide to install and configure Flix IPTV on Apple TV. Complete setup instructions for Apple TV 4K and Apple TV HD streaming.'
-        },
-        'playlist': {
-            title: 'Flix IPTV Playlist Management Guide - Setup Instructions',
-            keywords: 'IPTV playlist setup, m3u playlist guide, playlist management, IPTV playlist upload, streaming playlist, m3u8 playlist, playlist configuration, IPTV m3u setup, ibo player playlist, ibo iptv playlist, net iptv playlist, smart iptv playlist, iptv smarters playlist, perfect player playlist, playlist instructions',
-            description: 'Complete guide to manage and setup IPTV playlists. Learn how to upload, configure, and manage M3U playlists for optimal streaming experience.'
-        },
-        'samsung&lg&android': {
-            title: 'Flix IPTV Multi-Device Setup Guide - Samsung, LG & Android',
-            keywords: 'multi device IPTV setup, Samsung LG Android IPTV, cross platform IPTV, Smart TV Android setup, multiple device IPTV, unified IPTV guide, Samsung LG setup, Android TV IPTV, multi platform streaming, ibo player multi device, smart iptv multiple devices, cross platform streaming',
-            description: 'Comprehensive setup guide for Flix IPTV across Samsung Smart TVs, LG Smart TVs, and Android devices. Universal installation instructions for multiple platforms.'
-        }
-    };
-
-    return deviceSEOData[deviceType] || {
-        title: 'Flix IPTV Setup Guide - Device Installation Instructions',
-        keywords: 'IPTV setup guide, device installation, streaming setup, IPTV player installation, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player',
-        description: 'Step-by-step instructions to install and configure Flix IPTV on your device. Complete setup guide for IPTV streaming.'
-    };
-}
-
 
 exports.activation=(req,res)=>{
     let promises=[];
@@ -290,42 +187,23 @@ exports.activation=(req,res)=>{
 }
 
 exports.contact=(req,res)=>{
-    let meta_data = {
-        title: 'Contact Flix IPTV Support - Expert Customer Service & Technical Help 24/7',
-        keyword: 'contact Flix IPTV, IPTV support, customer service, technical support, contact streaming support, help desk, support email, IPTV assistance, contact us, customer care, streaming customer service, IPTV help center, technical help, device setup support, playlist support, activation support, payment support, billing support, account support, troubleshooting help, installation help, configuration support, streaming issues, buffering help, connection problems, app support, multi device support, android IPTV support, ios IPTV support, apple tv support, samsung tv support, lg tv support, fire stick support, windows support, smart tv support, ibo player support, ibo iptv support, net iptv support, set iptv support, smart iptv support, iptv player support, m3u support, smart iptv help, iptv smarters support, perfect player support, kodi iptv support, vlc iptv support, mx player support, iptv extreme support, duplex iptv support, ottplayer support, lazy iptv support, iptv pro support, ss iptv support, iptv ultimate support, xciptv support, implayer support, televizo support, streaming support center, iptv customer service, tv streaming help, live tv support, on demand support, catch up tv support, m3u8 support, playlist troubleshooting, EPG support, channel list support, subscription support, activation issues, trial support, premium support, reseller support, white label support, api support, server support, cdn support, bandwidth issues, quality issues, audio sync issues, subtitle support, recording support, timeshift support, parental control support, multi room support, concurrent streams support, geo blocking support, vpn support, proxy support, firewall support, router support, network support, wifi support, ethernet support, 4g support, 5g support, satellite support, cable support, fiber support',
-        description: 'Get professional support from Flix IPTV experts. We provide 24/7 customer service for device setup, technical troubleshooting, billing inquiries, account management, and streaming issues. Contact our dedicated support team for immediate assistance with your IPTV service across all devices and platforms.',
-        pageType: 'contact',
-        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/contact` : 'https://flixiptv.com/contact'
-    }
-    
-    res.render('frontend/pages/contact', {menu: 'contact', ...meta_data});
+    res.render('frontend/pages/contact', {menu: 'contact'});
 }
 
 exports.home=async(req,res)=>{
-    let keys=['home_meta_title','home_meta_keyword','home_meta_content']
+    let keys=['mylist_meta_title','mylist_meta_keyword','mylist_meta_content']
 
-    let data={
-        title: 'Flix IPTV - Premium IPTV Streaming Platform',
-        keyword: 'IPTV streaming, Flix IPTV, premium streaming, IPTV player, streaming platform, IPTV service, digital streaming, live TV streaming, IPTV solution, media streaming platform, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, tivimate, gse smart iptv, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, iptv pro, ss iptv, iptv ultimate, xciptv, implayer, televizo, free iptv, iptv channels, iptv playlist, m3u8 streaming, tv streaming, online tv, internet tv, cord cutting, streaming apps, firestick iptv, android tv iptv, roku iptv, smart tv streaming, iptv server, iptv provider, iptv subscription, iptv box',
-        description: 'Flix IPTV - Professional IPTV streaming platform offering premium streaming experience with 7-day free trial. Multi-device support for Android, iOS, Smart TV, and Windows.',
-        pageType: 'service',
-        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/home` : 'https://flixiptv.com/home'
-    }
+    let data={}
 
-    // Override with settings if available
     keys.map(key => {
-        if(settings[key]) {
-            let settingKey = key.replace('home_', '');
-            data[settingKey.replace('_', '')] = settings[key];
-        }
+        data[key] = settings[key] ? settings[key] : ''
     })
 
+    let title = data.mylist_meta_title;
+    let keyword = data.mylist_meta_keyword;
+    let description = data.mylist_meta_content;
     let meta_data = {
-        title: data.title, 
-        keyword: data.keyword, 
-        description: data.description,
-        pageType: data.pageType,
-        canonicalUrl: data.canonicalUrl
+        title: title, keyword: keyword, description: description
     }
 
     let mylist_content=await MyListContent.findOne();
@@ -493,30 +371,16 @@ exports.updatePinCode=async (req,res)=>{
 
 exports.showYoutubeList=async(req,res)=>{
     let keys=['youtubelist_meta_title','youtubelist_meta_keyword','youtubelist_meta_content']
-    let data={
-        youtubelist_meta_title: 'YouTube Playlist Upload - Flix IPTV',
-        youtubelist_meta_keyword: 'YouTube playlist, IPTV YouTube, YouTube streaming, playlist upload, YouTube integration, video streaming, YouTube channels, IPTV YouTube lists, streaming playlists, YouTube IPTV player, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, youtube tv, youtube streaming, video player, streaming video, online video player',
-        youtubelist_meta_content: 'Upload your YouTube playlists to Flix IPTV streaming service. Integrate YouTube content with your IPTV experience and enjoy seamless streaming across devices.'
-    }
-    
+    let data={}
     keys.map(key => {
-        if(settings[key]) {
-            data[key] = settings[key];
-        }
+        data[key] = settings[key] ? settings[key] : ''
     })
-    
-    let title = data.youtubelist_meta_title || 'YouTube Playlist Upload - Flix IPTV';
-    let keyword = data.youtubelist_meta_keyword || 'YouTube playlist, IPTV YouTube, YouTube streaming';
-    let description = data.youtubelist_meta_content || 'Upload your YouTube playlists to Flix IPTV streaming service.';
-    
+    let title = data.youtubelist_meta_title;
+    let keyword = data.youtubelist_meta_keyword;
+    let description = data.youtubelist_meta_content;
     let meta_data = {
-        title: title, 
-        keyword: keyword, 
-        description: description,
-        pageType: 'youtube-service',
-        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/youtube-list` : 'https://flixiptv.com/youtube-list'
+        title: title, keyword: keyword, description: description
     }
-    
     let mylist_content=await YoutubeListContent.findOne();
     res.render('frontend/pages/youtube_list', {menu: 'youtube-list',...meta_data,mylist_content:mylist_content});
 }

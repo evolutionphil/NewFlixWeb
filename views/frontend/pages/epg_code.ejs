@@ -1,0 +1,80 @@
+<link rel="stylesheet" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="/frontend/epg_page.css">
+<link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.7/css/responsive.bootstrap.min.css">
+
+<div id="epg-page-container" class="page-wrapper background-2">
+    <div class="page-container main-container">
+        <div class="country-list-part">
+            <div class="country-list-title">COUNTRY NAME</div>
+            <div class="country-list-container">
+                <div class="country-list-item active">ALL</div>
+                <%countries.map(item=>{%>
+                <div class="country-list-item"><%=item.country%></div>
+                <%})%>
+            </div>
+        </div>
+        <div class="channel-list-container position-relative">
+            <div class="loader position-absolute">
+                <img src="/images/loader.gif">
+            </div>
+            <div class="table-responsive">
+                <table class="table dt-responsive" id="epg-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <td>Channel Name</td>
+                            <td>Epg Code</td>
+                        </tr>
+                    </thead>
+                    <tbody class="table-dark table-hover"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<script>
+    var dataTable=$('#epg-table').DataTable({}), country="ALL", timer=null;
+    $(document).ready(function () {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        'use strict';
+        updateDataTable();
+    })
+
+    var site_url="";
+    function updateDataTable(){
+        $('.loader').show();
+        dataTable.destroy();
+        dataTable=$('#epg-table').DataTable({
+            'processing': true,
+            'serverSide': true,
+            'serverMethod': 'post',
+            pageLength: 25,
+            'ajax':{
+                url:site_url+"/getEpgCodes",
+                data:{
+                    country:country
+                },
+                "dataSrc": function ( json ) {
+                    $('.loader').hide();
+                    console.log(json);
+                    return json.data;
+                }
+            },
+            'columns': [
+                { data: 'name',sortable:true },
+                { data: 'channel_id',sortable:true },
+            ]
+        });
+    }
+    $(document).on('click','.country-list-item',function () {
+        $('.country-list-item').removeClass('active');
+        country=$(this).text();
+        $(this).addClass('active');
+        updateDataTable();
+    })
+</script>
+
