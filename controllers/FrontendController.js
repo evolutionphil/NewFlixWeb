@@ -30,7 +30,7 @@ exports.news=(req,res)=>{
     let keys=['news_meta_title','news_meta_keyword','news_meta_content']
     let data={
         news_meta_title: 'Flix IPTV News - Latest Updates and Announcements',
-        news_meta_keyword: 'IPTV news, Flix IPTV updates, streaming news, IPTV announcements, platform updates, IPTV industry news, streaming platform news, digital streaming updates, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player',
+        news_meta_keyword: 'IPTV news, Flix IPTV updates, streaming news, IPTV announcements, platform updates, IPTV industry news, streaming platform news, digital streaming updates, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, iptv pro, ss iptv, streaming news, tv streaming news, cord cutting news, iptv updates, streaming updates',
         news_meta_content: 'Stay updated with the latest Flix IPTV news, platform updates, and streaming industry announcements. Get the latest information about our IPTV streaming service.'
     }
     
@@ -84,7 +84,7 @@ exports.faq=(req,res)=>{
     let keys=['faq_meta_title','faq_meta_keyword','faq_meta_content']
     let data={
         faq_meta_title: 'Frequently Asked Questions - Flix IPTV',
-        faq_meta_keyword: 'IPTV FAQ, Flix IPTV help, IPTV questions, streaming help, IPTV support, how to use IPTV, IPTV troubleshooting, IPTV guide, streaming questions, IPTV setup, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player',
+        faq_meta_keyword: 'IPTV FAQ, Flix IPTV help, IPTV questions, streaming help, IPTV support, how to use IPTV, IPTV troubleshooting, IPTV guide, streaming questions, IPTV setup, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, iptv pro, ss iptv, iptv ultimate, xciptv, implayer, televizo, streaming faq, tv streaming help, firestick iptv setup, android tv iptv help, roku iptv guide',
         faq_meta_content: 'Find answers to frequently asked questions about Flix IPTV streaming service. Get help with setup, troubleshooting, device compatibility, and more.'
     }
     
@@ -215,7 +215,7 @@ exports.activation=(req,res)=>{
 exports.contact=(req,res)=>{
     let meta_data = {
         title: 'Contact Us - Flix IPTV Support',
-        keyword: 'contact Flix IPTV, IPTV support, customer service, technical support, contact streaming support, help desk, support email, IPTV assistance, contact us, customer care, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player',
+        keyword: 'contact Flix IPTV, IPTV support, customer service, technical support, contact streaming support, help desk, support email, IPTV assistance, contact us, customer care, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, iptv pro, ss iptv, iptv ultimate, xciptv, implayer, televizo, streaming support, iptv help, streaming help, tv player support',
         description: 'Contact Flix IPTV support team for assistance with your streaming service. Get help with technical issues, account questions, and general inquiries via email.',
         pageType: 'contact',
         canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/contact` : 'https://flixiptv.com/contact'
@@ -229,7 +229,7 @@ exports.home=async(req,res)=>{
 
     let data={
         title: 'Flix IPTV - Premium IPTV Streaming Platform',
-        keyword: 'IPTV streaming, Flix IPTV, premium streaming, IPTV player, streaming platform, IPTV service, digital streaming, live TV streaming, IPTV solution, media streaming platform, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, tivimate, gse smart iptv',
+        keyword: 'IPTV streaming, Flix IPTV, premium streaming, IPTV player, streaming platform, IPTV service, digital streaming, live TV streaming, IPTV solution, media streaming platform, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, tivimate, gse smart iptv, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, iptv pro, ss iptv, iptv ultimate, xciptv, implayer, televizo, free iptv, iptv channels, iptv playlist, m3u8 streaming, tv streaming, online tv, internet tv, cord cutting, streaming apps, firestick iptv, android tv iptv, roku iptv, smart tv streaming, iptv server, iptv provider, iptv subscription, iptv box',
         description: 'Flix IPTV - Professional IPTV streaming platform offering premium streaming experience with 7-day free trial. Multi-device support for Android, iOS, Smart TV, and Windows.',
         pageType: 'service',
         canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/home` : 'https://flixiptv.com/home'
@@ -418,7 +418,7 @@ exports.showYoutubeList=async(req,res)=>{
     let keys=['youtubelist_meta_title','youtubelist_meta_keyword','youtubelist_meta_content']
     let data={
         youtubelist_meta_title: 'YouTube Playlist Upload - Flix IPTV',
-        youtubelist_meta_keyword: 'YouTube playlist, IPTV YouTube, YouTube streaming, playlist upload, YouTube integration, video streaming, YouTube channels, IPTV YouTube lists, streaming playlists, YouTube IPTV player, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player',
+        youtubelist_meta_keyword: 'YouTube playlist, IPTV YouTube, YouTube streaming, playlist upload, YouTube integration, video streaming, YouTube channels, IPTV YouTube lists, streaming playlists, YouTube IPTV player, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, youtube tv, youtube streaming, video player, streaming video, online video player',
         youtubelist_meta_content: 'Upload your YouTube playlists to Flix IPTV streaming service. Integrate YouTube content with your IPTV experience and enjoy seamless streaming across devices.'
     }
     
