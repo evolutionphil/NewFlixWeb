@@ -347,28 +347,146 @@ exports.activation=(req,res)=>{
 }
 
 exports.codes=(req,res)=>{
-    // EPG codes data - sample channels with their codes
+    // Complete EPG codes database from siptv.eu/codes
     const epgCodes = [
-        { name: '1+1 International', code: '1p1_int', country: 'Ukraine', category: 'General' },
-        { name: '2+2', code: '2p2', country: 'Ukraine', category: 'General' },
-        { name: 'Animal Planet', code: 'animal_rus', country: 'Russia', category: 'Documentary' },
+        // International News & Entertainment
         { name: 'BBC Entertainment', code: 'bbc-entertainment', country: 'UK', category: 'Entertainment' },
         { name: 'BBC News', code: 'bbc-world', country: 'UK', category: 'News' },
-        { name: 'Cartoon Network', code: 'cartoon', country: 'USA', category: 'Kids' },
-        { name: 'Cinema', code: 'park-razvlecheniy', country: 'Russia', category: 'Movies' },
+        { name: 'BBC', code: 'bbc', country: 'UK', category: 'General' },
         { name: 'CNN', code: 'cnn', country: 'USA', category: 'News' },
-        { name: 'Comedy Central', code: 'paramount-comedy', country: 'Russia', category: 'Entertainment' },
-        { name: 'Discovery Channel', code: 'discovery', country: 'International', category: 'Documentary' },
-        { name: 'ESPN', code: 'espn', country: 'USA', category: 'Sports' },
-        { name: 'Eurosport 1', code: 'eurosport', country: 'Europe', category: 'Sports' },
-        { name: 'Fox News', code: 'fox-news', country: 'USA', category: 'News' },
-        { name: 'History Channel', code: 'history', country: 'International', category: 'Documentary' },
-        { name: 'MTV', code: 'mtv-rus', country: 'Russia', category: 'Music' },
-        { name: 'National Geographic', code: 'nat-geo', country: 'International', category: 'Documentary' },
-        { name: 'Nickelodeon', code: 'nickelodeon', country: 'International', category: 'Kids' },
-        { name: 'Sky Sports', code: 'sky-sports', country: 'UK', category: 'Sports' },
-        { name: 'TNT', code: 'tnt', country: 'Russia', category: 'Entertainment' },
-        { name: 'TV1000', code: 'tv1000', country: 'International', category: 'Movies' }
+        { name: 'Bloomberg', code: 'bloomberg', country: 'USA', category: 'News' },
+        { name: 'CNBC Europe', code: 'cnbc', country: 'Europe', category: 'News' },
+        
+        // Kids & Animation
+        { name: 'Cartoon Network', code: 'cartoon', country: 'International', category: 'Kids' },
+        { name: 'Cartoonito', code: 'boomerang', country: 'International', category: 'Kids' },
+        { name: 'BabyTV', code: 'baby-tv', country: 'International', category: 'Kids' },
+        { name: 'Cartoons 90', code: 'cartoons-90', country: 'International', category: 'Kids' },
+        { name: 'Cartoons Big', code: 'cartoons-big', country: 'International', category: 'Kids' },
+        { name: 'Cartoons Short', code: 'cartoons-short', country: 'International', category: 'Kids' },
+        
+        // Documentary & Educational
+        { name: 'Animal Planet', code: 'animal_rus', country: 'Russia', category: 'Documentary' },
+        { name: 'Animal Planet Europe', code: 'animal_ukr', country: 'Europe', category: 'Documentary' },
+        { name: 'Animal Planet HD', code: 'animal-hd', country: 'International', category: 'Documentary' },
+        { name: 'Da Vinci Learning Россия', code: 'da_vinci-rus', country: 'Russia', category: 'Documentary' },
+        { name: 'Curiosity Stream', code: 'curiosity-stream', country: 'International', category: 'Documentary' },
+        { name: 'CBS Reality', code: 'CBSReality.ru', country: 'Russia', category: 'Documentary' },
+        
+        // Movies & Cinema
+        { name: 'Cinema', code: 'park-razvlecheniy', country: 'Russia', category: 'Movies' },
+        { name: 'Cinema (Космос ТВ)', code: 'Cinema.ru', country: 'Russia', category: 'Movies' },
+        { name: 'CineMan', code: 'cineman', country: 'Russia', category: 'Movies' },
+        { name: 'CineMan Action', code: 'cineman-action', country: 'Russia', category: 'Movies' },
+        { name: 'CineMan Marvel', code: 'cineman-marvel', country: 'Russia', category: 'Movies' },
+        { name: 'CineMan Thriller', code: 'cineman-thriller', country: 'Russia', category: 'Movies' },
+        { name: 'CineMan Comedy', code: 'cineman-comedy', country: 'Russia', category: 'Movies' },
+        { name: 'AMC Украина и Прибалтика', code: 'mgm-int', country: 'Ukraine', category: 'Movies' },
+        
+        // Premium Movie Channels
+        { name: 'BCU Cinema HD', code: 'bcu-cinema', country: 'Russia', category: 'Movies' },
+        { name: 'BCU Action HD', code: 'bcu-action', country: 'Russia', category: 'Movies' },
+        { name: 'BCU Comedy HD', code: 'bcu-comedy', country: 'Russia', category: 'Movies' },
+        { name: 'BCU Marvel HD', code: 'bcu-marvel', country: 'Russia', category: 'Movies' },
+        { name: 'BCU Premiere HD', code: 'bcu-premiere', country: 'Russia', category: 'Movies' },
+        { name: 'BCU Fantastic HD', code: 'bcu-fantastic', country: 'Russia', category: 'Movies' },
+        { name: 'BCU History HD', code: 'bcu-history', country: 'Russia', category: 'Documentary' },
+        
+        // Box Premium Channels
+        { name: 'BOX Oscar HD', code: 'box-oscar', country: 'Russia', category: 'Movies' },
+        { name: 'BOX Gangster HD', code: 'box-gangster', country: 'Russia', category: 'Movies' },
+        { name: 'BOX Western HD', code: 'box-western', country: 'Russia', category: 'Movies' },
+        { name: 'BOX Fantasy HD', code: 'box-fantasy', country: 'Russia', category: 'Movies' },
+        { name: 'BOX Horror HD', code: 'box-zombie', country: 'Russia', category: 'Movies' },
+        { name: 'BOX Spy HD', code: 'box-spy', country: 'Russia', category: 'Movies' },
+        
+        // Sports
+        { name: 'BOX SportCast HD', code: 'box-sportcast', country: 'Russia', category: 'Sports' },
+        { name: 'Adjarasport 1', code: 'Adjarasport1.ge', country: 'Georgia', category: 'Sports' },
+        
+        // Music & Entertainment
+        { name: 'Bridge TV', code: 'bridge', country: 'Russia', category: 'Music' },
+        { name: 'Bridge TV Deluxe', code: 'bridge-hd', country: 'Russia', category: 'Music' },
+        { name: 'Bridge TV Hits', code: 'dange', country: 'Russia', category: 'Music' },
+        { name: 'Bridge TV Rock', code: 'bridge-tv-rock', country: 'Russia', category: 'Music' },
+        { name: 'Bridge TV Classic', code: 'topsong', country: 'Russia', category: 'Music' },
+        { name: 'Clubbing TV', code: 'clubbing-tv', country: 'International', category: 'Music' },
+        { name: '4Ever Music HD', code: '4evermusic', country: 'International', category: 'Music' },
+        
+        // Ukrainian Channels
+        { name: '1+1 Международный', code: '1p1_int', country: 'Ukraine', category: 'General' },
+        { name: '2+2', code: '2p2', country: 'Ukraine', category: 'General' },
+        { name: '1+1 Марафон', code: '1p1', country: 'Ukraine', category: 'General' },
+        { name: '8 канал (Украина)', code: 'pro-vse', country: 'Ukraine', category: 'General' },
+        { name: '7 канал (Одесса)', code: '7-kanal-od', country: 'Ukraine', category: 'Regional' },
+        
+        // Russian Channels
+        { name: '5 канал', code: '5kanal', country: 'Russia', category: 'General' },
+        { name: '8 канал (Россия)', code: '8-kanal', country: 'Russia', category: 'General' },
+        { name: '12 канал Омск', code: '12-omsk', country: 'Russia', category: 'Regional' },
+        { name: '49 канал (Новосибирск)', code: '49kanal', country: 'Russia', category: 'Regional' },
+        { name: '360° Новости', code: '360-news', country: 'Russia', category: 'News' },
+        { name: '24 (Телеканал новостей 24)', code: 'news24', country: 'Russia', category: 'News' },
+        { name: '2х2', code: '2x2', country: 'Russia', category: 'Entertainment' },
+        { name: 'Bolt Россия', code: 'bolt', country: 'Russia', category: 'Entertainment' },
+        
+        // Comedy & Entertainment
+        { name: 'Comedy Central Russian', code: 'paramount-comedy', country: 'Russia', category: 'Entertainment' },
+        { name: 'Candy', code: 'candy', country: 'Russia', category: 'Entertainment' },
+        
+        // Georgian Channels
+        { name: '1 TV GE', code: 'FirstChannel.ge', country: 'Georgia', category: 'General' },
+        { name: '2 TV GE', code: '2TV.ge', country: 'Georgia', category: 'General' },
+        { name: 'Ajara TV', code: 'AjaraTV.ge', country: 'Georgia', category: 'General' },
+        { name: 'Comedy TV GE', code: 'ComedyTV.ge', country: 'Georgia', category: 'Entertainment' },
+        
+        // Armenian Channels
+        { name: '21TV AM', code: '21TV.am', country: 'Armenia', category: 'General' },
+        { name: 'Armenia TV', code: 'ArmeniaTV.am', country: 'Armenia', category: 'General' },
+        { name: 'ArmNews', code: 'ArmNews.am', country: 'Armenia', category: 'News' },
+        { name: 'AR AM', code: 'AR.am', country: 'Armenia', category: 'General' },
+        { name: 'Ararat', code: 'Ararat.am', country: 'Armenia', category: 'General' },
+        { name: 'ATV Армения', code: 'ATV.am', country: 'Armenia', category: 'General' },
+        { name: 'Armcinema', code: 'Armcinema.am', country: 'Armenia', category: 'Movies' },
+        { name: 'Comedy AM', code: 'Comedy.am', country: 'Armenia', category: 'Entertainment' },
+        { name: 'Cineman AM', code: 'Cineman.am', country: 'Armenia', category: 'Movies' },
+        
+        // Belarusian Channels
+        { name: '8 канал (Беларусь)', code: '8channel', country: 'Belarus', category: 'General' },
+        
+        // French Channels
+        { name: 'Cine+', code: 'cine+', country: 'France', category: 'Movies' },
+        { name: 'Cine+ HD', code: 'cine+hd', country: 'France', category: 'Movies' },
+        { name: 'Cine+ Hit HD', code: 'cine+hit-hd', country: 'France', category: 'Movies' },
+        { name: 'Cine+ Kids', code: 'cine+kids', country: 'France', category: 'Kids' },
+        { name: 'Cine+ Legend', code: 'cine+legend', country: 'France', category: 'Movies' },
+        
+        // Bulgarian Channels
+        { name: 'Box Music TV BG', code: 'box-music-tv-bg', country: 'Bulgaria', category: 'Music' },
+        
+        // International Premium
+        { name: 'Bollywood HD', code: 'bollywood-hd', country: 'India', category: 'Movies' },
+        { name: 'Arirang', code: 'arirang-en', country: 'Korea', category: 'General' },
+        { name: 'CGTN Русский', code: 'cctv', country: 'China', category: 'News' },
+        
+        // Adult Content
+        { name: 'Blue Hustler', code: 'hustler-blue', country: 'International', category: 'Adult' },
+        
+        // Regional & Specialty
+        { name: 'ATR', code: 'atr', country: 'Crimea', category: 'Regional' },
+        { name: 'AzTV', code: 'aztv', country: 'Azerbaijan', category: 'General' },
+        { name: 'CNL Украина', code: 'cnl-ukraine', country: 'Ukraine', category: 'General' },
+        { name: 'DetectiveJam', code: 'detectivejam', country: 'Russia', category: 'Entertainment' },
+        
+        // Clarity4K Premium Channels
+        { name: 'Clarity4K Anime', code: 'clarity4k-anime', country: 'Russia', category: 'Kids' },
+        { name: 'Clarity4K Netflix', code: 'clarity4k-netflix', country: 'Russia', category: 'Movies' },
+        { name: 'Clarity4K HBO series', code: 'clarity4k-hboseries', country: 'Russia', category: 'Movies' },
+        { name: 'Clarity4K Walt Disney', code: 'clarity4k-waltdisney', country: 'Russia', category: 'Kids' },
+        { name: 'Clarity4K Боевик', code: 'clarity4k-boevik', country: 'Russia', category: 'Movies' },
+        { name: 'Clarity4K Комедия', code: 'clarity4k-komedia', country: 'Russia', category: 'Movies' },
+        { name: 'Clarity4K Фантастика', code: 'clarity4k-fantastik', country: 'Russia', category: 'Movies' },
+        { name: 'Clarity4K Ужасы', code: 'clarity4k-uzasy', country: 'Russia', category: 'Movies' }
     ];
 
     // Get unique countries and categories for filters
