@@ -72,16 +72,32 @@ exports.showNewsDetail = (req, res) => {
 
 exports.faq=(req,res)=>{
     let keys=['faq_meta_title','faq_meta_keyword','faq_meta_content']
-    let data={}
+    let data={
+        faq_meta_title: 'Frequently Asked Questions - Flix IPTV',
+        faq_meta_keyword: 'IPTV FAQ, Flix IPTV help, IPTV questions, streaming help, IPTV support, how to use IPTV, IPTV troubleshooting, IPTV guide, streaming questions, IPTV setup',
+        faq_meta_content: 'Find answers to frequently asked questions about Flix IPTV streaming service. Get help with setup, troubleshooting, device compatibility, and more.'
+    }
+    
     keys.map(key => {
-        data[key] = settings[key] ? settings[key] : ''
+        if(settings[key]) {
+            data[key] = settings[key];
+        }
     })
+    
     Faq.find().then(faqs=>{
-        let title=data.faq_meta_title;
-        let keyword=data.faq_meta_keyword;
-        let description=data.faq_meta_content;
+        let title=data.faq_meta_title || 'Frequently Asked Questions - Flix IPTV';
+        let keyword=data.faq_meta_keyword || 'IPTV FAQ, Flix IPTV help, IPTV questions, streaming help';
+        let description=data.faq_meta_content || 'Find answers to frequently asked questions about Flix IPTV streaming service.';
         res.render('frontend/pages/faq',
-            {menu:'faq',title:title, keyword:keyword,description:description,faqs:faqs}
+            {
+                menu:'faq',
+                title:title, 
+                keyword:keyword,
+                description:description,
+                faqs:faqs,
+                pageType: 'faq',
+                canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/faq` : 'https://flixiptv.com/faq'
+            }
         );
     })
 }

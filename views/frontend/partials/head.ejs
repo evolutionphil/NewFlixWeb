@@ -142,5 +142,40 @@
     }
     </script>
     <% } %>
+    
+    <% if (typeof pageType !== 'undefined' && pageType === 'faq') { %>
+    <!-- FAQ Page Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "name": "<%= title1 %>",
+        "description": "<%= description1 %>",
+        "url": "<%= url1 %>",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How do I start using Flix IPTV?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Simply upload your playlist and start your 7-day free trial. After the trial period, you can activate your account to continue using our premium streaming service."
+                }
+            },
+            {
+                "@type": "Question", 
+                "name": "What devices are supported?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Flix IPTV supports Android, iOS, Smart TV, and Windows devices. You can use the same account across multiple devices."
+                }
+            }
+        ],
+        "author": {
+            "@type": "Organization",
+            "name": "Flix IPTV"
+        }
+    }
+    </script>
+    <% } %>
 
 </head>
