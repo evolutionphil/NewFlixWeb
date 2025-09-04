@@ -25,4 +25,8 @@ jobs:
 
             npm install
 
-            pm2 restart all
+            # Set production port to 4000
+            export PORT=4000
+            export NODE_ENV=production
+
+            pm2 restart all --update-env
