@@ -55,8 +55,17 @@
                 </div>
             </div>
 
-            <!-- Upload Form Section - Right after header -->
-            <div class="order-2 order-md-2">
+            <!-- Database Content Section - After header, before forms on desktop -->
+            <div class="order-4 order-md-2">
+                <% if(mylist_content){ %>
+                    <div class="text-white" style="background: rgba(255, 255, 255, 0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); margin: 2rem 0;">
+                        <%- mylist_content.contents %>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Upload Form Section - After content on desktop, priority on mobile -->
+            <div class="order-2 order-md-3">
                 <form method="post" class="col-md-7 m-auto" action="/savePlaylists" id="playlist-form">
                     <div class="row">
                         <div class="col-md-6">
@@ -124,7 +133,7 @@
                 </form>
             </div>
 
-            <!-- Parent Pin Section - After upload form, last on desktop -->
+            <!-- Parent Pin Section - After upload form -->
             <div class="order-3 order-md-4">
                 <div style="margin-top: 2rem;">
                     <h2 class="text-center text-white h4">Parent Pin</h2>
@@ -164,52 +173,10 @@
                 </div>
             </div>
 
-            <!-- SEO Content Section - Last on mobile, third on desktop -->
-            <div class="order-4 order-md-3" style="background: rgba(255, 255, 255, 0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); margin: 2rem 0;">
-                <h2 class="text-white h5 mb-3 text-center">Complete Playlist Management for Streaming</h2>
-                
-                <div class="text-white-50 mb-3">
-                    <p><strong class="text-white">Playlist Upload Service:</strong> Upload and manage your streaming playlists with Flix app. Support for M3U playlists, live streaming, and media content across all your devices.</p>
-                    
-                    <p><strong class="text-white">Multi-Device Access:</strong> Your playlists sync automatically across Smart TV, Android, iOS, and streaming devices. Access your content anywhere with your registered device.</p>
-                    
-                    <p><strong class="text-white">Flix App Integration:</strong> Upload playlists exclusively to your Flix streaming app for seamless entertainment experience across all your registered devices.</p>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <h3 class="text-white h6 mb-2">Features:</h3>
-                        <ul class="text-white-50" style="font-size: 14px;">
-                            <li>M3U playlist upload</li>
-                            <li>Multi-device synchronization</li>
-                            <li>MAC address management</li>
-                            <li>Parental control options</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <h3 class="text-white h6 mb-2">Device Support:</h3>
-                        <ul class="text-white-50" style="font-size: 14px;">
-                            <li>Smart TV integration</li>
-                            <li>Android/iOS compatibility</li>
-                            <li>Streaming box support</li>
-                            <li>Cross-platform access</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </section>
 
-<section class="row mt-3">
-    <div class="col-md-12">
-        <div class="my-list-form-card text-white">
-            <% if(mylist_content){ %>
-                <%- mylist_content.contents %>
-            <% } %>
-        </div>
-    </div>
-</section>
 
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script>
