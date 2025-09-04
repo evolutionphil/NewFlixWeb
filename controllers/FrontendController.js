@@ -162,7 +162,7 @@ exports.showInstructionDetail = async (req, res) => {
     // Handle missing instruction types gracefully
     if (!instruction) {
         // Return 404 for truly non-existent instruction types
-        if (!['amazonstick', 'android', 'ios', 'windows', 'smarttv', 'samsung', 'lg', 'epg', 'apple-tv', 'playlist'].includes(kind)) {
+        if (!['amazonstick', 'android', 'ios', 'windows', 'smarttv', 'samsung', 'lg', 'epg', 'apple-tv', 'playlist', 'samsung&lg&android'].includes(kind)) {
             return res.status(404).send('Instruction not found');
         }
         
@@ -232,6 +232,11 @@ function getDeviceSpecificSEO(deviceType) {
             title: 'Flix IPTV Playlist Management Guide - Setup Instructions',
             keywords: 'IPTV playlist setup, m3u playlist guide, playlist management, IPTV playlist upload, streaming playlist, m3u8 playlist, playlist configuration, IPTV m3u setup, ibo player playlist, ibo iptv playlist, net iptv playlist, smart iptv playlist, iptv smarters playlist, perfect player playlist, playlist instructions',
             description: 'Complete guide to manage and setup IPTV playlists. Learn how to upload, configure, and manage M3U playlists for optimal streaming experience.'
+        },
+        'samsung&lg&android': {
+            title: 'Flix IPTV Multi-Device Setup Guide - Samsung, LG & Android',
+            keywords: 'multi device IPTV setup, Samsung LG Android IPTV, cross platform IPTV, Smart TV Android setup, multiple device IPTV, unified IPTV guide, Samsung LG setup, Android TV IPTV, multi platform streaming, ibo player multi device, smart iptv multiple devices, cross platform streaming',
+            description: 'Comprehensive setup guide for Flix IPTV across Samsung Smart TVs, LG Smart TVs, and Android devices. Universal installation instructions for multiple platforms.'
         }
     };
 
