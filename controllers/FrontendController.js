@@ -247,35 +247,6 @@ function getDeviceSpecificSEO(deviceType) {
     };
 }
 
-exports.epg = async (req, res) => {
-    let meta_data = {
-        title: 'EPG Codes - Electronic Program Guide for IPTV Channels',
-        keyword: 'EPG codes, IPTV EPG, electronic program guide, EPG channels, IPTV program guide, TV guide codes, channel EPG, EPG data, EPG list, EPG information, ibo player epg, ibo iptv epg, net iptv epg, set iptv epg, smart iptv epg, iptv player epg, m3u epg, smart iptv epg codes, iptv smarters epg, perfect player epg, kodi epg, vlc epg, tivimate epg, gse smart epg, iptv extreme epg, duplex iptv epg, lazy iptv epg, ottplayer epg, ss iptv epg, epg url, epg source, xmltv epg',
-        description: 'Complete list of EPG codes for IPTV channels organized by country. Find Electronic Program Guide codes for your favorite channels to enhance your IPTV streaming experience.',
-        pageType: 'epg-directory',
-        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/epg` : 'https://flixiptv.com/epg'
-    }
-    
-    // Get countries for EPG filtering - using default countries for demo
-    let countries = [
-        { country: 'United States' },
-        { country: 'United Kingdom' }, 
-        { country: 'Canada' },
-        { country: 'Germany' },
-        { country: 'France' },
-        { country: 'Spain' },
-        { country: 'Italy' },
-        { country: 'Netherlands' },
-        { country: 'Belgium' },
-        { country: 'Australia' }
-    ];
-
-    res.render('frontend/pages/epg_code', { 
-        menu: 'epg', 
-        countries: countries,
-        ...meta_data 
-    });
-}
 
 exports.activation=(req,res)=>{
     let promises=[];
