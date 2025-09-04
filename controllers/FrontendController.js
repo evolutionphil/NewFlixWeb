@@ -495,7 +495,7 @@ exports.showYoutubeList=async(req,res)=>{
     let keys=['youtubelist_meta_title','youtubelist_meta_keyword','youtubelist_meta_content']
     let data={
         youtubelist_meta_title: 'YouTube Playlist Upload - Flix IPTV',
-        youtubelist_meta_keyword: 'YouTube playlist, IPTV YouTube, YouTube streaming, playlist upload, YouTube integration, video streaming, YouTube channels, IPTV YouTube lists, streaming playlists, YouTube IPTV player, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, youtube tv, youtube streaming, video player, streaming video, online video player',
+        youtubelist_meta_keyword: 'YouTube playlist, streaming service, YouTube streaming, playlist upload, YouTube integration, video streaming, YouTube channels, streaming playlists, media player, streaming app, media streaming, streaming platform, video player, streaming video, online video player, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv',
         youtubelist_meta_content: 'Upload your YouTube playlists to Flix IPTV streaming service. Integrate YouTube content with your IPTV experience and enjoy seamless streaming across devices.'
     }
     
