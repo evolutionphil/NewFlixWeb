@@ -5,6 +5,7 @@ const cors=require('cors');
 const fileUpload = require("express-fileupload");
 const mongoose = require('mongoose');
 const expressLayouts = require('express-ejs-layouts');
+const compression = require('compression');
 
 // Set strictQuery to suppress deprecation warning
 mongoose.set('strictQuery', false);
@@ -31,6 +32,30 @@ const path=require('path');
 const PORT = process.env.PORT || 5000;
 
 // Removed Socket.IO setup - monitoring now uses regular HTTP requests
+
+// Enable gzip compression with optimized settings for better performance and SEO
+app.use(compression({
+    // Compression level (1-9, 6 is default, 9 is best compression but slower)
+    level: 6,
+    // Minimum response size to compress (bytes)
+    threshold: 1024,
+    // Compression filter - compress text-based content
+    filter: (req, res) => {
+        // Don't compress if the request includes a cache-control: no-transform directive
+        if (req.headers['cache-control'] && req.headers['cache-control'].includes('no-transform')) {
+            return false;
+        }
+        
+        // Fallback to standard filter function
+        return compression.filter(req, res);
+    },
+    // Chunk size for compression
+    chunkSize: 16 * 1024,
+    // Window bits for compression (8-15)
+    windowBits: 15,
+    // Memory level (1-9)
+    memLevel: 8
+}));
 
 app.use(cors({
     origin: true,

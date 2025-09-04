@@ -22,6 +22,7 @@
     "body-parser": "^1.19.0",
     "coinpayments": "^2.1.2",
     "coinpayments-ipn": "^1.0.0",
+    "compression": "^1.8.1",
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "dotenv": "^8.6.0",
