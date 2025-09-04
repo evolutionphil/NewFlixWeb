@@ -44,7 +44,8 @@
 <section class="row mt-3" id="vue">
     <div class="col-md-12">
         <div class="my-list-form-card">
-            <div>
+            <!-- Header Section -->
+            <div class="order-1">
                 <h1 class="text-center text-white">My List - Playlist Upload</h1>
                 <p class="text-center text-white">Upload Your Streaming Playlists to Flix App</p>
 
@@ -52,108 +53,110 @@
                     <img src="/images/icons/play-circle.png" alt="">
                     <p class="p-0 m-0" style="line-height: 0">Flix TV is a player, not a content host</p>
                 </div>
-
-                <!-- SEO Content Section -->
-                <div style="background: rgba(255, 255, 255, 0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); margin: 2rem 0;">
-                    <h2 class="text-white h5 mb-3 text-center">Complete Playlist Management for Streaming</h2>
-                    
-                    <div class="text-white-50 mb-3">
-                        <p><strong class="text-white">Playlist Upload Service:</strong> Upload and manage your streaming playlists with Flix app. Support for M3U playlists, live streaming, and media content across all your devices.</p>
-                        
-                        <p><strong class="text-white">Multi-Device Access:</strong> Your playlists sync automatically across Smart TV, Android, iOS, and streaming devices. Access your content anywhere with your registered device.</p>
-                        
-                        <p><strong class="text-white">Streaming Platform Integration:</strong> Compatible with popular media players and streaming applications for seamless entertainment experience.</p>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h3 class="text-white h6 mb-2">Features:</h3>
-                            <ul class="text-white-50" style="font-size: 14px;">
-                                <li>M3U playlist upload</li>
-                                <li>Multi-device synchronization</li>
-                                <li>MAC address management</li>
-                                <li>Parental control options</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h3 class="text-white h6 mb-2">Device Support:</h3>
-                            <ul class="text-white-50" style="font-size: 14px;">
-                                <li>Smart TV integration</li>
-                                <li>Android/iOS compatibility</li>
-                                <li>Streaming box support</li>
-                                <li>Cross-platform access</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <form method="post" class="col-md-7 m-auto" action="/savePlaylists" id="playlist-form">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Mac Address</label>
-                            <input
-                                    type="text"
-                                    class="form-control mac-address"
-                                    placeholder="00:aa:bb:cc:dd:11"
-                                    name="mac_address"
-                                    maxlength="17"
-                                    required
-                            >
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-group" v-for="(item,index) in urls" :key="index">
-                            <label>Url</label>
-                            <div class="d-flex url-input-container">
+            <!-- Upload Form Section - Priority on Mobile -->
+            <div class="order-2 order-md-3">
+                <form method="post" class="col-md-7 m-auto" action="/savePlaylists" id="playlist-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Mac Address</label>
                                 <input
                                         type="text"
-                                        class="form-control url-input"
-                                        name="urls[]"
-                                        v-model="item.url"
+                                        class="form-control mac-address"
+                                        placeholder="00:aa:bb:cc:dd:11"
+                                        name="mac_address"
+                                        maxlength="17"
                                         required
                                 >
-                                <button type="button" class="btn text-white d-flex align-items-center justify-content-center btn-delete"
-                                        v-if="urls.length>1"
-                                        @click.prevent="deleteUrl(index)">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M20.9999 6.73001C20.9799 6.73001 20.9499 6.73001 20.9199 6.73001C15.6299 6.20001 10.3499 6.00001 5.11992 6.53001L3.07992 6.73001C2.65992 6.77001 2.28992 6.47001 2.24992 6.05001C2.20992 5.63001 2.50992 5.27001 2.91992 5.23001L4.95992 5.03001C10.2799 4.49001 15.6699 4.70001 21.0699 5.23001C21.4799 5.27001 21.7799 5.64001 21.7399 6.05001C21.7099 6.44001 21.3799 6.73001 20.9999 6.73001Z"
-                                              fill="white"/>
-                                        <path d="M8.50001 5.72C8.46001 5.72 8.42001 5.72 8.37001 5.71C7.97001 5.64 7.69001 5.25 7.76001 4.85L7.98001 3.54C8.14001 2.58 8.36001 1.25 10.69 1.25H13.31C15.65 1.25 15.87 2.63 16.02 3.55L16.24 4.85C16.31 5.26 16.03 5.65 15.63 5.71C15.22 5.78 14.83 5.5 14.77 5.1L14.55 3.8C14.41 2.93 14.38 2.76 13.32 2.76H10.7C9.64001 2.76 9.62001 2.9 9.47001 3.79L9.24001 5.09C9.18001 5.46 8.86001 5.72 8.50001 5.72Z"
-                                              fill="white"/>
-                                        <path d="M15.2099 22.75H8.7899C5.2999 22.75 5.1599 20.82 5.0499 19.26L4.3999 9.19001C4.3699 8.78001 4.6899 8.42001 5.0999 8.39001C5.5199 8.37001 5.8699 8.68001 5.8999 9.09001L6.5499 19.16C6.6599 20.68 6.6999 21.25 8.7899 21.25H15.2099C17.3099 21.25 17.3499 20.68 17.4499 19.16L18.0999 9.09001C18.1299 8.68001 18.4899 8.37001 18.8999 8.39001C19.3099 8.42001 19.6299 8.77001 19.5999 9.19001L18.9499 19.26C18.8399 20.82 18.6999 22.75 15.2099 22.75Z"
-                                              fill="white"/>
-                                        <path d="M13.6601 17.25H10.3301C9.92008 17.25 9.58008 16.91 9.58008 16.5C9.58008 16.09 9.92008 15.75 10.3301 15.75H13.6601C14.0701 15.75 14.4101 16.09 14.4101 16.5C14.4101 16.91 14.0701 17.25 13.6601 17.25Z"
-                                              fill="white"/>
-                                        <path d="M14.5 13.25H9.5C9.09 13.25 8.75 12.91 8.75 12.5C8.75 12.09 9.09 11.75 9.5 11.75H14.5C14.91 11.75 15.25 12.09 15.25 12.5C15.25 12.91 14.91 13.25 14.5 13.25Z"
-                                              fill="white"/>
-                                    </svg>
-                                </button>
-                                <button type="button" class="btn text-white d-flex align-items-center justify-content-center btn-add"
-                                        @click.prevent="addUrl()">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z"
-                                              fill="white"/>
-                                        <path d="M12 18.75C11.59 18.75 11.25 18.41 11.25 18V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V18C12.75 18.41 12.41 18.75 12 18.75Z"
-                                              fill="white"/>
-                                    </svg>
-                                </button>
+                            </div>
+                        </div>
 
+                        <div class="col-md-6">
+                            <div class="form-group" v-for="(item,index) in urls" :key="index">
+                                <label>Url</label>
+                                <div class="d-flex url-input-container">
+                                    <input
+                                            type="text"
+                                            class="form-control url-input"
+                                            name="urls[]"
+                                            v-model="item.url"
+                                            required
+                                    >
+                                    <button type="button" class="btn text-white d-flex align-items-center justify-content-center btn-delete"
+                                            v-if="urls.length>1"
+                                            @click.prevent="deleteUrl(index)">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M20.9999 6.73001C20.9799 6.73001 20.9499 6.73001 20.9199 6.73001C15.6299 6.20001 10.3499 6.00001 5.11992 6.53001L3.07992 6.73001C2.65992 6.77001 2.28992 6.47001 2.24992 6.05001C2.20992 5.63001 2.50992 5.27001 2.91992 5.23001L4.95992 5.03001C10.2799 4.49001 15.6699 4.70001 21.0699 5.23001C21.4799 5.27001 21.7799 5.64001 21.7399 6.05001C21.7099 6.44001 21.3799 6.73001 20.9999 6.73001Z"
+                                                  fill="white"/>
+                                            <path d="M8.50001 5.72C8.46001 5.72 8.42001 5.72 8.37001 5.71C7.97001 5.64 7.69001 5.25 7.76001 4.85L7.98001 3.54C8.14001 2.58 8.36001 1.25 10.69 1.25H13.31C15.65 1.25 15.87 2.63 16.02 3.55L16.24 4.85C16.31 5.26 16.03 5.65 15.63 5.71C15.22 5.78 14.83 5.5 14.77 5.1L14.55 3.8C14.41 2.93 14.38 2.76 13.32 2.76H10.7C9.64001 2.76 9.62001 2.9 9.47001 3.79L9.24001 5.09C9.18001 5.46 8.86001 5.72 8.50001 5.72Z"
+                                                  fill="white"/>
+                                            <path d="M15.2099 22.75H8.7899C5.2999 22.75 5.1599 20.82 5.0499 19.26L4.3999 9.19001C4.3699 8.78001 4.6899 8.42001 5.0999 8.39001C5.5199 8.37001 5.8699 8.68001 5.8999 9.09001L6.5499 19.16C6.6599 20.68 6.6999 21.25 8.7899 21.25H15.2099C17.3099 21.25 17.3499 20.68 17.4499 19.16L18.0999 9.09001C18.1299 8.68001 18.4899 8.37001 18.8999 8.39001C19.3099 8.42001 19.6299 8.77001 19.5999 9.19001L18.9499 19.26C18.8399 20.82 18.6999 22.75 15.2099 22.75Z"
+                                                  fill="white"/>
+                                            <path d="M13.6601 17.25H10.3301C9.92008 17.25 9.58008 16.91 9.58008 16.5C9.58008 16.09 9.92008 15.75 10.3301 15.75H13.6601C14.0701 15.75 14.4101 16.09 14.4101 16.5C14.4101 16.91 14.0701 17.25 13.6601 17.25Z"
+                                                  fill="white"/>
+                                            <path d="M14.5 13.25H9.5C9.09 13.25 8.75 12.91 8.75 12.5C8.75 12.09 9.09 11.75 9.5 11.75H14.5C14.91 11.75 15.25 12.09 15.25 12.5C15.25 12.91 14.91 13.25 14.5 13.25Z"
+                                                  fill="white"/>
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="btn text-white d-flex align-items-center justify-content-center btn-add"
+                                            @click.prevent="addUrl()">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M18 12.75H6C5.59 12.75 5.25 12.41 5.25 12C5.25 11.59 5.59 11.25 6 11.25H18C18.41 11.25 18.75 11.59 18.75 12C18.75 12.41 18.41 12.75 18 12.75Z"
+                                                  fill="white"/>
+                                            <path d="M12 18.75C11.59 18.75 11.25 18.41 11.25 18V6C11.25 5.59 11.59 5.25 12 5.25C12.41 5.25 12.75 5.59 12.75 6V18C12.75 18.41 12.41 18.75 12 18.75Z"
+                                                  fill="white"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="text-center m-auto">
+                                <button type="submit" class="btn btn-primary btn-submit" id="send-url-btn">Send</button>
                             </div>
                         </div>
                     </div>
+                </form>
+            </div>
 
-                    <div class="col-12">
-                        <div class="text-center m-auto">
-                            <button type="submit" class="btn btn-primary btn-submit" id="send-url-btn">Send</button>
-                        </div>
+            <!-- SEO Content Section - After forms on mobile -->
+            <div class="order-4 order-md-2" style="background: rgba(255, 255, 255, 0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); margin: 2rem 0;">
+                <h2 class="text-white h5 mb-3 text-center">Complete Playlist Management for Streaming</h2>
+                
+                <div class="text-white-50 mb-3">
+                    <p><strong class="text-white">Playlist Upload Service:</strong> Upload and manage your streaming playlists with Flix app. Support for M3U playlists, live streaming, and media content across all your devices.</p>
+                    
+                    <p><strong class="text-white">Multi-Device Access:</strong> Your playlists sync automatically across Smart TV, Android, iOS, and streaming devices. Access your content anywhere with your registered device.</p>
+                    
+                    <p><strong class="text-white">Streaming Platform Integration:</strong> Compatible with popular media players and streaming applications for seamless entertainment experience.</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3 class="text-white h6 mb-2">Features:</h3>
+                        <ul class="text-white-50" style="font-size: 14px;">
+                            <li>M3U playlist upload</li>
+                            <li>Multi-device synchronization</li>
+                            <li>MAC address management</li>
+                            <li>Parental control options</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="text-white h6 mb-2">Device Support:</h3>
+                        <ul class="text-white-50" style="font-size: 14px;">
+                            <li>Smart TV integration</li>
+                            <li>Android/iOS compatibility</li>
+                            <li>Streaming box support</li>
+                            <li>Cross-platform access</li>
+                        </ul>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </section>
@@ -170,7 +173,7 @@
 
 <section class="row mt-3">
     <div class="col-md-12">
-        <div class="my-list-form-card">
+        <div class="my-list-form-card order-3">
             <div>
                 <h1 class="text-center text-white">Parent Pin</h1>
                 <p class="text-center text-white">Change Parent Pin Code</p>
