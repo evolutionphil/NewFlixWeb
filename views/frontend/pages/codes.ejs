@@ -78,10 +78,10 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <select id="countryFilter" class="form-control filter-select">
+                <select id="countryFilter" class="form-control filter-select" onchange="handleCountrySelection(this)">
                     <option value="">All Countries</option>
                     <% countries.forEach(country => { %>
-                        <option value="<%= country %>"><%= country %></option>
+                        <option value="<%= country %>" data-url="/codes/<%= country.toLowerCase().replace(/\s+/g, '-') %>"><%= country %></option>
                     <% }); %>
                 </select>
             </div>
@@ -181,9 +181,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     searchInput.addEventListener('input', filterTable);
-    countryFilter.addEventListener('change', filterTable);
     categoryFilter.addEventListener('change', filterTable);
 });
+
+// Handle country selection - redirect to country page or filter
+function handleCountrySelection(select) {
+    const selectedOption = select.options[select.selectedIndex];
+    const countryUrl = selectedOption.getAttribute('data-url');
+    
+    if (countryUrl && selectedOption.value) {
+        // Show loading state
+        select.style.opacity = '0.7';
+        select.disabled = true;
+        
+        // Add a small delay for better UX
+        setTimeout(() => {
+            window.location.href = countryUrl;
+        }, 300);
+    }
+}
 
 // Copy to clipboard functionality
 function copyCode(code) {

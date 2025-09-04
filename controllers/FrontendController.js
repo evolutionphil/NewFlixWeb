@@ -804,6 +804,559 @@ exports.codes=(req,res)=>{
     );
 }
 
+exports.countryEpgCodes=(req,res)=>{
+    const countryParam = req.params.country.toLowerCase();
+    
+    // Complete EPG codes database (same as main codes page)
+    const allEpgCodes = [
+        // International News & Entertainment
+        { name: 'BBC Entertainment', code: 'bbc-entertainment', country: 'UK', category: 'Entertainment' },
+        { name: 'BBC News', code: 'bbc-world', country: 'UK', category: 'News' },
+        { name: 'BBC', code: 'bbc', country: 'UK', category: 'General' },
+        { name: 'CNN', code: 'cnn', country: 'USA', category: 'News' },
+        { name: 'Bloomberg', code: 'bloomberg', country: 'USA', category: 'News' },
+        { name: 'CNBC Europe', code: 'cnbc', country: 'Europe', category: 'News' },
+        
+        // Kids & Animation
+        { name: 'Cartoon Network', code: 'cartoon', country: 'International', category: 'Kids' },
+        { name: 'Cartoonito', code: 'boomerang', country: 'International', category: 'Kids' },
+        { name: 'BabyTV', code: 'baby-tv', country: 'International', category: 'Kids' },
+        { name: 'Cartoons 90', code: 'cartoons-90', country: 'International', category: 'Kids' },
+        { name: 'Cartoons Big', code: 'cartoons-big', country: 'International', category: 'Kids' },
+        { name: 'Cartoons Short', code: 'cartoons-short', country: 'International', category: 'Kids' },
+        
+        // Documentary & Educational
+        { name: 'Animal Planet', code: 'animal_rus', country: 'Russia', category: 'Documentary' },
+        { name: 'Animal Planet Europe', code: 'animal_ukr', country: 'Europe', category: 'Documentary' },
+        { name: 'Animal Planet HD', code: 'animal-hd', country: 'International', category: 'Documentary' },
+        { name: 'Da Vinci Learning Россия', code: 'da_vinci-rus', country: 'Russia', category: 'Documentary' },
+        { name: 'Curiosity Stream', code: 'curiosity-stream', country: 'International', category: 'Documentary' },
+        { name: 'CBS Reality', code: 'CBSReality.ru', country: 'Russia', category: 'Documentary' },
+        
+        // Movies & Cinema
+        { name: 'Cinema', code: 'park-razvlecheniy', country: 'Russia', category: 'Movies' },
+        { name: 'Cinema (Космос ТВ)', code: 'Cinema.ru', country: 'Russia', category: 'Movies' },
+        { name: 'CineMan', code: 'cineman', country: 'Russia', category: 'Movies' },
+        { name: 'CineMan Action', code: 'cineman-action', country: 'Russia', category: 'Movies' },
+        { name: 'CineMan Marvel', code: 'cineman-marvel', country: 'Russia', category: 'Movies' },
+        { name: 'CineMan Thriller', code: 'cineman-thriller', country: 'Russia', category: 'Movies' },
+        { name: 'CineMan Comedy', code: 'cineman-comedy', country: 'Russia', category: 'Movies' },
+        { name: 'AMC Украина и Прибалтика', code: 'mgm-int', country: 'Ukraine', category: 'Movies' },
+        
+        // Premium Movie Channels
+        { name: 'BCU Cinema HD', code: 'bcu-cinema', country: 'Russia', category: 'Movies' },
+        { name: 'BCU Action HD', code: 'bcu-action', country: 'Russia', category: 'Movies' },
+        { name: 'BCU Comedy HD', code: 'bcu-comedy', country: 'Russia', category: 'Movies' },
+        { name: 'BCU Marvel HD', code: 'bcu-marvel', country: 'Russia', category: 'Movies' },
+        { name: 'BCU Premiere HD', code: 'bcu-premiere', country: 'Russia', category: 'Movies' },
+        { name: 'BCU Fantastic HD', code: 'bcu-fantastic', country: 'Russia', category: 'Movies' },
+        { name: 'BCU History HD', code: 'bcu-history', country: 'Russia', category: 'Documentary' },
+        
+        // Box Premium Channels
+        { name: 'BOX Oscar HD', code: 'box-oscar', country: 'Russia', category: 'Movies' },
+        { name: 'BOX Gangster HD', code: 'box-gangster', country: 'Russia', category: 'Movies' },
+        { name: 'BOX Western HD', code: 'box-western', country: 'Russia', category: 'Movies' },
+        { name: 'BOX Fantasy HD', code: 'box-fantasy', country: 'Russia', category: 'Movies' },
+        { name: 'BOX Horror HD', code: 'box-zombie', country: 'Russia', category: 'Movies' },
+        { name: 'BOX Spy HD', code: 'box-spy', country: 'Russia', category: 'Movies' },
+        
+        // Sports
+        { name: 'BOX SportCast HD', code: 'box-sportcast', country: 'Russia', category: 'Sports' },
+        { name: 'Adjarasport 1', code: 'Adjarasport1.ge', country: 'Georgia', category: 'Sports' },
+        
+        // Music & Entertainment
+        { name: 'Bridge TV', code: 'bridge', country: 'Russia', category: 'Music' },
+        { name: 'Bridge TV Deluxe', code: 'bridge-hd', country: 'Russia', category: 'Music' },
+        { name: 'Bridge TV Hits', code: 'dange', country: 'Russia', category: 'Music' },
+        { name: 'Bridge TV Rock', code: 'bridge-tv-rock', country: 'Russia', category: 'Music' },
+        { name: 'Bridge TV Classic', code: 'topsong', country: 'Russia', category: 'Music' },
+        { name: 'Clubbing TV', code: 'clubbing-tv', country: 'International', category: 'Music' },
+        { name: '4Ever Music HD', code: '4evermusic', country: 'International', category: 'Music' },
+        
+        // Ukrainian Channels
+        { name: '1+1 Международный', code: '1p1_int', country: 'Ukraine', category: 'General' },
+        { name: '2+2', code: '2p2', country: 'Ukraine', category: 'General' },
+        { name: '1+1 Марафон', code: '1p1', country: 'Ukraine', category: 'General' },
+        { name: '8 канал (Украина)', code: 'pro-vse', country: 'Ukraine', category: 'General' },
+        { name: '7 канал (Одесса)', code: '7-kanal-od', country: 'Ukraine', category: 'Regional' },
+        
+        // Russian Channels
+        { name: '5 канал', code: '5kanal', country: 'Russia', category: 'General' },
+        { name: '8 канал (Россия)', code: '8-kanal', country: 'Russia', category: 'General' },
+        { name: '12 канал Омск', code: '12-omsk', country: 'Russia', category: 'Regional' },
+        { name: '49 канал (Новосибирск)', code: '49kanal', country: 'Russia', category: 'Regional' },
+        { name: '360° Новости', code: '360-news', country: 'Russia', category: 'News' },
+        { name: '24 (Телеканал новостей 24)', code: 'news24', country: 'Russia', category: 'News' },
+        { name: '2х2', code: '2x2', country: 'Russia', category: 'Entertainment' },
+        { name: 'Bolt Россия', code: 'bolt', country: 'Russia', category: 'Entertainment' },
+        
+        // Comedy & Entertainment
+        { name: 'Comedy Central Russian', code: 'paramount-comedy', country: 'Russia', category: 'Entertainment' },
+        { name: 'Candy', code: 'candy', country: 'Russia', category: 'Entertainment' },
+        
+        // Georgian Channels
+        { name: '1 TV GE', code: 'FirstChannel.ge', country: 'Georgia', category: 'General' },
+        { name: '2 TV GE', code: '2TV.ge', country: 'Georgia', category: 'General' },
+        { name: 'Ajara TV', code: 'AjaraTV.ge', country: 'Georgia', category: 'General' },
+        { name: 'Comedy TV GE', code: 'ComedyTV.ge', country: 'Georgia', category: 'Entertainment' },
+        
+        // Armenian Channels
+        { name: '21TV AM', code: '21TV.am', country: 'Armenia', category: 'General' },
+        { name: 'Armenia TV', code: 'ArmeniaTV.am', country: 'Armenia', category: 'General' },
+        { name: 'ArmNews', code: 'ArmNews.am', country: 'Armenia', category: 'News' },
+        { name: 'AR AM', code: 'AR.am', country: 'Armenia', category: 'General' },
+        { name: 'Ararat', code: 'Ararat.am', country: 'Armenia', category: 'General' },
+        { name: 'ATV Армения', code: 'ATV.am', country: 'Armenia', category: 'General' },
+        { name: 'Armcinema', code: 'Armcinema.am', country: 'Armenia', category: 'Movies' },
+        { name: 'Comedy AM', code: 'Comedy.am', country: 'Armenia', category: 'Entertainment' },
+        { name: 'Cineman AM', code: 'Cineman.am', country: 'Armenia', category: 'Movies' },
+        
+        // Belarusian Channels
+        { name: '8 канал (Беларусь)', code: '8channel', country: 'Belarus', category: 'General' },
+        
+        // French Channels
+        { name: 'Cine+', code: 'cine+', country: 'France', category: 'Movies' },
+        { name: 'Cine+ HD', code: 'cine+hd', country: 'France', category: 'Movies' },
+        { name: 'Cine+ Hit HD', code: 'cine+hit-hd', country: 'France', category: 'Movies' },
+        { name: 'Cine+ Kids', code: 'cine+kids', country: 'France', category: 'Kids' },
+        { name: 'Cine+ Legend', code: 'cine+legend', country: 'France', category: 'Movies' },
+        
+        // Bulgarian Channels
+        { name: 'Box Music TV BG', code: 'box-music-tv-bg', country: 'Bulgaria', category: 'Music' },
+        
+        // International Premium
+        { name: 'Bollywood HD', code: 'bollywood-hd', country: 'India', category: 'Movies' },
+        { name: 'Arirang', code: 'arirang-en', country: 'Korea', category: 'General' },
+        { name: 'CGTN Русский', code: 'cctv', country: 'China', category: 'News' },
+        
+        // Adult Content
+        { name: 'Blue Hustler', code: 'hustler-blue', country: 'International', category: 'Adult' },
+        
+        // Regional & Specialty
+        { name: 'ATR', code: 'atr', country: 'Crimea', category: 'Regional' },
+        { name: 'AzTV', code: 'aztv', country: 'Azerbaijan', category: 'General' },
+        { name: 'CNL Украина', code: 'cnl-ukraine', country: 'Ukraine', category: 'General' },
+        { name: 'DetectiveJam', code: 'detectivejam', country: 'Russia', category: 'Entertainment' },
+        
+        // Clarity4K Premium Channels
+        { name: 'Clarity4K Anime', code: 'clarity4k-anime', country: 'Russia', category: 'Kids' },
+        { name: 'Clarity4K Netflix', code: 'clarity4k-netflix', country: 'Russia', category: 'Movies' },
+        { name: 'Clarity4K HBO series', code: 'clarity4k-hboseries', country: 'Russia', category: 'Movies' },
+        { name: 'Clarity4K Walt Disney', code: 'clarity4k-waltdisney', country: 'Russia', category: 'Kids' },
+        { name: 'Clarity4K Боевик', code: 'clarity4k-boevik', country: 'Russia', category: 'Movies' },
+        { name: 'Clarity4K Комедия', code: 'clarity4k-komedia', country: 'Russia', category: 'Movies' },
+        { name: 'Clarity4K Фантастика', code: 'clarity4k-fantastik', country: 'Russia', category: 'Movies' },
+        { name: 'Clarity4K Ужасы', code: 'clarity4k-uzasy', country: 'Russia', category: 'Movies' },
+        
+        // Turkish Channels - Comprehensive List
+        { name: 'TRT 1', code: 'trt1', country: 'Turkey', category: 'General' },
+        { name: 'TRT Haber', code: 'trt-haber', country: 'Turkey', category: 'News' },
+        { name: 'TRT Spor', code: 'trt-spor', country: 'Turkey', category: 'Sports' },
+        { name: 'TRT Çocuk', code: 'trt-cocuk', country: 'Turkey', category: 'Kids' },
+        { name: 'TRT Müzik', code: 'trt-muzik', country: 'Turkey', category: 'Music' },
+        { name: 'TRT Belgesel', code: 'trt-belgesel', country: 'Turkey', category: 'Documentary' },
+        { name: 'TRT Türk', code: 'trt-turk', country: 'Turkey', category: 'General' },
+        { name: 'TRT Avaz', code: 'trt-avaz', country: 'Turkey', category: 'General' },
+        { name: 'TRT World', code: 'trt-world', country: 'Turkey', category: 'News' },
+        { name: 'ATV Türkiye', code: 'atv-tr', country: 'Turkey', category: 'General' },
+        { name: 'Kanal D', code: 'kanal-d', country: 'Turkey', category: 'General' },
+        { name: 'Show TV', code: 'show-tv', country: 'Turkey', category: 'General' },
+        { name: 'Star TV', code: 'star-tv', country: 'Turkey', category: 'General' },
+        { name: 'Fox TV', code: 'fox-tv-tr', country: 'Turkey', category: 'General' },
+        { name: 'TV8', code: 'tv8-tr', country: 'Turkey', category: 'Entertainment' },
+        { name: 'NTV', code: 'ntv-tr', country: 'Turkey', category: 'News' },
+        { name: 'Habertürk TV', code: 'haberturk', country: 'Turkey', category: 'News' },
+        { name: 'CNN Türk', code: 'cnn-turk', country: 'Turkey', category: 'News' },
+        { name: 'A Haber', code: 'a-haber', country: 'Turkey', category: 'News' },
+        { name: 'Haber Global', code: 'haber-global', country: 'Turkey', category: 'News' },
+        { name: 'Halk TV', code: 'halk-tv', country: 'Turkey', category: 'News' },
+        { name: 'TGRT Haber', code: 'tgrt-haber', country: 'Turkey', category: 'News' },
+        { name: 'TV100', code: 'tv100', country: 'Turkey', category: 'News' },
+        { name: 'Ulusal Kanal', code: 'ulusal-kanal', country: 'Turkey', category: 'News' },
+        { name: 'Kanal 7', code: 'kanal7', country: 'Turkey', category: 'General' },
+        { name: 'Beyaz TV', code: 'beyaz-tv', country: 'Turkey', category: 'General' },
+        { name: 'NOW TV', code: 'now-tv-tr', country: 'Turkey', category: 'General' },
+        { name: 'TV8.5', code: 'tv8-5', country: 'Turkey', category: 'Entertainment' },
+        { name: 'Teve2', code: 'teve2', country: 'Turkey', category: 'General' },
+        { name: 'Flash TV', code: 'flash-tv', country: 'Turkey', category: 'General' },
+        { name: 'Number1 TV', code: 'number1-tv', country: 'Turkey', category: 'Music' },
+        { name: 'Kral TV', code: 'kral-tv', country: 'Turkey', category: 'Music' },
+        { name: 'Power TV', code: 'power-tv', country: 'Turkey', category: 'Music' },
+        { name: 'Dream TV', code: 'dream-tv', country: 'Turkey', category: 'Music' },
+        { name: 'FashionTV Turkey', code: 'fashion-tv-tr', country: 'Turkey', category: 'Entertainment' },
+        { name: 'Dmax Türkiye', code: 'dmax-tr', country: 'Turkey', category: 'Documentary' },
+        { name: 'National Geographic Turkey', code: 'natgeo-tr', country: 'Turkey', category: 'Documentary' },
+        { name: 'Discovery Channel Turkey', code: 'discovery-tr', country: 'Turkey', category: 'Documentary' },
+        { name: 'TLC Turkey', code: 'tlc-tr', country: 'Turkey', category: 'Entertainment' },
+        { name: 'Minika Çocuk', code: 'minika-cocuk', country: 'Turkey', category: 'Kids' },
+        { name: 'Minika GO', code: 'minika-go', country: 'Turkey', category: 'Kids' },
+        { name: 'Cartoon Network Turkey', code: 'cartoon-tr', country: 'Turkey', category: 'Kids' },
+        { name: 'Disney Channel Turkey', code: 'disney-tr', country: 'Turkey', category: 'Kids' },
+        { name: 'Nickelodeon Turkey', code: 'nick-tr', country: 'Turkey', category: 'Kids' },
+        { name: 'CNBC-e', code: 'cnbc-e', country: 'Turkey', category: 'News' },
+        { name: 'Bloomberg HT', code: 'bloomberg-ht', country: 'Turkey', category: 'News' },
+        { name: 'Akit TV', code: 'akit-tv', country: 'Turkey', category: 'News' },
+        { name: 'Ülke TV', code: 'ulke-tv', country: 'Turkey', category: 'News' },
+        { name: 'Yeni Şafak', code: 'yeni-safak', country: 'Turkey', category: 'News' },
+        { name: 'Meltem TV', code: 'meltem-tv', country: 'Turkey', category: 'General' },
+        { name: 'Kanal Firat', code: 'kanal-firat', country: 'Turkey', category: 'Regional' },
+        { name: 'GRT', code: 'grt', country: 'Turkey', category: 'Regional' },
+        { name: 'Diyalog TV', code: 'diyalog-tv', country: 'Turkey', category: 'Regional' },
+        
+        // German/Austrian/Swiss Channels (DE/AT/CH)
+        { name: 'Das Erste', code: 'das-erste', country: 'Germany', category: 'General' },
+        { name: 'ZDF', code: 'zdf', country: 'Germany', category: 'General' },
+        { name: 'RTL', code: 'rtl-de', country: 'Germany', category: 'General' },
+        { name: 'SAT.1', code: 'sat1', country: 'Germany', category: 'General' },
+        { name: 'ProSieben', code: 'pro7', country: 'Germany', category: 'General' },
+        { name: 'VOX', code: 'vox-de', country: 'Germany', category: 'General' },
+        { name: 'RTL2', code: 'rtl2', country: 'Germany', category: 'General' },
+        { name: 'Kabel Eins', code: 'kabel1', country: 'Germany', category: 'General' },
+        { name: 'N-TV', code: 'ntv-de', country: 'Germany', category: 'News' },
+        { name: 'N24 DOKU', code: 'n24-doku', country: 'Germany', category: 'Documentary' },
+        { name: 'ORF 1', code: 'orf1', country: 'Austria', category: 'General' },
+        { name: 'ORF 2', code: 'orf2', country: 'Austria', category: 'General' },
+        { name: 'SRF 1', code: 'srf1', country: 'Switzerland', category: 'General' },
+        { name: 'SRF zwei', code: 'srf2', country: 'Switzerland', category: 'General' },
+        
+        // Spanish Channels
+        { name: 'La 1', code: 'la1', country: 'Spain', category: 'General' },
+        { name: 'La 2', code: 'la2', country: 'Spain', category: 'General' },
+        { name: 'Antena 3', code: 'antena3', country: 'Spain', category: 'General' },
+        { name: 'Cuatro', code: 'cuatro', country: 'Spain', category: 'General' },
+        { name: 'Telecinco', code: 'telecinco', country: 'Spain', category: 'General' },
+        { name: 'La Sexta', code: 'lasexta', country: 'Spain', category: 'General' },
+        { name: 'Canal+ España', code: 'canal-plus-es', country: 'Spain', category: 'Movies' },
+        { name: 'Movistar+', code: 'movistar-plus', country: 'Spain', category: 'Movies' },
+        
+        // Italian Channels
+        { name: 'Rai 1', code: 'rai1', country: 'Italy', category: 'General' },
+        { name: 'Rai 2', code: 'rai2', country: 'Italy', category: 'General' },
+        { name: 'Rai 3', code: 'rai3', country: 'Italy', category: 'General' },
+        { name: 'Canale 5', code: 'canale5', country: 'Italy', category: 'General' },
+        { name: 'Italia 1', code: 'italia1', country: 'Italy', category: 'General' },
+        { name: 'Rete 4', code: 'rete4', country: 'Italy', category: 'General' },
+        { name: 'La7', code: 'la7', country: 'Italy', category: 'General' },
+        { name: 'Sky Cinema Uno', code: 'sky-cinema-uno', country: 'Italy', category: 'Movies' },
+        
+        // Polish Channels
+        { name: 'TVP 1', code: 'tvp1', country: 'Poland', category: 'General' },
+        { name: 'TVP 2', code: 'tvp2', country: 'Poland', category: 'General' },
+        { name: 'Polsat', code: 'polsat', country: 'Poland', category: 'General' },
+        { name: 'TVN', code: 'tvn', country: 'Poland', category: 'General' },
+        { name: 'TVP Info', code: 'tvp-info', country: 'Poland', category: 'News' },
+        { name: 'TVN24', code: 'tvn24', country: 'Poland', category: 'News' },
+        { name: 'Polsat News', code: 'polsat-news', country: 'Poland', category: 'News' },
+        
+        // Nordic Channels
+        { name: 'SVT1', code: 'svt1', country: 'Sweden', category: 'General' },
+        { name: 'SVT2', code: 'svt2', country: 'Sweden', category: 'General' },
+        { name: 'TV4', code: 'tv4-se', country: 'Sweden', category: 'General' },
+        { name: 'NRK1', code: 'nrk1', country: 'Norway', category: 'General' },
+        { name: 'NRK2', code: 'nrk2', country: 'Norway', category: 'General' },
+        { name: 'TV 2 Norge', code: 'tv2-no', country: 'Norway', category: 'General' },
+        { name: 'DR1', code: 'dr1', country: 'Denmark', category: 'General' },
+        { name: 'DR2', code: 'dr2', country: 'Denmark', category: 'General' },
+        { name: 'TV 2 Danmark', code: 'tv2-dk', country: 'Denmark', category: 'General' },
+        { name: 'YLE TV1', code: 'yle1', country: 'Finland', category: 'General' },
+        { name: 'YLE TV2', code: 'yle2', country: 'Finland', category: 'General' },
+        
+        // Portuguese/Brazilian Channels
+        { name: 'RTP 1', code: 'rtp1', country: 'Portugal', category: 'General' },
+        { name: 'RTP 2', code: 'rtp2', country: 'Portugal', category: 'General' },
+        { name: 'SIC', code: 'sic', country: 'Portugal', category: 'General' },
+        { name: 'TVI', code: 'tvi', country: 'Portugal', category: 'General' },
+        { name: 'Globo', code: 'globo', country: 'Brazil', category: 'General' },
+        { name: 'SBT', code: 'sbt', country: 'Brazil', category: 'General' },
+        { name: 'Record TV', code: 'record', country: 'Brazil', category: 'General' },
+        { name: 'Band', code: 'band', country: 'Brazil', category: 'General' },
+        
+        // Greek Channels
+        { name: 'ERT1', code: 'ert1', country: 'Greece', category: 'General' },
+        { name: 'ERT2', code: 'ert2', country: 'Greece', category: 'General' },
+        { name: 'Mega Channel', code: 'mega-gr', country: 'Greece', category: 'General' },
+        { name: 'ANT1', code: 'ant1-gr', country: 'Greece', category: 'General' },
+        { name: 'Alpha TV', code: 'alpha-tv', country: 'Greece', category: 'General' },
+        { name: 'Star Channel', code: 'star-gr', country: 'Greece', category: 'General' },
+        
+        // Middle East Channels
+        { name: 'Al Jazeera', code: 'aljazeera', country: 'Qatar', category: 'News' },
+        { name: 'Al Arabiya', code: 'alarabiya', country: 'UAE', category: 'News' },
+        { name: 'MBC 1', code: 'mbc1', country: 'UAE', category: 'General' },
+        { name: 'MBC 2', code: 'mbc2', country: 'UAE', category: 'Movies' },
+        { name: 'Dubai TV', code: 'dubai-tv', country: 'UAE', category: 'General' },
+        
+        // Canadian Channels
+        { name: 'CBC', code: 'cbc', country: 'Canada', category: 'General' },
+        { name: 'CTV', code: 'ctv', country: 'Canada', category: 'General' },
+        { name: 'Global TV', code: 'global-tv', country: 'Canada', category: 'General' },
+        { name: 'TVA', code: 'tva', country: 'Canada', category: 'General' },
+        { name: 'Radio-Canada', code: 'radio-canada', country: 'Canada', category: 'General' },
+        
+        // Romanian & Hungarian Channels
+        { name: 'TVR 1', code: 'tvr1', country: 'Romania', category: 'General' },
+        { name: 'Pro TV', code: 'pro-tv-ro', country: 'Romania', category: 'General' },
+        { name: 'Antena 1', code: 'antena1-ro', country: 'Romania', category: 'General' },
+        { name: 'M1', code: 'm1-hu', country: 'Hungary', category: 'General' },
+        { name: 'M2', code: 'm2-hu', country: 'Hungary', category: 'General' },
+        { name: 'RTL Klub', code: 'rtl-klub', country: 'Hungary', category: 'General' },
+        
+        // Czech/Slovak Channels
+        { name: 'ČT1', code: 'ct1', country: 'Czech Republic', category: 'General' },
+        { name: 'ČT2', code: 'ct2', country: 'Czech Republic', category: 'General' },
+        { name: 'Nova', code: 'nova-cz', country: 'Czech Republic', category: 'General' },
+        { name: 'Prima', code: 'prima-cz', country: 'Czech Republic', category: 'General' },
+        { name: 'JOJ', code: 'joj', country: 'Slovakia', category: 'General' },
+        { name: 'Markíza', code: 'markiza', country: 'Slovakia', category: 'General' },
+        
+        // Israeli Channels
+        { name: 'Channel 11', code: 'channel11-il', country: 'Israel', category: 'General' },
+        { name: 'Channel 12', code: 'channel12-il', country: 'Israel', category: 'General' },
+        { name: 'Channel 13', code: 'channel13-il', country: 'Israel', category: 'General' },
+        { name: 'Channel 14', code: 'channel14-il', country: 'Israel', category: 'General' },
+        
+        // Mexican & Latin American
+        { name: 'Las Estrellas', code: 'las-estrellas', country: 'Mexico', category: 'General' },
+        { name: 'Canal 5', code: 'canal5-mx', country: 'Mexico', category: 'General' },
+        { name: 'Azteca Uno', code: 'azteca-uno', country: 'Mexico', category: 'General' },
+        { name: 'Televisa', code: 'televisa', country: 'Mexico', category: 'General' },
+        
+        // Chilean & Argentinian
+        { name: 'TVN Chile', code: 'tvn-cl', country: 'Chile', category: 'General' },
+        { name: 'Canal 13 Chile', code: 'canal13-cl', country: 'Chile', category: 'General' },
+        { name: 'Mega Chile', code: 'mega-cl', country: 'Chile', category: 'General' },
+        { name: 'Telefe', code: 'telefe', country: 'Argentina', category: 'General' },
+        { name: 'Canal 13 Argentina', code: 'canal13-ar', country: 'Argentina', category: 'General' },
+        { name: 'América TV', code: 'america-tv-ar', country: 'Argentina', category: 'General' },
+        
+        // Baltic States
+        { name: 'LTV1', code: 'ltv1', country: 'Latvia', category: 'General' },
+        { name: 'TV3 Latvia', code: 'tv3-lv', country: 'Latvia', category: 'General' },
+        { name: 'LRT', code: 'lrt', country: 'Lithuania', category: 'General' },
+        { name: 'TV3 Lithuania', code: 'tv3-lt', country: 'Lithuania', category: 'General' },
+        { name: 'ETV', code: 'etv', country: 'Estonia', category: 'General' },
+        { name: 'Kanal 2', code: 'kanal2-ee', country: 'Estonia', category: 'General' },
+        
+        // Benelux
+        { name: 'NPO 1', code: 'npo1', country: 'Netherlands', category: 'General' },
+        { name: 'NPO 2', code: 'npo2', country: 'Netherlands', category: 'General' },
+        { name: 'RTL 4', code: 'rtl4', country: 'Netherlands', category: 'General' },
+        { name: 'SBS6', code: 'sbs6', country: 'Netherlands', category: 'General' },
+        { name: 'VRT 1', code: 'vrt1', country: 'Belgium', category: 'General' },
+        { name: 'Vtm', code: 'vtm', country: 'Belgium', category: 'General' },
+        { name: 'RTL-TVI', code: 'rtl-tvi', country: 'Belgium', category: 'General' },
+        
+        // Additional Major European Channels
+        { name: 'Eurosport 1', code: 'eurosport1', country: 'Europe', category: 'Sports' },
+        { name: 'Eurosport 2', code: 'eurosport2', country: 'Europe', category: 'Sports' },
+        { name: 'MTV Europe', code: 'mtv-eu', country: 'Europe', category: 'Music' },
+        { name: 'VH1 Europe', code: 'vh1-eu', country: 'Europe', category: 'Music' },
+        { name: 'Comedy Central Europe', code: 'comedy-central-eu', country: 'Europe', category: 'Entertainment' },
+        { name: 'Nickelodeon Europe', code: 'nick-eu', country: 'Europe', category: 'Kids' },
+        { name: 'Discovery Europe', code: 'discovery-eu', country: 'Europe', category: 'Documentary' },
+        { name: 'History Europe', code: 'history-eu', country: 'Europe', category: 'Documentary' },
+        { name: 'National Geographic Europe', code: 'natgeo-eu', country: 'Europe', category: 'Documentary' },
+        
+        // Albanian Channels
+        { name: 'RTSH 1', code: 'rtsh1', country: 'Albania', category: 'General' },
+        { name: 'RTSH 2', code: 'rtsh2', country: 'Albania', category: 'General' },
+        { name: 'Top Channel', code: 'top-channel', country: 'Albania', category: 'General' },
+        { name: 'Klan TV', code: 'klan-tv', country: 'Albania', category: 'General' },
+        { name: 'TV Klan', code: 'tv-klan', country: 'Albania', category: 'General' },
+        { name: 'Vizion Plus', code: 'vizion-plus', country: 'Albania', category: 'General' },
+        { name: 'News 24', code: 'news24-al', country: 'Albania', category: 'News' },
+        { name: 'Report TV', code: 'report-tv', country: 'Albania', category: 'News' },
+        { name: 'ABC News', code: 'abc-news-al', country: 'Albania', category: 'News' },
+        { name: 'Ora News', code: 'ora-news', country: 'Albania', category: 'News' },
+        
+        // Macedonian Channels
+        { name: 'MRT 1', code: 'mrt1', country: 'Macedonia', category: 'General' },
+        { name: 'MRT 2', code: 'mrt2', country: 'Macedonia', category: 'General' },
+        { name: 'Sitel TV', code: 'sitel', country: 'Macedonia', category: 'General' },
+        { name: 'Kanal 5', code: 'kanal5-mk', country: 'Macedonia', category: 'General' },
+        { name: 'Alfa TV', code: 'alfa-tv-mk', country: 'Macedonia', category: 'General' },
+        { name: 'Telma', code: 'telma', country: 'Macedonia', category: 'General' },
+        { name: '24 Vesti', code: '24vesti', country: 'Macedonia', category: 'News' },
+        
+        // Serbian Channels (ExYu)
+        { name: 'RTS 1', code: 'rts1', country: 'Serbia', category: 'General' },
+        { name: 'RTS 2', code: 'rts2', country: 'Serbia', category: 'General' },
+        { name: 'Pink', code: 'pink', country: 'Serbia', category: 'General' },
+        { name: 'B92', code: 'b92', country: 'Serbia', category: 'General' },
+        { name: 'Nova S', code: 'nova-s', country: 'Serbia', category: 'General' },
+        { name: 'N1 Srbija', code: 'n1-srbija', country: 'Serbia', category: 'News' },
+        { name: 'Happy TV', code: 'happy-tv', country: 'Serbia', category: 'General' },
+        { name: 'Studio B', code: 'studio-b', country: 'Serbia', category: 'General' },
+        { name: 'TV Prva', code: 'tv-prva', country: 'Serbia', category: 'General' },
+        
+        // Croatian Channels (ExYu)
+        { name: 'HRT 1', code: 'hrt1', country: 'Croatia', category: 'General' },
+        { name: 'HRT 2', code: 'hrt2', country: 'Croatia', category: 'General' },
+        { name: 'Nova TV', code: 'nova-tv-hr', country: 'Croatia', category: 'General' },
+        { name: 'RTL Hrvatska', code: 'rtl-hr', country: 'Croatia', category: 'General' },
+        { name: 'N1 Hrvatska', code: 'n1-hrvatska', country: 'Croatia', category: 'News' },
+        { name: 'Doma TV', code: 'doma-tv', country: 'Croatia', category: 'General' },
+        
+        // Bosnian Channels (ExYu)
+        { name: 'BHRT', code: 'bhrt', country: 'Bosnia', category: 'General' },
+        { name: 'FTV', code: 'ftv', country: 'Bosnia', category: 'General' },
+        { name: 'OBN', code: 'obn', country: 'Bosnia', category: 'General' },
+        { name: 'N1 BiH', code: 'n1-bih', country: 'Bosnia', category: 'News' },
+        { name: 'Al Jazeera Balkans', code: 'aj-balkans', country: 'Bosnia', category: 'News' },
+        
+        // Slovenian Channels (ExYu)
+        { name: 'RTV SLO 1', code: 'rtvslo1', country: 'Slovenia', category: 'General' },
+        { name: 'RTV SLO 2', code: 'rtvslo2', country: 'Slovenia', category: 'General' },
+        { name: 'POP TV', code: 'pop-tv', country: 'Slovenia', category: 'General' },
+        { name: 'Kanal A', code: 'kanal-a', country: 'Slovenia', category: 'General' },
+        { name: 'TV3 Slovenia', code: 'tv3-si', country: 'Slovenia', category: 'General' },
+        
+        // Bulgarian Channels
+        { name: 'BNT 1', code: 'bnt1', country: 'Bulgaria', category: 'General' },
+        { name: 'BNT 2', code: 'bnt2', country: 'Bulgaria', category: 'General' },
+        { name: 'bTV', code: 'btv', country: 'Bulgaria', category: 'General' },
+        { name: 'Nova TV Bulgaria', code: 'nova-bg', country: 'Bulgaria', category: 'General' },
+        { name: 'Bulgaria ON AIR', code: 'bg-onair', country: 'Bulgaria', category: 'News' },
+        { name: 'TV7 Bulgaria', code: 'tv7-bg', country: 'Bulgaria', category: 'General' },
+        { name: 'BG Music', code: 'bg-music', country: 'Bulgaria', category: 'Music' },
+        { name: 'Folklor TV', code: 'folklor-tv', country: 'Bulgaria', category: 'Music' },
+        
+        // Indian Channels
+        { name: 'Star Plus', code: 'star-plus', country: 'India', category: 'General' },
+        { name: 'Colors TV', code: 'colors', country: 'India', category: 'General' },
+        { name: 'Sony TV', code: 'sony-tv', country: 'India', category: 'General' },
+        { name: 'Zee TV', code: 'zee-tv', country: 'India', category: 'General' },
+        { name: 'Star Gold', code: 'star-gold', country: 'India', category: 'Movies' },
+        { name: 'Zee Cinema', code: 'zee-cinema', country: 'India', category: 'Movies' },
+        { name: 'Sony Max', code: 'sony-max', country: 'India', category: 'Movies' },
+        { name: 'Colors Cineplex', code: 'colors-cineplex', country: 'India', category: 'Movies' },
+        { name: 'NDTV 24x7', code: 'ndtv-24x7', country: 'India', category: 'News' },
+        { name: 'Times Now', code: 'times-now', country: 'India', category: 'News' },
+        { name: 'India Today', code: 'india-today', country: 'India', category: 'News' },
+        { name: 'Republic TV', code: 'republic-tv', country: 'India', category: 'News' },
+        { name: 'Star Sports 1', code: 'star-sports1', country: 'India', category: 'Sports' },
+        { name: 'Sony Six', code: 'sony-six', country: 'India', category: 'Sports' },
+        { name: 'Pogo', code: 'pogo', country: 'India', category: 'Kids' },
+        { name: 'Nick India', code: 'nick-india', country: 'India', category: 'Kids' },
+        { name: 'Disney India', code: 'disney-india', country: 'India', category: 'Kids' }
+    ];
+    
+    // Country mapping for URL normalization
+    const countryMapping = {
+        'turkey': 'Turkey',
+        'germany': 'Germany', 
+        'spain': 'Spain',
+        'italy': 'Italy',
+        'france': 'France',
+        'uk': 'UK',
+        'usa': 'USA',
+        'russia': 'Russia',
+        'ukraine': 'Ukraine',
+        'poland': 'Poland',
+        'greece': 'Greece',
+        'armenia': 'Armenia',
+        'georgia': 'Georgia',
+        'bulgaria': 'Bulgaria',
+        'romania': 'Romania',
+        'hungary': 'Hungary',
+        'czech-republic': 'Czech Republic',
+        'slovakia': 'Slovakia',
+        'netherlands': 'Netherlands',
+        'belgium': 'Belgium',
+        'sweden': 'Sweden',
+        'norway': 'Norway',
+        'denmark': 'Denmark',
+        'finland': 'Finland',
+        'portugal': 'Portugal',
+        'brazil': 'Brazil',
+        'canada': 'Canada',
+        'albania': 'Albania',
+        'macedonia': 'Macedonia',
+        'serbia': 'Serbia',
+        'croatia': 'Croatia',
+        'bosnia': 'Bosnia',
+        'slovenia': 'Slovenia',
+        'india': 'India',
+        'israel': 'Israel',
+        'mexico': 'Mexico',
+        'argentina': 'Argentina',
+        'chile': 'Chile',
+        'latvia': 'Latvia',
+        'lithuania': 'Lithuania',
+        'estonia': 'Estonia',
+        'austria': 'Austria',
+        'switzerland': 'Switzerland',
+        'belarus': 'Belarus',
+        'korea': 'Korea',
+        'china': 'China',
+        'qatar': 'Qatar',
+        'uae': 'UAE',
+        'crimea': 'Crimea',
+        'azerbaijan': 'Azerbaijan',
+        'international': 'International',
+        'europe': 'Europe'
+    };
+    
+    const targetCountry = countryMapping[countryParam];
+    
+    if (!targetCountry) {
+        return res.status(404).render('frontend/pages/404', {
+            title: 'Country Not Found - FlixTV',
+            keyword: 'country not found, EPG codes, 404 error',
+            description: 'The requested country EPG codes page was not found.'
+        });
+    }
+    
+    // Filter EPG codes for the specific country
+    const countryEpgCodes = allEpgCodes.filter(channel => 
+        channel.country.toLowerCase() === targetCountry.toLowerCase()
+    );
+    
+    if (countryEpgCodes.length === 0) {
+        return res.status(404).render('frontend/pages/404', {
+            title: `${targetCountry} EPG Codes Not Found - FlixTV`,
+            keyword: `${targetCountry} EPG codes, country channels, 404 error`,
+            description: `No EPG codes found for ${targetCountry}. Please check back later for updates.`
+        });
+    }
+    
+    // Get unique categories for this country
+    const categories = [...new Set(countryEpgCodes.map(item => item.category))].sort();
+    
+    // Country-specific SEO metadata
+    const countryKeywords = {
+        'Turkey': 'Turkish EPG codes, TRT channels, Turkish TV codes, Turkey television guide, Turkish streaming codes, TRT 1 EPG, Kanal D EPG, Show TV EPG, ATV Turkey EPG, Turkish broadcasting codes, Turkey TV guide integration, Turkish channel identifiers, Turkey EPG XML, Turkish television EPG, Turkey streaming EPG, Turkish digital TV codes, Turkey cable TV EPG, Turkish satellite TV codes, Turkey terrestrial TV EPG, Turkish OTT streaming codes',
+        'Germany': 'German EPG codes, ARD Das Erste EPG, ZDF EPG, RTL Germany EPG, German TV codes, Germany television guide, German streaming codes, German broadcasting codes, Germany TV guide integration, German channel identifiers, Germany EPG XML, German television EPG, Germany streaming EPG, German digital TV codes, Germany cable TV EPG, German satellite TV codes, Germany terrestrial TV EPG, German OTT streaming codes',
+        'Spain': 'Spanish EPG codes, La 1 EPG, Antena 3 EPG, Telecinco EPG, Spanish TV codes, Spain television guide, Spanish streaming codes, Spanish broadcasting codes, Spain TV guide integration, Spanish channel identifiers, Spain EPG XML, Spanish television EPG, Spain streaming EPG, Spanish digital TV codes, Spain cable TV EPG, Spanish satellite TV codes, Spain terrestrial TV EPG, Spanish OTT streaming codes',
+        'Italy': 'Italian EPG codes, Rai 1 EPG, Canale 5 EPG, Italia 1 EPG, Italian TV codes, Italy television guide, Italian streaming codes, Italian broadcasting codes, Italy TV guide integration, Italian channel identifiers, Italy EPG XML, Italian television EPG, Italy streaming EPG, Italian digital TV codes, Italy cable TV EPG, Italian satellite TV codes, Italy terrestrial TV EPG, Italian OTT streaming codes',
+        'France': 'French EPG codes, Cine+ EPG, French TV codes, France television guide, French streaming codes, French broadcasting codes, France TV guide integration, French channel identifiers, France EPG XML, French television EPG, France streaming EPG, French digital TV codes, France cable TV EPG, French satellite TV codes, France terrestrial TV EPG, French OTT streaming codes',
+        'UK': 'UK EPG codes, BBC EPG, British TV codes, UK television guide, British streaming codes, UK broadcasting codes, Britain TV guide integration, UK channel identifiers, UK EPG XML, British television EPG, UK streaming EPG, British digital TV codes, UK cable TV EPG, British satellite TV codes, UK terrestrial TV EPG, British OTT streaming codes',
+        'USA': 'US EPG codes, CNN EPG, American TV codes, USA television guide, American streaming codes, US broadcasting codes, America TV guide integration, US channel identifiers, USA EPG XML, American television EPG, US streaming EPG, American digital TV codes, USA cable TV EPG, American satellite TV codes, US terrestrial TV EPG, American OTT streaming codes',
+        'Russia': 'Russian EPG codes, Russia TV codes, Russian television guide, Russian streaming codes, Russian broadcasting codes, Russia TV guide integration, Russian channel identifiers, Russia EPG XML, Russian television EPG, Russia streaming EPG, Russian digital TV codes, Russia cable TV EPG, Russian satellite TV codes, Russia terrestrial TV EPG, Russian OTT streaming codes'
+    };
+    
+    const defaultKeywords = `${targetCountry} EPG codes, ${targetCountry} TV codes, ${targetCountry} television guide, ${targetCountry} streaming codes, ${targetCountry} broadcasting codes, ${targetCountry} TV guide integration, ${targetCountry} channel identifiers, ${targetCountry} EPG XML, ${targetCountry} television EPG, ${targetCountry} streaming EPG, ${targetCountry} digital TV codes, ${targetCountry} cable TV EPG, ${targetCountry} satellite TV codes, ${targetCountry} terrestrial TV EPG, ${targetCountry} OTT streaming codes`;
+    
+    let title = `${targetCountry} EPG Codes - ${countryEpgCodes.length}+ TV Channel Identifiers | FlixTV`;
+    let keyword = countryKeywords[targetCountry] || defaultKeywords;
+    let description = `Complete ${targetCountry} EPG (Electronic Program Guide) codes database with ${countryEpgCodes.length}+ channels. Professional TV channel identifiers for ${targetCountry} streaming integration, broadcasting solutions, and digital TV guide implementation.`;
+
+    res.render('frontend/pages/country-codes',
+        {
+            menu:'codes',
+            title:title, 
+            keyword:keyword,
+            description:description,
+            epgCodes: countryEpgCodes,
+            categories: categories,
+            country: targetCountry,
+            countryParam: countryParam,
+            pageType: 'country-epg-codes',
+            canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/codes/${countryParam}` : `https://flixapp.net/codes/${countryParam}`
+        }
+    );
+}
+
 exports.contact=(req,res)=>{
     let meta_data = {
         title: 'Contact Flix IPTV Support - Expert Customer Service & Technical Help 24/7',
