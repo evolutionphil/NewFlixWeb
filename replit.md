@@ -4,6 +4,17 @@
 
 This is a comprehensive IPTV streaming platform that provides multi-platform device management, payment processing, and playlist distribution. The system supports Android, iOS, Smart TV, and Windows applications with MAC address-based device registration, trial periods, and premium activation through multiple payment methods. It includes administrative controls for content management, user monitoring, and reseller functionality.
 
+## Recent Changes
+
+### SEO Optimization Improvements (September 2025)
+- **robots.txt**: Added comprehensive robots.txt file for proper search engine crawling guidance
+- **XML Sitemap**: Implemented dynamic sitemap generation with static and dynamic content indexing
+- **Meta Tags Enhancement**: Added Open Graph and Twitter Card meta tags for improved social media sharing
+- **Structured Data**: Implemented schema.org markup for better search engine understanding
+- **Canonical URLs**: Added canonical link tags to prevent duplicate content issues
+- **Performance Optimization**: Added cache control headers for improved loading speeds
+- **Enhanced SEO Meta Tags**: Added additional SEO-focused meta tags including robots, language, and theme-color
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

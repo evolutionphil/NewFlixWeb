@@ -2,7 +2,9 @@
     <%
         let title1=typeof title!='undefined' ? title : 'Flix IPTV';
         let keyword1=typeof keyword!='undefined' ? keyword : '' ;
-        let description1=typeof description!='undefined' ? description : '' ;
+        let description1=typeof description!='undefined' ? description : 'Professional IPTV streaming platform with 7-day free trial. Upload your playlist and enjoy premium streaming experience.' ;
+        let image1=typeof ogImage!='undefined' ? ogImage : '/images/logo.png';
+        let url1=typeof canonicalUrl!='undefined' ? canonicalUrl : process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}${originalUrl || '/'}` : 'https://flixiptv.com' + (originalUrl || '/');
     %>
     <title><%= title1 %></title>
     <meta charset="utf-8">
@@ -10,6 +12,32 @@
     <meta name="description" content="<%= description1 %>">
     <link rel="icon" href="/images/logo.png"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<%= url1 %>">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<%= title1 %>">
+    <meta property="og:description" content="<%= description1 %>">
+    <meta property="og:image" content="<%= url1.split('/').slice(0,3).join('/') + image1 %>">
+    <meta property="og:url" content="<%= url1 %>">
+    <meta property="og:site_name" content="Flix IPTV">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= title1 %>">
+    <meta name="twitter:description" content="<%= description1 %>">
+    <meta name="twitter:image" content="<%= url1.split('/').slice(0,3).join('/') + image1 %>">
+    <meta name="twitter:creator" content="@FlixIPTV">
+    
+    <!-- Additional SEO Meta Tags -->
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="en">
+    <meta name="author" content="Flix IPTV">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#473590">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,5 +52,95 @@
     <script src="/admin/template/vendor/bootstrap/bootstrap.js"></script>
 
     <link rel="stylesheet" href="/frontend/style.css">
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Flix IPTV",
+        "alternateName": "FlixIPTV",
+        "url": "<%= url1.split('/').slice(0,3).join('/') %>",
+        "description": "<%= description1 %>",
+        "publisher": {
+            "@type": "Organization",
+            "name": "Flix IPTV",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "<%= url1.split('/').slice(0,3).join('/') %>/images/logo.png"
+            }
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "<%= url1.split('/').slice(0,3).join('/') %>/news?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        },
+        "sameAs": [
+            "https://twitter.com/FlixIPTV",
+            "https://facebook.com/FlixIPTV"
+        ]
+    }
+    </script>
+    
+    <% if (typeof pageType !== 'undefined' && pageType === 'article') { %>
+    <!-- Article Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "<%= title1 %>",
+        "description": "<%= description1 %>",
+        "image": "<%= url1.split('/').slice(0,3).join('/') + image1 %>",
+        "author": {
+            "@type": "Organization",
+            "name": "Flix IPTV"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Flix IPTV",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "<%= url1.split('/').slice(0,3).join('/') %>/images/logo.png"
+            }
+        },
+        "dateModified": "<%= new Date().toISOString() %>",
+        "datePublished": "<%= new Date().toISOString() %>",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "<%= url1 %>"
+        }
+    }
+    </script>
+    <% } %>
+    
+    <% if (typeof pageType !== 'undefined' && pageType === 'service') { %>
+    <!-- Service/Product Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "Flix IPTV Streaming Service",
+        "description": "Professional IPTV streaming platform with 7-day free trial. Upload your playlist and enjoy premium streaming experience.",
+        "image": "<%= url1.split('/').slice(0,3).join('/') %>/images/logo.png",
+        "brand": {
+            "@type": "Brand",
+            "name": "Flix IPTV"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "7.49",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+                "@type": "Organization",
+                "name": "Flix IPTV"
+            }
+        }
+    }
+    </script>
+    <% } %>
 
 </head>

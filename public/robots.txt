@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+
+# Important pages for indexing
+Allow: /home
+Allow: /news
+Allow: /news/*
+Allow: /instructions
+Allow: /instructions/*
+Allow: /faq
+Allow: /contact
+Allow: /activation
+Allow: /terms&conditions
+Allow: /privacy-policy
+
+# Block admin and API endpoints
+Disallow: /admin/
+Disallow: /api/
+Disallow: /reseller/
+
+# Block internal files
+Disallow: /*.js$
+Disallow: /*.css$
+Disallow: /static/
+
+# Sitemap location
+Sitemap: https://${REPL_SLUG}.${REPL_OWNER}.repl.co/sitemap.xml
