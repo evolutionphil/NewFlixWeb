@@ -79,23 +79,64 @@ app.use(express.json(
 ));
 
 app.use(useragent.express());
-// Disable caching for development to prevent cached content issues
+// Production-optimized static file caching with content-specific headers
 app.use(express.static('public', {
-    etag: false,
-    lastModified: false,
-    setHeaders: (res, path) => {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
+    etag: true,
+    lastModified: true,
+    maxAge: 0, // Default no cache, override with setHeaders
+    setHeaders: (res, filePath, stat) => {
+        const ext = path.extname(filePath).toLowerCase();
+        
+        // Long-term caching for static assets (1 year)
+        if (['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot'].includes(ext)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); // 1 year
+            res.setHeader('Expires', new Date(Date.now() + 31536000000).toUTCString());
+        }
+        // Medium-term caching for images and media (1 week)
+        else if (['.webp', '.avif', '.mp4', '.webm', '.pdf'].includes(ext)) {
+            res.setHeader('Cache-Control', 'public, max-age=604800'); // 1 week
+            res.setHeader('Expires', new Date(Date.now() + 604800000).toUTCString());
+        }
+        // Short-term caching for HTML and other files (1 hour)
+        else {
+            res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
+            res.setHeader('Expires', new Date(Date.now() + 3600000).toUTCString());
+        }
+        
+        // Add security and performance headers
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'DENY');
     }
 }))
 
-// Add cache control to all routes with stronger headers
+// Smart cache control for dynamic content with performance optimization
 app.use((req, res, next) => {
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '-1');
-    res.setHeader('Last-Modified', new Date().toUTCString());
+    // Different caching strategies based on route type
+    if (req.path.startsWith('/api/') || req.path.includes('admin')) {
+        // No caching for API and admin routes
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+    } else if (req.path === '/robots.txt' || req.path === '/sitemap.xml') {
+        // Medium caching for SEO files (1 day)
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        res.setHeader('Expires', new Date(Date.now() + 86400000).toUTCString());
+    } else {
+        // Short caching for regular pages (5 minutes) to balance performance and freshness
+        res.setHeader('Cache-Control', 'public, max-age=300, must-revalidate');
+        res.setHeader('Expires', new Date(Date.now() + 300000).toUTCString());
+    }
+    
+    // Add performance and SEO headers
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
+    // Performance optimization headers
+    res.setHeader('X-DNS-Prefetch-Control', 'on');
+    res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
+    
     next();
 });
 
