@@ -28,7 +28,7 @@ app.use(expressLayouts);
 
 const fs = require('fs');
 const path=require('path');
-const PORT=5000;
+const PORT = process.env.PORT || 5000;
 
 // Removed Socket.IO setup - monitoring now uses regular HTTP requests
 
