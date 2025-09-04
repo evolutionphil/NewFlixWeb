@@ -192,72 +192,23 @@
 }
 
 /* Mobile-first payment section positioning */
-@media (max-width: 767px) {
-    /* Mobile payment form takes priority within the payment section */
-    .mobile-payment-priority {
-        width: 100% !important;
-        max-width: none !important;
-        margin-bottom: 2rem;
-        padding: 0 !important;
+@media (max-width: 767.98px) {
+    /* Force Bootstrap container to be flexible on mobile */
+    .mobile-content-wrapper {
+        display: flex !important;
+        flex-direction: column !important;
     }
     
-    /* Content section after payment on mobile */
-    .mobile-content-order {
-        width: 100% !important;
-        max-width: none !important;
-        padding: 0 !important;
+    /* Force the Bootstrap row to be a column on mobile */
+    .mobile-content-wrapper .row {
+        display: flex !important;
+        flex-direction: column !important;
+        margin: 0 !important;
     }
     
-    /* Enhanced payment card for mobile */
-    .payment-card {
-        background: #1a1f2e !important;
-        border: 2px solid #4a90e2 !important;
-        border-radius: 15px !important;
-        padding: 2rem 1.5rem !important;
-        box-shadow: 0 8px 25px rgba(74, 144, 226, 0.2) !important;
-        margin-bottom: 2rem;
-    }
-    
-    /* Payment header styling */
-    .payment-card-header h4 {
-        font-size: 1.8rem !important;
-        text-align: center !important;
-        margin-bottom: 1.5rem !important;
-        color: #4a90e2 !important;
-        font-weight: 700 !important;
-    }
-    
-    /* Mobile form optimization */
-    .payment-card .form-group {
-        margin-bottom: 1.5rem;
-    }
-    
-    .payment-card input {
-        font-size: 1.1rem !important;
-        padding: 12px !important;
-        border-radius: 8px !important;
-    }
-    
-    /* Mobile payment buttons */
-    .payment-item-container .btn {
-        width: 100%;
-        padding: 15px;
-        font-size: 1.2rem;
-        font-weight: 700;
-        border-radius: 10px;
-        margin-top: 10px;
-    }
-    
-    /* Payment section labels */
-    .payment-section-label {
-        font-size: 1.3rem !important;
-        text-align: center;
-        margin-bottom: 1rem;
-        color: #fff !important;
-    }
-    
-    /* Mobile header styling */
+    /* Mobile header stays at top */
     .mobile-header-order {
+        order: 1 !important;
         text-align: center;
         margin-bottom: 1.5rem;
     }
@@ -270,5 +221,101 @@
     .mobile-header-order p {
         font-size: 1rem !important;
         color: #888 !important;
+    }
+    
+    /* Payment form comes FIRST - override Bootstrap classes */
+    .mobile-payment-priority {
+        order: 1 !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin-bottom: 2rem !important;
+        padding: 0 15px !important;
+        flex: none !important;
+    }
+    
+    /* Content section comes AFTER payment on mobile */
+    .mobile-content-order {
+        order: 2 !important;
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0 15px !important;
+        flex: none !important;
+    }
+    
+    /* Enhanced payment card for mobile - make it stand out */
+    .payment-card {
+        background: #1a1f2e !important;
+        border: 3px solid #4a90e2 !important;
+        border-radius: 20px !important;
+        padding: 2.5rem 2rem !important;
+        box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3) !important;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    /* Add a glow effect to payment card on mobile */
+    .payment-card::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #4a90e2, #667eea, #4a90e2);
+        border-radius: 22px;
+        z-index: -1;
+        opacity: 0.7;
+    }
+    
+    /* Payment header styling */
+    .payment-card-header h4 {
+        font-size: 2rem !important;
+        text-align: center !important;
+        margin-bottom: 2rem !important;
+        color: #4a90e2 !important;
+        font-weight: 800 !important;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    /* Mobile form optimization */
+    .payment-card .form-group {
+        margin-bottom: 1.8rem;
+    }
+    
+    .payment-card input {
+        font-size: 1.2rem !important;
+        padding: 15px !important;
+        border-radius: 10px !important;
+        border: 2px solid #333 !important;
+        background: #0f1419 !important;
+        color: #fff !important;
+    }
+    
+    .payment-card label {
+        font-size: 1.1rem !important;
+        color: #fff !important;
+        font-weight: 600 !important;
+        margin-bottom: 8px !important;
+    }
+    
+    /* Mobile payment buttons */
+    .payment-item-container .btn {
+        width: 100%;
+        padding: 18px;
+        font-size: 1.3rem;
+        font-weight: 800;
+        border-radius: 12px;
+        margin-top: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    /* Payment section labels */
+    .payment-section-label {
+        font-size: 1.4rem !important;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: #4a90e2 !important;
+        font-weight: 700 !important;
     }
 }
