@@ -206,5 +206,42 @@
     }
     </script>
     <% } %>
+    
+    <% if (typeof pageType !== 'undefined' && pageType === 'youtube-service') { %>
+    <!-- YouTube Service Page Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "<%= title1 %>",
+        "description": "<%= description1 %>",
+        "url": "<%= url1 %>",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": ["Android", "iOS", "Windows", "Smart TV"],
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "@id": "<%= url1 %>",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "description": "Free YouTube playlist integration with 7-day trial"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Flix IPTV",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "<%= url1.split('/').slice(0,3).join('/') %>/images/logo.png"
+            }
+        },
+        "featureList": [
+            "YouTube Playlist Upload",
+            "Multi-device Streaming",
+            "Cross-platform Compatibility",
+            "Free 7-day Trial"
+        ]
+    }
+    </script>
+    <% } %>
 
 </head>

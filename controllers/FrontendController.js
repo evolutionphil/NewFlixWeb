@@ -408,16 +408,30 @@ exports.updatePinCode=async (req,res)=>{
 
 exports.showYoutubeList=async(req,res)=>{
     let keys=['youtubelist_meta_title','youtubelist_meta_keyword','youtubelist_meta_content']
-    let data={}
-    keys.map(key => {
-        data[key] = settings[key] ? settings[key] : ''
-    })
-    let title = data.youtubelist_meta_title;
-    let keyword = data.youtubelist_meta_keyword;
-    let description = data.youtubelist_meta_content;
-    let meta_data = {
-        title: title, keyword: keyword, description: description
+    let data={
+        youtubelist_meta_title: 'YouTube Playlist Upload - Flix IPTV',
+        youtubelist_meta_keyword: 'YouTube playlist, IPTV YouTube, YouTube streaming, playlist upload, YouTube integration, video streaming, YouTube channels, IPTV YouTube lists, streaming playlists, YouTube IPTV player',
+        youtubelist_meta_content: 'Upload your YouTube playlists to Flix IPTV streaming service. Integrate YouTube content with your IPTV experience and enjoy seamless streaming across devices.'
     }
+    
+    keys.map(key => {
+        if(settings[key]) {
+            data[key] = settings[key];
+        }
+    })
+    
+    let title = data.youtubelist_meta_title || 'YouTube Playlist Upload - Flix IPTV';
+    let keyword = data.youtubelist_meta_keyword || 'YouTube playlist, IPTV YouTube, YouTube streaming';
+    let description = data.youtubelist_meta_content || 'Upload your YouTube playlists to Flix IPTV streaming service.';
+    
+    let meta_data = {
+        title: title, 
+        keyword: keyword, 
+        description: description,
+        pageType: 'youtube-service',
+        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/youtube-list` : 'https://flixiptv.com/youtube-list'
+    }
+    
     let mylist_content=await YoutubeListContent.findOne();
     res.render('frontend/pages/youtube_list', {menu: 'youtube-list',...meta_data,mylist_content:mylist_content});
 }
