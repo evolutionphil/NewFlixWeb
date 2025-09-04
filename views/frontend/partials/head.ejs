@@ -243,5 +243,55 @@
     }
     </script>
     <% } %>
+    
+    <% if (typeof pageType !== 'undefined' && pageType === 'contact') { %>
+    <!-- Contact Page Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": ["ContactPage", "WebPage"],
+        "name": "<%= title1 %>",
+        "description": "<%= description1 %>",
+        "url": "<%= url1 %>",
+        "mainEntity": {
+            "@type": "Organization",
+            "name": "Flix IPTV",
+            "url": "<%= url1.split('/').slice(0,3).join('/') %>",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "<%= url1.split('/').slice(0,3).join('/') %>/images/logo.png"
+            },
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer support",
+                "email": "support@evolution-world.com",
+                "availableLanguage": ["English"],
+                "areaServed": "Worldwide"
+            },
+            "sameAs": [
+                "https://twitter.com/FlixIPTV",
+                "https://facebook.com/FlixIPTV"
+            ]
+        },
+        "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "<%= url1.split('/').slice(0,3).join('/') %>"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Contact",
+                    "item": "<%= url1 %>"
+                }
+            ]
+        }
+    }
+    </script>
+    <% } %>
 
 </head>

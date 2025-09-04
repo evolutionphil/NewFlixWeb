@@ -213,7 +213,15 @@ exports.activation=(req,res)=>{
 }
 
 exports.contact=(req,res)=>{
-    res.render('frontend/pages/contact', {menu: 'contact'});
+    let meta_data = {
+        title: 'Contact Us - Flix IPTV Support',
+        keyword: 'contact Flix IPTV, IPTV support, customer service, technical support, contact streaming support, help desk, support email, IPTV assistance, contact us, customer care',
+        description: 'Contact Flix IPTV support team for assistance with your streaming service. Get help with technical issues, account questions, and general inquiries via email.',
+        pageType: 'contact',
+        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/contact` : 'https://flixiptv.com/contact'
+    }
+    
+    res.render('frontend/pages/contact', {menu: 'contact', ...meta_data});
 }
 
 exports.home=async(req,res)=>{
