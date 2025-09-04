@@ -1,5 +1,8 @@
 const express=require('express');
 const app=express();
+
+// Security: Remove X-Powered-By header to hide Express.js information
+app.disable('x-powered-by');
 const bodyParser=require('body-parser');
 const cors=require('cors');
 const fileUpload = require("express-fileupload");
