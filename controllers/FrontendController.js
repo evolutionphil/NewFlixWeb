@@ -191,19 +191,30 @@ exports.contact=(req,res)=>{
 }
 
 exports.home=async(req,res)=>{
-    let keys=['mylist_meta_title','mylist_meta_keyword','mylist_meta_content']
+    let keys=['home_meta_title','home_meta_keyword','home_meta_content']
 
-    let data={}
+    let data={
+        title: 'Flix IPTV - Premium IPTV Streaming Platform',
+        keyword: 'IPTV streaming, Flix IPTV, premium streaming, IPTV player, streaming platform, IPTV service, digital streaming, live TV streaming, IPTV solution, media streaming platform',
+        description: 'Flix IPTV - Professional IPTV streaming platform offering premium streaming experience with 7-day free trial. Multi-device support for Android, iOS, Smart TV, and Windows.',
+        pageType: 'service',
+        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/home` : 'https://flixiptv.com/home'
+    }
 
+    // Override with settings if available
     keys.map(key => {
-        data[key] = settings[key] ? settings[key] : ''
+        if(settings[key]) {
+            let settingKey = key.replace('home_', '');
+            data[settingKey.replace('_', '')] = settings[key];
+        }
     })
 
-    let title = data.mylist_meta_title;
-    let keyword = data.mylist_meta_keyword;
-    let description = data.mylist_meta_content;
     let meta_data = {
-        title: title, keyword: keyword, description: description
+        title: data.title, 
+        keyword: data.keyword, 
+        description: data.description,
+        pageType: data.pageType,
+        canonicalUrl: data.canonicalUrl
     }
 
     let mylist_content=await MyListContent.findOne();
