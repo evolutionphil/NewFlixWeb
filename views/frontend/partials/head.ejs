@@ -293,5 +293,70 @@
     }
     </script>
     <% } %>
+    
+    <% if (typeof pageType !== 'undefined' && pageType === 'instruction-guide') { %>
+    <!-- Device Instruction Guide Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "<%= title1 %>",
+        "description": "<%= description1 %>",
+        "url": "<%= url1 %>",
+        "image": {
+            "@type": "ImageObject",
+            "url": "<%= url1.split('/').slice(0,3).join('/') %>/images/logo.png"
+        },
+        "author": {
+            "@type": "Organization",
+            "name": "Flix IPTV",
+            "url": "<%= url1.split('/').slice(0,3).join('/') %>"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Flix IPTV",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "<%= url1.split('/').slice(0,3).join('/') %>/images/logo.png"
+            }
+        },
+        "mainEntity": {
+            "@type": "SoftwareApplication",
+            "name": "Flix IPTV",
+            "applicationCategory": "MultimediaApplication",
+            "operatingSystem": "<%= typeof deviceType !== 'undefined' ? deviceType.charAt(0).toUpperCase() + deviceType.slice(1) : 'Multiple Platforms' %>",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD",
+                "description": "Free 7-day trial"
+            }
+        },
+        "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "<%= url1.split('/').slice(0,3).join('/') %>"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Instructions",
+                    "item": "<%= url1.split('/').slice(0,4).join('/') %>"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "<%= typeof deviceType !== 'undefined' ? deviceType.charAt(0).toUpperCase() + deviceType.slice(1) : 'Device Setup' %>",
+                    "item": "<%= url1 %>"
+                }
+            ]
+        }
+    }
+    </script>
+    <% } %>
 
 </head>

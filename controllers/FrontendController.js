@@ -155,20 +155,65 @@ exports.showInstructionDetail = async (req, res) => {
     })
 
     var kind = req.params.kind;
-
     kind = kind.toLocaleLowerCase();
 
     let instruction = await Instruction.findOne({kind: kind})
 
-    let title = data.instruction_meta_title;
-    let keyword = data.instruction_meta_keyword;
-    let description = data.instruction_meta_content;
+    // Device-specific SEO optimization - prioritize device-specific content
+    let deviceSEO = getDeviceSpecificSEO(kind);
+    
+    // Use device-specific SEO if available, otherwise fall back to admin settings
+    let title = deviceSEO.title || data.instruction_meta_title;
+    let keyword = deviceSEO.keywords || data.instruction_meta_keyword;
+    let description = deviceSEO.description || data.instruction_meta_content;
 
     let meta_data = {
-        title: title, keyword: keyword, description: description
+        title: title, 
+        keyword: keyword, 
+        description: description,
+        pageType: 'instruction-guide',
+        deviceType: kind,
+        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/instructions/${kind}` : `https://flixiptv.com/instructions/${kind}`
     }
 
     res.render('frontend/pages/instructions/show', {menu: 'instruction', instruction: instruction, ...meta_data});
+}
+
+// Device-specific SEO helper function
+function getDeviceSpecificSEO(deviceType) {
+    const deviceSEOData = {
+        'amazonstick': {
+            title: 'Flix IPTV Setup Guide for Amazon Fire TV Stick - Installation Instructions',
+            keywords: 'Amazon Fire Stick IPTV, Fire TV Stick setup, Flix IPTV Fire Stick, Amazon Fire TV IPTV installation, Fire Stick streaming, Fire TV IPTV player, Fire Stick IPTV guide, Amazon streaming device, Fire TV Stick apps, Fire Stick sideload, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, vlc iptv, firestick iptv, amazon fire tv iptv, fire tv streaming',
+            description: 'Complete step-by-step guide to install and setup Flix IPTV on Amazon Fire TV Stick. Learn how to sideload IPTV apps and configure streaming on your Fire Stick device.'
+        },
+        'android': {
+            title: 'Flix IPTV Android Setup Guide - Installation Instructions',
+            keywords: 'Android IPTV setup, Flix IPTV Android, Android TV IPTV, Android streaming, IPTV Android app, mobile IPTV, android iptv player, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, kodi iptv, android tv iptv, android streaming apps',
+            description: 'Step-by-step instructions to install and configure Flix IPTV on Android devices. Setup guide for Android phones, tablets, and Android TV boxes.'
+        },
+        'ios': {
+            title: 'Flix IPTV iOS Setup Guide - iPhone/iPad Installation Instructions',
+            keywords: 'iOS IPTV setup, iPhone IPTV, iPad IPTV, Flix IPTV iOS, Apple TV IPTV, iOS streaming, iPhone streaming app, iPad streaming, mobile IPTV iOS, ios iptv player, apple tv iptv, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player',
+            description: 'Complete guide to install and setup Flix IPTV on iPhone, iPad, and Apple TV devices. Learn how to configure IPTV streaming on iOS devices.'
+        },
+        'windows': {
+            title: 'Flix IPTV Windows Setup Guide - PC Installation Instructions',
+            keywords: 'Windows IPTV setup, PC IPTV player, Windows streaming, Flix IPTV Windows, desktop IPTV, windows iptv app, pc streaming software, windows media player, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, vlc iptv, kodi iptv, windows iptv streaming',
+            description: 'Step-by-step guide to install and configure Flix IPTV on Windows PC. Complete setup instructions for Windows desktop IPTV streaming.'
+        },
+        'smarttv': {
+            title: 'Flix IPTV Smart TV Setup Guide - Installation Instructions',
+            keywords: 'Smart TV IPTV setup, Samsung Smart TV IPTV, LG Smart TV IPTV, Smart TV streaming, TV IPTV app, smart tv iptv player, tizen iptv, webos iptv, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, ss iptv, smart tv streaming',
+            description: 'Complete guide to setup Flix IPTV on Smart TVs including Samsung, LG, Sony, and other Smart TV brands. Easy installation instructions for TV streaming.'
+        }
+    };
+
+    return deviceSEOData[deviceType] || {
+        title: 'Flix IPTV Setup Guide - Device Installation Instructions',
+        keywords: 'IPTV setup guide, device installation, streaming setup, IPTV player installation, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player',
+        description: 'Step-by-step instructions to install and configure Flix IPTV on your device. Complete setup guide for IPTV streaming.'
+    };
 }
 
 exports.activation=(req,res)=>{
