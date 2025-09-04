@@ -26,6 +26,18 @@ let stripe = require('stripe');
 const {convert} = require("html-to-text");
 const path = require("path");
 
+// Helper function to generate URL-friendly slug from title
+function generateSlugFromTitle(title) {
+    if (!title) return '';
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9 -]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single
+        .trim() // Remove leading/trailing spaces
+        .substring(0, 100); // Limit length to 100 characters
+}
+
 exports.news=(req,res)=>{
     let keys=['news_meta_title','news_meta_keyword','news_meta_content']
     let data={
@@ -43,7 +55,14 @@ exports.news=(req,res)=>{
     News.find()
 .sort({_id:-1})
         .exec()
-        .then(news=>{
+        .then(async news=>{
+        // Auto-generate missing slugs for existing news articles
+        for (let article of news) {
+            if (!article.slug && article.title) {
+                article.slug = generateSlugFromTitle(article.title);
+                await article.save();
+            }
+        }
         let title=data.news_meta_title || 'Flix IPTV News - Latest Updates';
         let keyword=data.news_meta_keyword || 'IPTV news, Flix IPTV updates, streaming news';
         let description=data.news_meta_content || 'Stay updated with the latest Flix IPTV news and platform updates.';
@@ -54,7 +73,13 @@ exports.news=(req,res)=>{
                 title: title,
                 keyword: keyword,
                 description: description,
-                news: news.map(item=>({_id: item._id, title: item.title, content: convert(item.content).substring(0, 80)})),
+                news: news.map(item=>({
+                    _id: item._id, 
+                    title: item.title, 
+                    content: convert(item.content).substring(0, 80),
+                    slug: item.slug || generateSlugFromTitle(item.title),
+                    urlPath: `/news/${item.slug || generateSlugFromTitle(item.title)}`
+                })),
                 pageType: 'news-listing',
                 canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/news` : 'https://flixapp.net/news'
             }
@@ -63,21 +88,53 @@ exports.news=(req,res)=>{
 }
 
 exports.showNewsDetail = (req, res) => {
-    News.findOne({_id: req.params.id})
+    const slug = req.params.slug;
+    
+    // Try finding by slug first, then fall back to ID for backward compatibility
+    let findQuery = { slug: slug };
+    
+    // If slug looks like MongoDB ObjectId, also try finding by ID
+    if (slug.match(/^[0-9a-fA-F]{24}$/)) {
+        findQuery = { $or: [{ slug: slug }, { _id: slug }] };
+    }
+    
+    News.findOne(findQuery)
         .exec()
-        .then(news => {
-            let title = news.title;
-            let description = news.content;
+        .then(async news => {
+            if (!news) {
+                return res.status(404).send('News article not found');
+            }
+            
+            // Auto-generate slug if missing
+            if (!news.slug && news.title) {
+                news.slug = generateSlugFromTitle(news.title);
+                await news.save();
+            }
+            
+            // If found by ID (backward compatibility), redirect to proper slug URL
+            if (slug.match(/^[0-9a-fA-F]{24}$/) && news.slug) {
+                return res.redirect(301, `/news/${news.slug}`);
+            }
+            
+            let title = `${news.title} - Flix IPTV News`;
+            let description = news.content.substring(0, 160) + '...';
 
             res.render('frontend/pages/news/show',
                 {
                     menu: 'news/show',
                     title: title,
+                    keyword: `IPTV news, streaming news, ${news.title}, Flix IPTV updates`,
                     description: description,
-                    news: news
+                    news: news,
+                    pageType: 'news-article',
+                    canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/news/${news.slug}` : `https://flixapp.net/news/${news.slug}`
                 }
             );
         })
+        .catch(err => {
+            console.error('Error finding news:', err);
+            res.status(404).send('News article not found');
+        });
 }
 
 exports.faq=(req,res)=>{

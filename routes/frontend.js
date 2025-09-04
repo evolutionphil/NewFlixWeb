@@ -8,7 +8,7 @@ router.get('/',(req,res)=>{
 });
 router.get('/home',frontendController.home);
 router.get('/news',frontendController.news);
-router.get('/news/:id',frontendController.showNewsDetail);
+router.get('/news/:slug',frontendController.showNewsDetail);
 router.get('/faq',frontendController.faq);
 router.get('/instructions',frontendController.instructions);
 router.get('/instructions/:kind',frontendController.showInstructionDetail);

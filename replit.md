@@ -17,6 +17,7 @@ This is a comprehensive IPTV streaming platform that provides multi-platform dev
 - **Image Alt Attributes**: Added descriptive, keyword-rich alt text to all images for better SEO and accessibility
 - **Hidden Social Sharing**: Implemented invisible social sharing buttons for 10+ platforms with SEO-optimized metadata
 - **Advanced Caching Strategy**: Implemented production-grade caching with 1-year static asset caching, 5-minute page caching, and smart cache invalidation for optimal performance
+- **SEO-Friendly News URLs**: Converted news URLs from ID-based (/news/67d3007c0b3c7461603eceff) to title-based slugs (/news/website-upgrade) with automatic slug generation and backward compatibility redirects
 
 ## User Preferences
 
