@@ -55,8 +55,8 @@
                 </div>
             </div>
 
-            <!-- Database Content Section - After header, before forms on desktop -->
-            <div class="order-4 order-md-2">
+            <!-- Database Content Section - After upload form on desktop -->
+            <div class="order-4 order-md-3">
                 <% if(mylist_content){ %>
                     <div class="text-white" style="background: rgba(255, 255, 255, 0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); margin: 2rem 0;">
                         <%- mylist_content.contents %>
@@ -64,8 +64,8 @@
                 <% } %>
             </div>
 
-            <!-- Upload Form Section - After content on desktop, priority on mobile -->
-            <div class="order-2 order-md-3">
+            <!-- Upload Form Section - TOP on desktop, priority on mobile -->
+            <div class="order-2 order-md-2">
                 <form method="post" class="col-md-7 m-auto" action="/savePlaylists" id="playlist-form">
                     <div class="row">
                         <div class="col-md-6">
