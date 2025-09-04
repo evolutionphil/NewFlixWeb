@@ -16,6 +16,13 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+// Log startup information
+console.log('=== APPLICATION STARTUP ===');
+console.log('Node.js version:', process.version);
+console.log('Environment:', process.env.NODE_ENV || 'development');
+console.log('Port:', process.env.PORT || 5000);
+console.log('Database DSN configured:', process.env.DATABASE_DSN ? 'Yes' : 'No');
+
 let axios=require('axios');
 app.use(expressLayouts);
 
@@ -98,26 +105,55 @@ console.log('CONNECTION STRING VALIDATION:', {
   actualPrefix: cleanConnectionString.substring(0, 15)
 });
 
+// Enhanced error handling for production
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+});
+
+// Database connection with better error handling
 mongoose.connect(cleanConnectionString, { 
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
   connectTimeoutMS: 10000
+}).catch(error => {
+    console.error('Failed to connect to MongoDB:', error.message);
+    process.exit(1);
 });
+
 const connection = mongoose.connection;
 connection.once('open', async function() {
     console.log("MongoDB database connection established successfully");
-    getSettings();
-    await removePendingTransactions();
-})
+    try {
+        await getSettings();
+        await removePendingTransactions();
+        console.log("Application initialization completed successfully");
+    } catch (error) {
+        console.error("Error during application initialization:", error.message);
+        process.exit(1);
+    }
+});
 
 connection.on('error', (error) => {
-    console.log('MongoDB connection error:', error.message);
+    console.error('MongoDB connection error:', error.message);
+    process.exit(1);
 });
-// Regular HTTP server without Socket.IO
-app.listen(PORT, '0.0.0.0', function () {
-    console.log('Server is running on Port: '+PORT);
-})
+
+// Start server with error handling
+const server = app.listen(PORT, '0.0.0.0', function () {
+    console.log('Server is running on Port: ' + PORT);
+    console.log('Environment:', process.env.NODE_ENV || 'development');
+    console.log('Process ID:', process.pid);
+}).on('error', (error) => {
+    console.error('Server failed to start:', error.message);
+    process.exit(1);
+});
 
 global.settings={
     stripe_secret_key: '',
