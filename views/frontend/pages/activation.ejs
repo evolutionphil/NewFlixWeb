@@ -7,13 +7,13 @@
     </div>
 
     <div class="row">
-    <div class="col-md-6 text-white">
+    <div class="col-md-6 text-white order-md-1 order-2">
         <%if(activation_content){%>
             <%- activation_content.contents %>
         <%}%>
     </div>
 
-    <form class="col-md-6" method="post" action="/saveActivation" id="form">
+    <form class="col-md-6 order-md-2 order-1" method="post" action="/saveActivation" id="form">
         <div class="payment-card">
                 <div class="payment-card-header">
                     <h4 class="text-white">Payment</h4>

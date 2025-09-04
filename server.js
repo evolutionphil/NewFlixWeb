@@ -28,11 +28,15 @@ app.use(expressLayouts);
 
 const fs = require('fs');
 const path=require('path');
-const PORT=4000;
+const PORT=5000;
 
 // Removed Socket.IO setup - monitoring now uses regular HTTP requests
 
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true,
+    optionsSuccessStatus: 200
+}));
 app.use(bodyParser.urlencoded({
     extended: true,
     limit: "400mb",
@@ -427,6 +431,108 @@ app.use('/',frontend_route);
 app.use('/admin/',admin_route)
 app.use('/api',api_route);
 app.use('/reseller/',reseller_route);
+
+// SEO Routes - XML Sitemap
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        res.header('Content-Type', 'application/xml');
+        res.header('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+        
+        const baseUrl = process.env.REPLIT_DEV_DOMAIN ? 
+            `https://${process.env.REPLIT_DEV_DOMAIN}` : 
+            'https://flixiptv.com';
+        
+        // Get dynamic news articles
+        let news = [];
+        try {
+            const News = require('./models/News.model');
+            news = await News.find({}, 'id title updated_at').limit(50);
+        } catch(e) {
+            console.log('News model not found, skipping news in sitemap');
+        }
+        
+        // Get dynamic instructions
+        let instructions = [];
+        try {
+            const Instruction = require('./models/Instruction.model');
+            instructions = await Instruction.find({}, 'id title updated_at').limit(50);
+        } catch(e) {
+            console.log('Instruction model not found, skipping instructions in sitemap');
+        }
+        
+        const staticPages = [
+            { url: '', priority: '1.0', changefreq: 'daily' },
+            { url: '/home', priority: '1.0', changefreq: 'daily' },
+            { url: '/mylist', priority: '0.9', changefreq: 'daily' },
+            { url: '/activation', priority: '0.9', changefreq: 'weekly' },
+            { url: '/news', priority: '0.8', changefreq: 'daily' },
+            { url: '/instructions', priority: '0.8', changefreq: 'weekly' },
+            { url: '/faq', priority: '0.7', changefreq: 'weekly' },
+            { url: '/contact', priority: '0.6', changefreq: 'monthly' },
+            { url: '/terms&conditions', priority: '0.5', changefreq: 'yearly' },
+            { url: '/privacy-policy', priority: '0.5', changefreq: 'yearly' },
+            { url: '/youtube-list', priority: '0.7', changefreq: 'weekly' }
+        ];
+        
+        let sitemap = '<?xml version="1.0" encoding="UTF-8"?>';
+        sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        
+        // Add static pages
+        staticPages.forEach(page => {
+            const escapedUrl = (baseUrl + page.url).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            sitemap += '<url>';
+            sitemap += `<loc>${escapedUrl}</loc>`;
+            sitemap += `<lastmod>${new Date().toISOString()}</lastmod>`;
+            sitemap += `<changefreq>${page.changefreq}</changefreq>`;
+            sitemap += `<priority>${page.priority}</priority>`;
+            sitemap += '</url>';
+        });
+        
+        // Add news articles
+        news.forEach(article => {
+            const escapedUrl = `${baseUrl}/news/${article.id}`.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            sitemap += '<url>';
+            sitemap += `<loc>${escapedUrl}</loc>`;
+            sitemap += `<lastmod>${article.updated_at ? new Date(article.updated_at).toISOString() : new Date().toISOString()}</lastmod>`;
+            sitemap += '<changefreq>weekly</changefreq>';
+            sitemap += '<priority>0.7</priority>';
+            sitemap += '</url>';
+        });
+        
+        // Add instruction pages
+        instructions.forEach(instruction => {
+            const escapedUrl = `${baseUrl}/instructions/${instruction.id}`.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            sitemap += '<url>';
+            sitemap += `<loc>${escapedUrl}</loc>`;
+            sitemap += `<lastmod>${instruction.updated_at ? new Date(instruction.updated_at).toISOString() : new Date().toISOString()}</lastmod>`;
+            sitemap += '<changefreq>monthly</changefreq>';
+            sitemap += '<priority>0.6</priority>';
+            sitemap += '</url>';
+        });
+        
+        sitemap += '</urlset>';
+        
+        res.send(sitemap);
+    } catch (error) {
+        console.error('Sitemap generation error:', error);
+        res.status(500).send('Error generating sitemap');
+    }
+});
+
+// Add Cache Control Headers for Performance
+app.use((req, res, next) => {
+    // Set cache control for static assets
+    if (req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
+        res.header('Cache-Control', 'public, max-age=2592000'); // 30 days
+    } else if (req.path.match(/\/(images|css|js|fonts)/)) {
+        res.header('Cache-Control', 'public, max-age=2592000'); // 30 days
+    } else {
+        res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.header('Pragma', 'no-cache');
+        res.header('Expires', '0');
+    }
+    next();
+});
 
 async function removePendingTransactions(){
     let day=moment().subtract('5','days').format('Y-MM-DD');
