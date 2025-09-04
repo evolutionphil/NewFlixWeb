@@ -479,8 +479,9 @@ app.get('/sitemap.xml', async (req, res) => {
         
         // Add static pages
         staticPages.forEach(page => {
+            const escapedUrl = (baseUrl + page.url).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             sitemap += '<url>';
-            sitemap += `<loc>${baseUrl}${page.url}</loc>`;
+            sitemap += `<loc>${escapedUrl}</loc>`;
             sitemap += `<lastmod>${new Date().toISOString()}</lastmod>`;
             sitemap += `<changefreq>${page.changefreq}</changefreq>`;
             sitemap += `<priority>${page.priority}</priority>`;
@@ -489,8 +490,9 @@ app.get('/sitemap.xml', async (req, res) => {
         
         // Add news articles
         news.forEach(article => {
+            const escapedUrl = `${baseUrl}/news/${article.id}`.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             sitemap += '<url>';
-            sitemap += `<loc>${baseUrl}/news/${article.id}</loc>`;
+            sitemap += `<loc>${escapedUrl}</loc>`;
             sitemap += `<lastmod>${article.updated_at ? new Date(article.updated_at).toISOString() : new Date().toISOString()}</lastmod>`;
             sitemap += '<changefreq>weekly</changefreq>';
             sitemap += '<priority>0.7</priority>';
@@ -499,8 +501,9 @@ app.get('/sitemap.xml', async (req, res) => {
         
         // Add instruction pages
         instructions.forEach(instruction => {
+            const escapedUrl = `${baseUrl}/instructions/${instruction.id}`.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             sitemap += '<url>';
-            sitemap += `<loc>${baseUrl}/instructions/${instruction.id}</loc>`;
+            sitemap += `<loc>${escapedUrl}</loc>`;
             sitemap += `<lastmod>${instruction.updated_at ? new Date(instruction.updated_at).toISOString() : new Date().toISOString()}</lastmod>`;
             sitemap += '<changefreq>monthly</changefreq>';
             sitemap += '<priority>0.6</priority>';
