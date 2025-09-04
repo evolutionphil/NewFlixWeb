@@ -56,7 +56,7 @@ exports.news=(req,res)=>{
                 description: description,
                 news: news.map(item=>({_id: item._id, title: item.title, content: convert(item.content).substring(0, 80)})),
                 pageType: 'news-listing',
-                canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/news` : 'https://flixiptv.com/news'
+                canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/news` : 'https://flixapp.net/news'
             }
         );
     })
@@ -106,7 +106,7 @@ exports.faq=(req,res)=>{
                 description:description,
                 faqs:faqs,
                 pageType: 'faq',
-                canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/faq` : 'https://flixiptv.com/faq'
+                canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/faq` : 'https://flixapp.net/faq'
             }
         );
     })
@@ -189,7 +189,7 @@ exports.showInstructionDetail = async (req, res) => {
         description: description,
         pageType: 'instruction-guide',
         deviceType: kind,
-        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/instructions/${kind}` : `https://flixiptv.com/instructions/${kind}`
+        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/instructions/${kind}` : `https://flixapp.net/instructions/${kind}`
     }
 
     res.render('frontend/pages/instructions/show', {menu: 'instruction', instruction: instruction, ...meta_data});
@@ -295,7 +295,7 @@ exports.contact=(req,res)=>{
         keyword: 'contact Flix IPTV, IPTV support, customer service, technical support, contact streaming support, help desk, support email, IPTV assistance, contact us, customer care, streaming customer service, IPTV help center, technical help, device setup support, playlist support, activation support, payment support, billing support, account support, troubleshooting help, installation help, configuration support, streaming issues, buffering help, connection problems, app support, multi device support, android IPTV support, ios IPTV support, apple tv support, samsung tv support, lg tv support, fire stick support, windows support, smart tv support, ibo player support, ibo iptv support, net iptv support, set iptv support, smart iptv support, iptv player support, m3u support, smart iptv help, iptv smarters support, perfect player support, kodi iptv support, vlc iptv support, mx player support, iptv extreme support, duplex iptv support, ottplayer support, lazy iptv support, iptv pro support, ss iptv support, iptv ultimate support, xciptv support, implayer support, televizo support, streaming support center, iptv customer service, tv streaming help, live tv support, on demand support, catch up tv support, m3u8 support, playlist troubleshooting, EPG support, channel list support, subscription support, activation issues, trial support, premium support, reseller support, white label support, api support, server support, cdn support, bandwidth issues, quality issues, audio sync issues, subtitle support, recording support, timeshift support, parental control support, multi room support, concurrent streams support, geo blocking support, vpn support, proxy support, firewall support, router support, network support, wifi support, ethernet support, 4g support, 5g support, satellite support, cable support, fiber support',
         description: 'Get professional support from Flix IPTV experts. We provide 24/7 customer service for device setup, technical troubleshooting, billing inquiries, account management, and streaming issues. Contact our dedicated support team for immediate assistance with your IPTV service across all devices and platforms.',
         pageType: 'contact',
-        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/contact` : 'https://flixiptv.com/contact'
+        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/contact` : 'https://flixapp.net/contact'
     }
     
     res.render('frontend/pages/contact', {menu: 'contact', ...meta_data});
@@ -309,7 +309,7 @@ exports.home=async(req,res)=>{
         keyword: 'IPTV streaming, Flix IPTV, premium streaming, IPTV player, streaming platform, IPTV service, digital streaming, live TV streaming, IPTV solution, media streaming platform, ibo player, ibo iptv, net iptv, set iptv, smart iptv player, iptv player, m3u player, smart iptv, iptv smarters, perfect player, tivimate, gse smart iptv, kodi iptv, vlc iptv, mx player iptv, iptv extreme, duplex iptv, ottplayer, lazy iptv, iptv pro, ss iptv, iptv ultimate, xciptv, implayer, televizo, free iptv, iptv channels, iptv playlist, m3u8 streaming, tv streaming, online tv, internet tv, cord cutting, streaming apps, firestick iptv, android tv iptv, roku iptv, smart tv streaming, iptv server, iptv provider, iptv subscription, iptv box',
         description: 'Flix IPTV - Professional IPTV streaming platform offering premium streaming experience with 7-day free trial. Multi-device support for Android, iOS, Smart TV, and Windows.',
         pageType: 'service',
-        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/home` : 'https://flixiptv.com/home'
+        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/home` : 'https://flixapp.net/home'
     }
 
     // Override with settings if available
@@ -514,7 +514,7 @@ exports.showYoutubeList=async(req,res)=>{
         keyword: keyword, 
         description: description,
         pageType: 'youtube-service',
-        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/youtube-list` : 'https://flixiptv.com/youtube-list'
+        canonicalUrl: process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}/youtube-list` : 'https://flixapp.net/youtube-list'
     }
     
     let mylist_content=await YoutubeListContent.findOne();

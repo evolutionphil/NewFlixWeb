@@ -74,6 +74,46 @@ app.use((req, res, next) => {
     next();
 });
 
+// WWW to non-WWW redirect middleware for SEO canonicalization
+app.use((req, res, next) => {
+    const host = req.get('Host');
+    
+    // Skip redirect for localhost and Replit development domains
+    if (!host || host.includes('localhost') || host.includes('replit.dev') || host.includes('replit.app')) {
+        return next();
+    }
+    
+    // If request comes to www subdomain, redirect to non-www
+    if (host && host.startsWith('www.')) {
+        const protocol = req.get('X-Forwarded-Proto') || req.protocol || 'https';
+        const nonWwwHost = host.slice(4); // Remove 'www.' prefix
+        const redirectUrl = `${protocol}://${nonWwwHost}${req.originalUrl}`;
+        
+        // 301 permanent redirect for SEO
+        return res.redirect(301, redirectUrl);
+    }
+    
+    next();
+});
+
+// Force HTTPS redirect for production (SEO best practice)
+app.use((req, res, next) => {
+    const host = req.get('Host');
+    
+    // Skip HTTPS redirect for localhost and development
+    if (!host || host.includes('localhost') || host.includes('replit.dev') || host.includes('replit.app')) {
+        return next();
+    }
+    
+    // Force HTTPS in production
+    if (req.get('X-Forwarded-Proto') === 'http') {
+        const httpsUrl = `https://${host}${req.originalUrl}`;
+        return res.redirect(301, httpsUrl);
+    }
+    
+    next();
+});
+
 app.set('trust proxy', 2)
 app.get('/ip', (request, response) => response.send(request.ip))
 
@@ -157,7 +197,7 @@ global.settings={
     mylist_meta_content: 'You can upload your playlist via mylist, after uploading a list you should restart you app. You can try our app for 7 days free. After 7 days you should activate it.',
     terms_meta_title: 'Flix IPTV TERMS AND CONDITIONS',
     terms_meta_keyword: 'flix IPTV, Terms and CONDITIONS, binding, terms and conditions, terms of iptv, iptv terms and conditions, flixiptv terms and conditions,',
-    terms_meta_content: 'This document constitutes a legally binding agreement between you as a user of the Site flixiptv.com defined as you, your, User or Seller, as the case may be) and flix IPTV.',
+    terms_meta_content: 'This document constitutes a legally binding agreement between you as a user of the Site flixapp.net defined as you, your, User or Seller, as the case may be) and flix IPTV.',
     privacy_meta_content: 'This page ist o ilustrate visitors regarding our policies with collection, using, and disclousure of Personal data. When a user dicided to use our Service this policies would be automaticaly applied by the user.  If you choose our service, then you agree to collection and use of information in relation to this policy. We use the personal information providing and improving the service. We don`t use or share any information with other people or companies exceptet as described',
     news_meta_title: 'Flix IPTV NEWS',
     instruction_meta_title: 'INSTRUCTION',
@@ -458,7 +498,7 @@ app.get('/sitemap.xml', async (req, res) => {
         
         const baseUrl = process.env.REPLIT_DEV_DOMAIN ? 
             `https://${process.env.REPLIT_DEV_DOMAIN}` : 
-            'https://flixiptv.com';
+            'https://flixapp.net';
         
         // Get dynamic news articles
         let news = [];

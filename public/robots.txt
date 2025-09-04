@@ -1,8 +1,12 @@
 User-agent: *
 Allow: /
 
+# Preferred domain (non-www) - www redirects to non-www
+# This helps search engines understand our canonicalization policy
+
 # Important pages for indexing
 Allow: /home
+Allow: /mylist
 Allow: /news
 Allow: /news/*
 Allow: /instructions
@@ -18,10 +22,20 @@ Disallow: /admin/
 Disallow: /api/
 Disallow: /reseller/
 
-# Block internal files
+# Block internal files and technical endpoints
 Disallow: /*.js$
 Disallow: /*.css$
 Disallow: /static/
+Disallow: /ip
+Disallow: /checkMacValid
+Disallow: /saveActivation
+Disallow: /savePlaylists
 
-# Sitemap location
-Sitemap: https://${REPL_SLUG}.${REPL_OWNER}.repl.co/sitemap.xml
+# Crawl delay to prevent server overload
+Crawl-delay: 1
+
+# Sitemap location (production)
+Sitemap: https://flixapp.net/sitemap.xml
+
+# Development sitemap
+# Sitemap: https://${REPL_SLUG}.${REPL_OWNER}.repl.co/sitemap.xml
