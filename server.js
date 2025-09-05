@@ -656,6 +656,76 @@ app.get('/sitemap.xml', async (req, res) => {
             sitemap += '</url>';
         });
         
+        // Add EPG Country Pages - All supported countries
+        const epgCountryPages = [
+            // Major European Countries (High Priority)
+            { url: '/codes/germany', priority: '0.8', changefreq: 'weekly' },
+            { url: '/codes/france', priority: '0.8', changefreq: 'weekly' },
+            { url: '/codes/uk', priority: '0.8', changefreq: 'weekly' },
+            { url: '/codes/italy', priority: '0.8', changefreq: 'weekly' },
+            { url: '/codes/spain', priority: '0.8', changefreq: 'weekly' },
+            { url: '/codes/austria', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/switzerland', priority: '0.7', changefreq: 'weekly' },
+            
+            // Nordic Countries
+            { url: '/codes/sweden', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/norway', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/denmark', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/finland', priority: '0.7', changefreq: 'weekly' },
+            
+            // Eastern Europe
+            { url: '/codes/poland', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/czech-republic', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/slovakia', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/hungary', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/romania', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/bulgaria', priority: '0.7', changefreq: 'weekly' },
+            
+            // Major Non-European Countries
+            { url: '/codes/usa', priority: '0.8', changefreq: 'weekly' },
+            { url: '/codes/canada', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/russia', priority: '0.8', changefreq: 'weekly' },
+            { url: '/codes/georgia', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/armenia', priority: '0.7', changefreq: 'weekly' },
+            
+            // Other European Countries
+            { url: '/codes/netherlands', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/belgium', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/portugal', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/greece', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/turkey', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/croatia', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/serbia', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/slovenia', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/bosnia-and-herzegovina', priority: '0.6', changefreq: 'weekly' },
+            { url: '/codes/macedonia', priority: '0.6', changefreq: 'weekly' },
+            { url: '/codes/albania', priority: '0.6', changefreq: 'weekly' },
+            
+            // Baltic States
+            { url: '/codes/lithuania', priority: '0.6', changefreq: 'weekly' },
+            { url: '/codes/latvia', priority: '0.6', changefreq: 'weekly' },
+            { url: '/codes/estonia', priority: '0.6', changefreq: 'weekly' },
+            
+            // Middle East & Others
+            { url: '/codes/israel', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/india', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/brazil', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/mexico', priority: '0.7', changefreq: 'weekly' },
+            { url: '/codes/chile', priority: '0.6', changefreq: 'weekly' },
+            { url: '/codes/argentina', priority: '0.6', changefreq: 'weekly' }
+        ];
+        
+        // Add EPG country pages to sitemap
+        epgCountryPages.forEach(page => {
+            const escapedUrl = (baseUrl + page.url).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            sitemap += '<url>';
+            sitemap += `<loc>${escapedUrl}</loc>`;
+            sitemap += `<lastmod>${new Date().toISOString()}</lastmod>`;
+            sitemap += `<changefreq>${page.changefreq}</changefreq>`;
+            sitemap += `<priority>${page.priority}</priority>`;
+            sitemap += '</url>';
+        });
+        
         sitemap += '</urlset>';
         
         res.send(sitemap);

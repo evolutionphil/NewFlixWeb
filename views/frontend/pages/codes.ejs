@@ -4,10 +4,10 @@
 <section style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 3rem 0; border-radius: 20px; margin-bottom: 2rem;">
     <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; text-align: center;">
         <h1 style="color: #ffffff; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-            EPG Channel Codes Database
+            EPG Channel Codes Database - 848+ Channels
         </h1>
         <p style="color: #b8c5d6; font-size: 1.2rem; max-width: 800px; margin: 0 auto; line-height: 1.6;">
-            Search and browse Electronic Program Guide codes for seamless streaming channel integration with comprehensive EPG data support and professional broadcasting solutions.
+            Comprehensive Electronic Program Guide codes database with professional channel identifiers from 40+ countries. Complete collection includes Germany (56), France (40), UK (32), Austria (7), Italy (18), Spain (17), and worldwide coverage for seamless streaming channel integration.
         </p>
     </div>
 </section>
@@ -137,7 +137,65 @@
     <!-- Results Info -->
     <div class="codes-results-info">
         <p class="text-muted text-center" id="resultsInfo">
-            Showing <span id="resultCount"><%= epgCodes.length %></span> EPG codes
+            Showing <span id="resultCount"><%= epgCodes.length %></span> EPG codes from 40+ countries
+        </p>
+    </div>
+</section>
+
+<!-- Country Quick Access Section -->
+<section style="background: rgba(255, 255, 255, 0.02); padding: 2rem; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); margin-top: 2rem;">
+    <h2 style="color: #ffffff; font-size: 1.8rem; font-weight: 600; margin-bottom: 1.5rem; text-align: center;">Popular Country Collections</h2>
+    <div class="row">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <a href="/codes/germany" style="text-decoration: none;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem; border-radius: 12px; text-align: center; transition: transform 0.3s ease;">
+                    <h3 style="color: #ffffff; font-size: 1.1rem; margin-bottom: 0.5rem;">🇩🇪 Germany</h3>
+                    <p style="color: #ffffff; font-size: 0.9rem; margin: 0; opacity: 0.9;">56+ Channels</p>
+                    <p style="color: #ffffff; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.8;">ARD, ZDF, RTL, ProSieben, SAT.1</p>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <a href="/codes/france" style="text-decoration: none;">
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 1.5rem; border-radius: 12px; text-align: center; transition: transform 0.3s ease;">
+                    <h3 style="color: #ffffff; font-size: 1.1rem; margin-bottom: 0.5rem;">🇫🇷 France</h3>
+                    <p style="color: #ffffff; font-size: 0.9rem; margin: 0; opacity: 0.9;">40+ Channels</p>
+                    <p style="color: #ffffff; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.8;">TF1, France 2, M6, Canal+</p>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <a href="/codes/uk" style="text-decoration: none;">
+                <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 1.5rem; border-radius: 12px; text-align: center; transition: transform 0.3s ease;">
+                    <h3 style="color: #ffffff; font-size: 1.1rem; margin-bottom: 0.5rem;">🇬🇧 United Kingdom</h3>
+                    <p style="color: #ffffff; font-size: 0.9rem; margin: 0; opacity: 0.9;">32+ Channels</p>
+                    <p style="color: #ffffff; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.8;">BBC, ITV, Channel 4, Sky</p>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+            <a href="/codes/russia" style="text-decoration: none;">
+                <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 1.5rem; border-radius: 12px; text-align: center; transition: transform 0.3s ease;">
+                    <h3 style="color: #ffffff; font-size: 1.1rem; margin-bottom: 0.5rem;">🇷🇺 Russia</h3>
+                    <p style="color: #ffffff; font-size: 0.9rem; margin: 0; opacity: 0.9;">217+ Channels</p>
+                    <p style="color: #ffffff; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.8;">НТВ, Россия 1, Первый канал</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 1.5rem;">
+        <p style="color: #b8c5d6; font-size: 0.9rem;">
+            More countries available: 
+            <a href="/codes/austria" style="color: #667eea;">Austria (7)</a>, 
+            <a href="/codes/italy" style="color: #667eea;">Italy (18)</a>, 
+            <a href="/codes/spain" style="color: #667eea;">Spain (17)</a>, 
+            <a href="/codes/usa" style="color: #667eea;">USA (9)</a>, 
+            <a href="/codes/georgia" style="color: #667eea;">Georgia (57)</a>, 
+            and 35+ more countries
         </p>
     </div>
 </section>

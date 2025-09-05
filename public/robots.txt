@@ -11,6 +11,8 @@ Allow: /news
 Allow: /news/*
 Allow: /instructions
 Allow: /instructions/*
+Allow: /codes
+Allow: /codes/*
 Allow: /faq
 Allow: /contact
 Allow: /activation

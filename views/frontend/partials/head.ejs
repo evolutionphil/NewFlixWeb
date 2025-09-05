@@ -389,8 +389,68 @@
         "mainEntity": {
             "@type": "Dataset",
             "name": "EPG Codes Database",
-            "description": "Comprehensive database of Electronic Program Guide codes for IPTV channels worldwide",
-            "keywords": ["EPG", "Electronic Program Guide", "IPTV", "TV Guide", "Channel Codes"],
+            "description": "Comprehensive database of Electronic Program Guide codes for streaming channels worldwide with 848+ channel identifiers",
+            "keywords": ["EPG", "Electronic Program Guide", "IPTV", "TV Guide", "Channel Codes", "streaming integration", "broadcasting solutions"],
+            "publisher": {
+                "@type": "Organization",
+                "name": "Flix IPTV",
+                "url": "<%= url1.split('/').slice(0,3).join('/') %>"
+            },
+            "distribution": {
+                "@type": "DataDownload",
+                "contentUrl": "<%= url1 %>",
+                "encodingFormat": "text/html"
+            },
+            "spatialCoverage": "Worldwide",
+            "temporalCoverage": "2025",
+            "variableMeasured": ["Channel Identifier", "Country Origin", "Content Category", "EPG Code"]
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Flix IPTV",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "<%= url1.split('/').slice(0,3).join('/') %>/images/logo.png"
+            }
+        },
+        "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "<%= url1.split('/').slice(0,3).join('/') %>"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "EPG Codes",
+                    "item": "<%= url1 %>"
+                }
+            ]
+        }
+    }
+    </script>
+    <% } %>
+    
+    <% if (typeof pageType !== 'undefined' && pageType === 'country-epg-codes') { %>
+    <!-- Country-Specific EPG Codes Page Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": ["WebPage", "DataCatalog"],
+        "name": "<%= title1 %>",
+        "description": "<%= description1 %>",
+        "url": "<%= url1 %>",
+        "mainEntity": {
+            "@type": "Dataset",
+            "name": "<%= typeof country !== 'undefined' ? country + ' EPG Codes Database' : 'Country EPG Codes Database' %>",
+            "description": "<%= typeof country !== 'undefined' ? 'Professional ' + country + ' Electronic Program Guide database with comprehensive TV channel identifiers for streaming integration and broadcasting solutions' : 'Country-specific Electronic Program Guide database' %>",
+            "keywords": ["<%= typeof country !== 'undefined' ? country : 'Country' %> EPG", "Electronic Program Guide", "<%= typeof country !== 'undefined' ? country : 'Country' %> TV Channels", "Streaming Codes", "Broadcasting Identifiers"],
+            "spatialCoverage": "<%= typeof country !== 'undefined' ? country : 'Specific Country' %>",
+            "temporalCoverage": "2025",
+            "variableMeasured": ["Channel Identifier", "Content Category", "EPG Code"],
             "publisher": {
                 "@type": "Organization",
                 "name": "Flix IPTV",
@@ -423,9 +483,20 @@
                     "@type": "ListItem",
                     "position": 2,
                     "name": "EPG Codes",
+                    "item": "<%= url1.split('/').slice(0,-1).join('/') %>"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "<%= typeof country !== 'undefined' ? country + ' Channels' : 'Country Channels' %>",
                     "item": "<%= url1 %>"
                 }
             ]
+        },
+        "isPartOf": {
+            "@type": "DataCatalog",
+            "name": "EPG Codes Database",
+            "url": "<%= url1.split('/').slice(0,-1).join('/') %>"
         }
     }
     </script>
