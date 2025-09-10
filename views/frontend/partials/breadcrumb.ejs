@@ -1,0 +1,166 @@
+<%
+    // Define breadcrumb data based on current page
+    let breadcrumbs = [];
+    let currentPage = menu || 'home';
+    
+    // Always start with Home
+    breadcrumbs.push({
+        name: 'Home',
+        url: '/home',
+        active: currentPage === 'home'
+    });
+    
+    // Add specific page breadcrumbs
+    switch(currentPage) {
+        case 'news':
+            breadcrumbs.push({
+                name: 'News',
+                url: '/news',
+                active: true
+            });
+            break;
+        case 'faq':
+            breadcrumbs.push({
+                name: 'FAQ',
+                url: '/faq',
+                active: true
+            });
+            break;
+        case 'codes':
+            breadcrumbs.push({
+                name: 'EPG Codes',
+                url: '/codes',
+                active: typeof countryName === 'undefined'
+            });
+            if (typeof countryName !== 'undefined' && countryName) {
+                breadcrumbs.push({
+                    name: countryName + ' EPG Codes',
+                    url: '/codes/' + (typeof countrySlug !== 'undefined' ? countrySlug : countryName.toLowerCase()),
+                    active: true
+                });
+            }
+            break;
+        case 'contact':
+            breadcrumbs.push({
+                name: 'Contact',
+                url: '/contact',
+                active: true
+            });
+            break;
+        case 'activation':
+            breadcrumbs.push({
+                name: 'Activation',
+                url: '/activation',
+                active: true
+            });
+            break;
+        case 'mylist':
+            breadcrumbs.push({
+                name: 'My List',
+                url: '/mylist',
+                active: true
+            });
+            break;
+        case 'instruction':
+            breadcrumbs.push({
+                name: 'Instructions',
+                url: '/instructions',
+                active: typeof instructionType === 'undefined'
+            });
+            if (typeof instructionType !== 'undefined' && instructionType) {
+                breadcrumbs.push({
+                    name: instructionType + ' Instructions',
+                    url: '/instructions/' + instructionType,
+                    active: true
+                });
+            }
+            break;
+        case 'youtube-list':
+            breadcrumbs.push({
+                name: 'YouTube Playlist',
+                url: '/youtube-list',
+                active: true
+            });
+            break;
+        default:
+            // For unknown pages, just show current page name if available
+            if (typeof title !== 'undefined' && title && title !== 'Flix IPTV') {
+                breadcrumbs.push({
+                    name: title.replace(' | FlixTV', '').replace(' | Flix IPTV', ''),
+                    url: '#',
+                    active: true
+                });
+            }
+            break;
+    }
+%>
+
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb" style="background: rgba(255, 255, 255, 0.02); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 2rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+    <ol class="breadcrumb" style="margin: 0; background: none; padding: 0;">
+        <% breadcrumbs.forEach((crumb, index) => { %>
+            <% if (crumb.active) { %>
+                <li class="breadcrumb-item active" aria-current="page" style="color: #ffffff; font-weight: 500;">
+                    <i class="fa fa-home" style="margin-right: 0.5rem; color: #667eea;"></i>
+                    <%= crumb.name %>
+                </li>
+            <% } else { %>
+                <li class="breadcrumb-item">
+                    <a href="<%= crumb.url %>" style="color: #b8c5d6; text-decoration: none; transition: color 0.3s ease;" 
+                       onmouseover="this.style.color='#667eea'" onmouseout="this.style.color='#b8c5d6'">
+                        <% if (index === 0) { %>
+                            <i class="fa fa-home" style="margin-right: 0.5rem;"></i>
+                        <% } %>
+                        <%= crumb.name %>
+                    </a>
+                </li>
+            <% } %>
+        <% }); %>
+    </ol>
+</nav>
+
+<!-- Structured Data for Breadcrumb SEO -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        <% breadcrumbs.forEach((crumb, index) => { %>
+            {
+                "@type": "ListItem",
+                "position": <%= index + 1 %>,
+                "name": "<%= crumb.name.replace(/"/g, '\\"') %>",
+                "item": "<%= (typeof canonicalUrl !== 'undefined' ? canonicalUrl.split('/').slice(0,3).join('/') : process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'https://flixapp.net') + crumb.url %>"
+            }<%= index < breadcrumbs.length - 1 ? ',' : '' %>
+        <% }); %>
+    ]
+}
+</script>
+
+<style>
+.breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    color: #667eea;
+    margin: 0 0.5rem;
+    font-weight: bold;
+}
+
+.breadcrumb-item:last-child::before {
+    content: none;
+}
+
+@media (max-width: 768px) {
+    .breadcrumb {
+        font-size: 0.9rem;
+    }
+    
+    .breadcrumb-item {
+        display: inline-block;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: top;
+    }
+}
+</style>

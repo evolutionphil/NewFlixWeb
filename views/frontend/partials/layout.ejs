@@ -7,6 +7,11 @@
         </div>
 
         <main class="container">
+            <!-- Breadcrumb Navigation -->
+            <% if (typeof menu !== 'undefined' && menu !== 'home') { %>
+                <%- include('breadcrumb.ejs') %>
+            <% } %>
+            
             <div class="content-container">
                 <%- body %>
             </div>
