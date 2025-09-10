@@ -1362,7 +1362,7 @@ exports.codes=(req,res)=>{
     const countries = [...new Set(epgCodes.map(item => item.country))].sort();
     const categories = [...new Set(epgCodes.map(item => item.category))].sort();
 
-    let title = 'EPG Channel Codes Database - 848+ Professional Channel Identifiers | FlixTV';
+    let title = 'EPG Channel Codes Database - 848+ Professional Channel Identifiers | Flix IPTV';
     let keyword = 'EPG codes, electronic program guide, channel codes, TV guide codes, channel identifiers, EPG integration, electronic TV guide, program guide codes, TV listing codes, streaming EPG, EPG XML codes, digital TV guide, EPG configuration, channel mapping, broadcast guide, television programming guide, EPG data source, streaming guide codes, EPG provider, channel guide integration, digital broadcasting EPG, smart TV EPG, set top box EPG, cable TV EPG, satellite TV EPG, terrestrial TV EPG, OTT streaming EPG, media player EPG, entertainment platform EPG, broadcasting solution EPG, professional TV guide, channel lineup codes, programming schedule codes, broadcast schedule integration, TV channel database, electronic guide system, digital program guide, streaming service EPG, media streaming guide, entertainment guide codes, television guide integration, broadcast data codes, channel information system, program data integration, streaming platform guide, digital entertainment EPG, media platform codes, broadcasting platform EPG, content delivery EPG, streaming technology EPG, digital media guide, entertainment technology EPG, broadcast technology codes, streaming application EPG, media application guide, entertainment software EPG, digital broadcasting codes, streaming infrastructure EPG, media infrastructure guide, broadcast infrastructure codes, entertainment infrastructure EPG, digital platform guide, streaming ecosystem EPG, media ecosystem guide, broadcast ecosystem codes, entertainment ecosystem EPG, Germany EPG codes, France EPG codes, UK EPG codes, Austria EPG codes, Italy EPG codes, Spain EPG codes, USA EPG codes, Russia EPG codes, international EPG codes, worldwide EPG codes, European EPG codes, Nordic EPG codes, complete EPG database, comprehensive EPG collection, professional EPG directory';
     let description = 'Comprehensive EPG (Electronic Program Guide) codes database with 848+ professional channel identifiers from 40+ countries. Complete collection includes Germany (56 channels), France (40 channels), UK (32 channels), Austria (7 channels), Italy (18 channels), and worldwide coverage for seamless streaming integration and broadcasting solutions.';
 
@@ -2455,7 +2455,7 @@ exports.countryEpgCodes=(req,res)=>{
     
     if (!targetCountry) {
         return res.status(404).render('frontend/pages/404', {
-            title: 'Country Not Found - FlixTV',
+            title: 'Country Not Found - Flix IPTV',
             keyword: 'country not found, EPG codes, 404 error',
             description: 'The requested country EPG codes page was not found.'
         });
@@ -2468,7 +2468,7 @@ exports.countryEpgCodes=(req,res)=>{
     
     if (countryEpgCodes.length === 0) {
         return res.status(404).render('frontend/pages/404', {
-            title: `${targetCountry} EPG Codes Not Found - FlixTV`,
+            title: `${targetCountry} EPG Codes Not Found - Flix IPTV`,
             keyword: `${targetCountry} EPG codes, country channels, 404 error`,
             description: `No EPG codes found for ${targetCountry}. Please check back later for updates.`
         });
@@ -2491,7 +2491,7 @@ exports.countryEpgCodes=(req,res)=>{
     
     const defaultKeywords = `${targetCountry} EPG codes, ${targetCountry} TV codes, ${targetCountry} television guide, ${targetCountry} streaming codes, ${targetCountry} broadcasting codes, ${targetCountry} TV guide integration, ${targetCountry} channel identifiers, ${targetCountry} EPG XML, ${targetCountry} television EPG, ${targetCountry} streaming EPG, ${targetCountry} digital TV codes, ${targetCountry} cable TV EPG, ${targetCountry} satellite TV codes, ${targetCountry} terrestrial TV EPG, ${targetCountry} OTT streaming codes`;
     
-    let title = `${targetCountry} EPG Codes - ${countryEpgCodes.length}+ TV Channel Identifiers | FlixTV`;
+    let title = `${targetCountry} EPG Codes - ${countryEpgCodes.length}+ Channel Identifiers | Professional TV Guide Database on FLIX IPTV APP`;
     let keyword = countryKeywords[targetCountry] || defaultKeywords;
     let description = `Complete ${targetCountry} EPG (Electronic Program Guide) codes database with ${countryEpgCodes.length}+ channels. Professional TV channel identifiers for ${targetCountry} streaming integration, broadcasting solutions, and digital TV guide implementation.`;
 
