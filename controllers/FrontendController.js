@@ -41,13 +41,13 @@ function generateSlugFromTitle(title) {
 exports.news=(req,res)=>{
     let keys=['news_meta_title','news_meta_keyword','news_meta_content']
     let data={
-        news_meta_title: 'Flix IPTV News - Latest Updates and Announcements',
-        news_meta_keyword: 'IPTV news, Flix IPTV updates, streaming news, IPTV announcements, platform updates, IPTV industry news, streaming platform news, digital streaming updates, ibo player news, ibo iptv news, net iptv news, set iptv news, smart iptv player news, iptv player news, m3u player news, smart iptv news, iptv smarters news, perfect player news, kodi iptv news, vlc iptv news, mx player iptv news, iptv extreme news, duplex iptv news, ottplayer news, lazy iptv news, iptv pro news, ss iptv news, gse iptv news, tivimate news, myiptv player news, live nettv news, purple iptv news, stb emulator news, mag player news, stalker portal news, ministra player news, infomir mag news, gse smart iptv news, iptv ultimate news, xciptv news, implayer news, televizo news, plex iptv news, emby iptv news, jellyfin iptv news, streaming news, tv streaming news, cord cutting news, iptv updates, streaming updates, iptv breaking news, iptv latest news, iptv platform news, iptv service news, iptv technology news, iptv application news, iptv software news, streaming app news, streaming device news, android tv iptv news, firestick iptv news, roku iptv news, smart tv iptv news',
-        news_meta_content: 'Stay updated with the latest Flix IPTV news, platform updates, and streaming industry announcements. Get the latest information about our IPTV streaming service.'
+        news_meta_title: 'Flix IPTV News - Latest Updates and Announcements | Professional Streaming Platform',
+        news_meta_keyword: 'IPTV news, Flix IPTV updates, streaming news, IPTV announcements, platform updates, IPTV industry news, streaming platform news, digital streaming updates, ibo player news, ibo iptv news, net iptv news, set iptv news, smart iptv player news, iptv player news, m3u player news, smart iptv news, iptv smarters news, perfect player news, kodi iptv news, vlc iptv news, mx player iptv news, iptv extreme news, duplex iptv news, ottplayer news, lazy iptv news, iptv pro news, ss iptv news, gse iptv news, tivimate news, myiptv player news, live nettv news, purple iptv news, stb emulator news, mag player news, stalker portal news, ministra player news, infomir mag news, gse smart iptv news, iptv ultimate news, xciptv news, implayer news, televizo news, plex iptv news, emby iptv news, jellyfin iptv news, streaming news, tv streaming news, cord cutting news, iptv updates, streaming updates, iptv breaking news, iptv latest news, iptv platform news, iptv service news, iptv technology news, iptv application news, iptv software news, streaming app news, streaming device news, android tv iptv news, firestick iptv news, roku iptv news, smart tv iptv news, professional streaming news, enterprise streaming news, business streaming news',
+        news_meta_content: 'Stay updated with the latest Flix IPTV news, platform updates, and streaming industry announcements. Get comprehensive information about our professional IPTV streaming service, technology updates, and industry developments.'
     }
     
     keys.map(key => {
-        if(settings[key]) {
+        if(settings && settings[key] && settings[key].trim() !== '' && settings[key] !== 'FLIX APP NEWS') {
             data[key] = settings[key];
         }
     })
