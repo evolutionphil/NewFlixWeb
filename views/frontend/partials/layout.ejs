@@ -113,6 +113,19 @@
             $('#header-toggle').click(function () {
                 $('.header-items-container').toggleClass('open');
             })
+            
+            // Register Service Worker for PWA Support
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(function(registration) {
+                            console.log('ServiceWorker registered successfully:', registration.scope);
+                        })
+                        .catch(function(error) {
+                            console.log('ServiceWorker registration failed:', error);
+                        });
+                });
+            }
         </script>
     </body>
 </html>

@@ -1,0 +1,117 @@
+{
+    "name": "Flix IPTV - Professional Streaming Platform",
+    "short_name": "Flix IPTV",
+    "description": "Professional IPTV streaming platform with premium features, multi-device support, and 7-day free trial.",
+    "start_url": "/home",
+    "display": "standalone",
+    "background_color": "#1a1a2e",
+    "theme_color": "#473590",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "en",
+    "dir": "ltr",
+    "categories": ["entertainment", "multimedia", "productivity"],
+    "screenshots": [
+        {
+            "src": "/images/screenshot-mobile.png",
+            "sizes": "320x640",
+            "type": "image/png",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/images/screenshot-desktop.png", 
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        }
+    ],
+    "icons": [
+        {
+            "src": "/images/logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/images/logo.png",
+            "sizes": "512x512", 
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/images/logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Upload Playlist",
+            "short_name": "Upload",
+            "description": "Upload your streaming playlist",
+            "url": "/mylist",
+            "icons": [
+                {
+                    "src": "/images/icons/play-circle.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Device Activation", 
+            "short_name": "Activate",
+            "description": "Activate your streaming device",
+            "url": "/activation",
+            "icons": [
+                {
+                    "src": "/images/icons/shield-tick.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Latest News",
+            "short_name": "News", 
+            "description": "Read latest platform updates",
+            "url": "/news",
+            "icons": [
+                {
+                    "src": "/images/icons/features-ui.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Support & FAQ",
+            "short_name": "Help",
+            "description": "Get help and support",
+            "url": "/faq",
+            "icons": [
+                {
+                    "src": "/images/icons/voice-square.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
+    "related_applications": [
+        {
+            "platform": "play",
+            "url": "https://play.google.com/store/apps/details?id=net.flixapp.player",
+            "id": "net.flixapp.player"
+        },
+        {
+            "platform": "itunes",
+            "url": "https://apps.apple.com/app/flix-iptv-player/id6746156813",
+            "id": "6746156813"
+        }
+    ],
+    "prefer_related_applications": false,
+    "protocol_handlers": [
+        {
+            "protocol": "m3u",
+            "url": "/mylist?playlist=%s"
+        }
+    ]
+}

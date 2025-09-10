@@ -56,14 +56,33 @@
     <meta name="author" content="Flix IPTV">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="theme-color" content="#473590">
+    
+    <!-- Progressive Web App Support -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Flix IPTV">
+    <meta name="msapplication-TileColor" content="#473590">
+    <meta name="msapplication-config" content="/browserconfig.xml">
 
+    <!-- Font Preloading for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet"></noscript>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
-    <link rel="stylesheet" href="/admin/template/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/admin/template/fonts/font-awesome/font-awesome.css">
+    <!-- Critical CSS - Preload for Performance -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/admin/template/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="/admin/template/fonts/font-awesome/font-awesome.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- Fallback for browsers without JavaScript -->
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
+        <link rel="stylesheet" href="/admin/template/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/admin/template/fonts/font-awesome/font-awesome.css">
+    </noscript>
 
     <script src="/admin/template/vendor/jquery/jquery.js"></script>
     <script src="/admin/template/vendor/popper-js/umd/popper.min.js"></script>
