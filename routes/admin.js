@@ -150,6 +150,7 @@ router.get('/investigate-ip/:ip', adminController.investigateIp);
 
 router.get('/playlist-summary',adminController.showPlaylistSummary);
 router.post('/get-playlist-summary',adminController.getPlaylistSummary);
+router.get('/get-device-playlists/:mac_address',adminController.getDevicePlaylistsByMac);
 
 router.get('/old-devices',adminController.showOldDevices);
 router.post('/get-old-devices',adminController.getOldDevices);

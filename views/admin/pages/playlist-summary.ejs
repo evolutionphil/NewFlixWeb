@@ -28,7 +28,35 @@
         </div>
     </div>
 </div>
+
+<!-- Playlist Details Modal -->
+<div class="modal fade" id="playlistModal" tabindex="-1" role="dialog" aria-labelledby="playlistModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="playlistModalLabel">
+                    Playlists for Device: <span id="modalMacAddress" class="text-primary"></span>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="playlistContent">
+                    <div class="text-center">
+                        <i class="fa fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">Loading playlists...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
+</div>
+
 <script>
     var current_tr, current_playlist_id, dataTable, current_button;
     $(document).ready(function () {
@@ -38,7 +66,13 @@
     })
 
     var columns = [
-        {data: 'mac_address', sortable: true},
+        {
+            data: 'mac_address', 
+            sortable: true,
+            render: function(data, type, row) {
+                return '<a href="#" class="mac-address-link text-primary" data-mac="' + data + '" style="text-decoration: underline; cursor: pointer;">' + data + '</a>';
+            }
+        },
         {data: 'is_active', sortable: false},
         {data: 'total_urls', sortable: true},
     ];
@@ -102,6 +136,111 @@
                     }
                 }
             ],
+        });
+    }
+
+    // MAC Address click handler and modal functions
+    $(document).on('click', '.mac-address-link', function(e) {
+        e.preventDefault();
+        e.stopPropagation(); // Prevent row selection
+        const macAddress = $(this).data('mac');
+        showPlaylistsModal(macAddress);
+    });
+
+    function showPlaylistsModal(macAddress) {
+        $('#modalMacAddress').text(macAddress);
+        $('#playlistModal').modal('show');
+        
+        // Reset content to loading state
+        $('#playlistContent').html(`
+            <div class="text-center">
+                <i class="fa fa-spinner fa-spin fa-2x"></i>
+                <p class="mt-2">Loading playlists...</p>
+            </div>
+        `);
+        
+        // Load playlists from server
+        $.ajax({
+            url: site_url + '/admin/get-device-playlists/' + encodeURIComponent(macAddress),
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    let content = '<div class="alert alert-info mb-3">';
+                    content += '<div class="row">';
+                    content += '<div class="col-md-6">';
+                    content += '<strong><i class="fa fa-laptop"></i> Device Information:</strong><br>';
+                    content += '<strong>MAC:</strong> ' + response.device.mac_address + '<br>';
+                    content += '<strong>App Type:</strong> ' + (response.device.app_type || 'Unknown');
+                    content += '</div>';
+                    content += '<div class="col-md-6">';
+                    content += '<strong>Status:</strong> ' + (response.device.is_active ? 
+                        '<span class="badge badge-success">Active</span>' : 
+                        '<span class="badge badge-warning">Inactive</span>') + '<br>';
+                    content += '<strong>Created:</strong> ' + (response.device.created_at ? 
+                        new Date(response.device.created_at).toLocaleDateString() : 'Unknown');
+                    content += '</div>';
+                    content += '</div>';
+                    content += '</div>';
+                    
+                    if (response.playlists && response.playlists.length > 0) {
+                        content += '<h5><i class="fa fa-list"></i> Playlists (' + response.playlists.length + '):</h5>';
+                        content += '<div class="table-responsive">';
+                        content += '<table class="table table-sm table-striped table-hover">';
+                        content += '<thead class="table-dark">';
+                        content += '<tr>';
+                        content += '<th style="width: 50%;">Playlist URL</th>';
+                        content += '<th style="width: 20%;">Created</th>';
+                        content += '<th style="width: 20%;">Updated</th>';
+                        content += '<th style="width: 10%;">Status</th>';
+                        content += '</tr>';
+                        content += '</thead>';
+                        content += '<tbody>';
+                        
+                        response.playlists.forEach(function(playlist) {
+                            const status = playlist.is_trial === 2 ? 
+                                '<span class="badge badge-success">Active</span>' : 
+                                '<span class="badge badge-warning">Trial</span>';
+                            
+                            // Truncate long URLs for display
+                            let displayUrl = playlist.playlist_url;
+                            if (displayUrl.length > 60) {
+                                displayUrl = displayUrl.substring(0, 60) + '...';
+                            }
+                            
+                            content += '<tr>';
+                            content += '<td>';
+                            content += '<small title="' + playlist.playlist_url + '">' + displayUrl + '</small>';
+                            content += '</td>';
+                            content += '<td><small>' + new Date(playlist.created_at).toLocaleDateString() + '</small></td>';
+                            content += '<td><small>' + new Date(playlist.updated_at).toLocaleDateString() + '</small></td>';
+                            content += '<td>' + status + '</td>';
+                            content += '</tr>';
+                        });
+                        
+                        content += '</tbody></table></div>';
+                    } else {
+                        content += '<div class="alert alert-warning">';
+                        content += '<i class="fa fa-exclamation-triangle"></i> No playlists found for this device.';
+                        content += '</div>';
+                    }
+                    
+                    $('#playlistContent').html(content);
+                } else {
+                    $('#playlistContent').html(`
+                        <div class="alert alert-danger">
+                            <i class="fa fa-exclamation-circle"></i> ${response.message || 'Error loading device information.'}
+                        </div>
+                    `);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading playlists:', error);
+                $('#playlistContent').html(`
+                    <div class="alert alert-danger">
+                        <i class="fa fa-exclamation-circle"></i> Error loading playlists. Please try again.
+                    </div>
+                `);
+            }
         });
     }
 

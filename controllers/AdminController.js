@@ -2550,6 +2550,59 @@ exports.getPlaylistSummary = async (req, res) => {
     });
 }
 
+exports.getDevicePlaylistsByMac = async (req, res) => {
+    try {
+        const { mac_address } = req.params;
+        
+        // Find device by MAC address
+        const device = await Device.findOne({ 
+            mac_address: mac_address.toLowerCase() 
+        });
+        
+        if (!device) {
+            return res.json({ 
+                success: false,
+                message: 'Device not found',
+                device: null,
+                playlists: [] 
+            });
+        }
+        
+        // Get all playlists for this device
+        const playlists = await PlayList.find({ 
+            device_id: device._id.toString() 
+        }).select('playlist_url created_at updated_at is_trial')
+          .sort({ created_at: -1 }); // Latest first
+        
+        res.json({ 
+            success: true,
+            device: {
+                mac_address: device.mac_address,
+                app_type: device.app_type,
+                is_active: device.is_trial === 2,
+                created_at: device.created_at
+            },
+            playlists: playlists.map(playlist => ({
+                id: playlist._id,
+                playlist_url: playlist.playlist_url,
+                created_at: playlist.created_at,
+                updated_at: playlist.updated_at,
+                is_trial: playlist.is_trial,
+                status: playlist.is_trial === 2 ? 'Active' : 'Trial'
+            }))
+        });
+        
+    } catch (error) {
+        console.error('Error getting device playlists:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error loading playlists',
+            device: null,
+            playlists: []
+        });
+    }
+}
+
 
 // exports.uploadFlixData=async (req,res)=>{
 //     console.clear();
