@@ -2415,6 +2415,7 @@ exports.getPlaylistSummary = async (req, res) => {
         order,
         columns,
         search,
+        filter_https,
     } = req.body;
 
     start = parseInt(start);
@@ -2440,6 +2441,13 @@ exports.getPlaylistSummary = async (req, res) => {
         );
     }
 
+    // Add HTTPS filter condition
+    if (filter_https === 'true' || filter_https === true) {
+        filter_condition = combineFilterCondition(filter_condition, {
+            url: { $regex: '^https://', $options: 'i' }
+        });
+    }
+
     let sort_filter = {};
 
     if (columnName === 'total_urls') {
@@ -2447,22 +2455,23 @@ exports.getPlaylistSummary = async (req, res) => {
     }
 
     // First get total count before pagination
-    const countPipeline = [
-        {
-            $group: {
-                _id: "$device_id",
-                total_urls: {
-                    $sum: 1
-                }
-            }
-        }
-    ];
-
+    const countPipeline = [];
+    
+    // Apply same filter conditions to count pipeline
     if (Object.keys(filter_condition).length > 0) {
-        countPipeline.unshift({
+        countPipeline.push({
             $match: filter_condition
         });
     }
+    
+    countPipeline.push({
+        $group: {
+            _id: "$device_id",
+            total_urls: {
+                $sum: 1
+            }
+        }
+    });
 
     const totalCount = await PlayList.aggregate([
         ...countPipeline,

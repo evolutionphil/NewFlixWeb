@@ -9,6 +9,17 @@
             <h3 class="panel-title">Playlist Summary</h3>
         </div>
         <div class="panel-body">
+            <div class="mb-3">
+                <button type="button" class="btn btn-info" id="filter-https-btn">
+                    <i class="fa fa-filter"></i> Show Only HTTPS Playlists
+                </button>
+                <button type="button" class="btn btn-secondary" id="clear-filter-btn" style="display: none;">
+                    <i class="fa fa-times"></i> Clear Filter
+                </button>
+                <span id="filter-status" class="ml-2 text-info" style="display: none;"></span>
+            </div>
+        </div>
+        <div class="panel-body">
             <div class="">
                 <div class="list-wrapper w-full">
                     <div class="table-responsive">
@@ -80,6 +91,8 @@
     $(document).ready(function () {
         updateDataTable();
     })
+    var httpsFilterActive = false;
+
     function updateDataTable(){
         dataTable.destroy();
         dataTable=$('#item-list-table').DataTable({
@@ -92,6 +105,7 @@
             'ajax':{
                 url:site_url+"/admin/get-playlist-summary",
                 data:{
+                    filter_https: httpsFilterActive
                 },
                 "dataSrc": function ( json ) {
                     return json.data;
@@ -138,6 +152,23 @@
             ],
         });
     }
+
+    // HTTPS Filter functionality
+    $('#filter-https-btn').on('click', function() {
+        httpsFilterActive = true;
+        $(this).hide();
+        $('#clear-filter-btn').show();
+        $('#filter-status').text('Showing only HTTPS playlists').show();
+        updateDataTable();
+    });
+
+    $('#clear-filter-btn').on('click', function() {
+        httpsFilterActive = false;
+        $(this).hide();
+        $('#filter-https-btn').show();
+        $('#filter-status').hide();
+        updateDataTable();
+    });
 
     // MAC Address click handler and modal functions
     $(document).on('click', '.mac-address-link', function(e) {
