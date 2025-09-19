@@ -2571,7 +2571,7 @@ exports.getDevicePlaylistsByMac = async (req, res) => {
         // Get all playlists for this device
         const playlists = await PlayList.find({ 
             device_id: device._id.toString() 
-        }).select('playlist_url created_at updated_at is_trial')
+        }).select('url created_at updated_at is_trial')
           .sort({ created_at: -1 }); // Latest first
         
         res.json({ 
@@ -2584,7 +2584,7 @@ exports.getDevicePlaylistsByMac = async (req, res) => {
             },
             playlists: playlists.map(playlist => ({
                 id: playlist._id,
-                playlist_url: playlist.playlist_url,
+                playlist_url: playlist.url,
                 created_at: playlist.created_at,
                 updated_at: playlist.updated_at,
                 is_trial: playlist.is_trial,
