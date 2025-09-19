@@ -216,12 +216,12 @@
                     if (response.playlists && response.playlists.length > 0) {
                         content += '<h5><i class="fa fa-list"></i> Playlists (' + response.playlists.length + '):</h5>';
                         content += '<div class="table-responsive">';
-                        content += '<table class="table table-sm table-striped table-hover">';
+                        content += '<table class="table table-sm table-striped table-hover" style="table-layout: fixed;">';
                         content += '<thead class="table-dark">';
                         content += '<tr>';
-                        content += '<th style="width: 50%;">Playlist URL</th>';
-                        content += '<th style="width: 20%;">Created</th>';
-                        content += '<th style="width: 20%;">Updated</th>';
+                        content += '<th style="width: 60%;">Playlist URL</th>';
+                        content += '<th style="width: 15%;">Created</th>';
+                        content += '<th style="width: 15%;">Updated</th>';
                         content += '<th style="width: 10%;">Status</th>';
                         content += '</tr>';
                         content += '</thead>';
@@ -232,15 +232,12 @@
                                 '<span class="badge badge-success">Active</span>' : 
                                 '<span class="badge badge-warning">Trial</span>';
                             
-                            // Truncate long URLs for display - add null checks
+                            // Show full URLs without truncation
                             let displayUrl = playlist.playlist_url || 'No URL';
-                            if (displayUrl && displayUrl.length > 60) {
-                                displayUrl = displayUrl.substring(0, 60) + '...';
-                            }
                             
                             content += '<tr>';
-                            content += '<td>';
-                            content += '<small title="' + (playlist.playlist_url || 'No URL') + '">' + displayUrl + '</small>';
+                            content += '<td style="word-break: break-all; max-width: 400px;">';
+                            content += '<small>' + displayUrl + '</small>';
                             content += '</td>';
                             content += '<td><small>' + (playlist.created_at ? new Date(playlist.created_at).toLocaleDateString() : 'Unknown') + '</small></td>';
                             content += '<td><small>' + (playlist.updated_at ? new Date(playlist.updated_at).toLocaleDateString() : 'Unknown') + '</small></td>';
