@@ -201,18 +201,18 @@
                                 '<span class="badge badge-success">Active</span>' : 
                                 '<span class="badge badge-warning">Trial</span>';
                             
-                            // Truncate long URLs for display
-                            let displayUrl = playlist.playlist_url;
-                            if (displayUrl.length > 60) {
+                            // Truncate long URLs for display - add null checks
+                            let displayUrl = playlist.playlist_url || 'No URL';
+                            if (displayUrl && displayUrl.length > 60) {
                                 displayUrl = displayUrl.substring(0, 60) + '...';
                             }
                             
                             content += '<tr>';
                             content += '<td>';
-                            content += '<small title="' + playlist.playlist_url + '">' + displayUrl + '</small>';
+                            content += '<small title="' + (playlist.playlist_url || 'No URL') + '">' + displayUrl + '</small>';
                             content += '</td>';
-                            content += '<td><small>' + new Date(playlist.created_at).toLocaleDateString() + '</small></td>';
-                            content += '<td><small>' + new Date(playlist.updated_at).toLocaleDateString() + '</small></td>';
+                            content += '<td><small>' + (playlist.created_at ? new Date(playlist.created_at).toLocaleDateString() : 'Unknown') + '</small></td>';
+                            content += '<td><small>' + (playlist.updated_at ? new Date(playlist.updated_at).toLocaleDateString() : 'Unknown') + '</small></td>';
                             content += '<td>' + status + '</td>';
                             content += '</tr>';
                         });
