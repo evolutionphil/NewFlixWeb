@@ -110,8 +110,12 @@
             <div class="detail-item" style="margin-top: 15px;">
                 <span class="detail-item-label">Admin Tools: </span>
                 <span class="detail-item-content">
-                    <button class="btn btn-warning btn-unlock-playlist" style="margin-right: 10px;">
-                        <i class="fa fa-unlock"></i> Unlock Blocked Playlist
+                    <button class="btn btn-warning btn-unlock-playlist" style="margin-right: 10px;" id="device-lock-btn">
+                        <%if(device.lock === 1){%>
+                            <i class="fa fa-unlock"></i> Unlock Device (Allow Uploads)
+                        <%}else{%>
+                            <i class="fa fa-lock"></i> Lock Device (Prevent Uploads)
+                        <%}%>
                     </button>
                     <button class="btn btn-info btn-change-parental-pin">
                         <i class="fa fa-key"></i> Change Parental PIN
@@ -162,7 +166,7 @@
     </div>
 </div>
 
-<!-- Unlock Blocked Playlist Modal -->
+<!-- Device Lock/Unlock Modal -->
 <div class="modal fade" id="unlock-playlist-modal">
     <div class="modal-dialog modal-simple modal-center">
         <div class="modal-content">
@@ -170,18 +174,20 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
-                <h4 class="modal-title">Unlock Blocked Playlist</h4>
+                <h4 class="modal-title" id="lock-modal-title">Toggle Device Lock</h4>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to unlock all blocked channels/content for this playlist?</p>
-                <div class="alert alert-warning">
-                    <strong>Warning:</strong> This will remove all parental controls and content restrictions.
+                <p id="lock-modal-question">Are you sure you want to change the device lock status?</p>
+                <div class="alert alert-info" id="lock-modal-info">
+                    <strong>Device Lock Status:</strong>
+                    <br>• <strong>Locked:</strong> Device cannot upload or modify playlists
+                    <br>• <strong>Unlocked:</strong> Device can upload and modify playlists normally
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-warning" onclick="confirmUnlockPlaylist()">
-                    <i class="fa fa-unlock"></i> Unlock Playlist
+                <button type="button" class="btn btn-warning" onclick="confirmUnlockPlaylist()" id="lock-modal-confirm">
+                    <i class="fa fa-unlock"></i> Toggle Lock
                 </button>
             </div>
         </div>
@@ -233,6 +239,19 @@
         })
 
         $(document).on('click','.btn-unlock-playlist', function () {
+            // Update modal content based on current lock status
+            var currentLockStatus = <%=device.lock || 0%>;
+            
+            if (currentLockStatus === 1) {
+                $('#lock-modal-title').text('Unlock Device');
+                $('#lock-modal-question').text('Are you sure you want to unlock this device to allow playlist uploads and modifications?');
+                $('#lock-modal-confirm').html('<i class="fa fa-unlock"></i> Unlock Device');
+            } else {
+                $('#lock-modal-title').text('Lock Device');
+                $('#lock-modal-question').text('Are you sure you want to lock this device to prevent playlist uploads and modifications?');
+                $('#lock-modal-confirm').html('<i class="fa fa-lock"></i> Lock Device');
+            }
+            
             $('#unlock-playlist-modal').modal('show');
         })
 
@@ -279,12 +298,20 @@
                     $('#unlock-playlist-modal').modal('hide');
                     if(data.success) {
                         Toastify({
-                            text: data.message || "Playlist unlocked successfully!",
+                            text: data.message || "Device lock status changed successfully!",
                             backgroundColor: "green"
                         }).showToast();
+                        
+                        // Update button text and icon based on new lock status
+                        var lockBtn = $('#device-lock-btn');
+                        if(data.is_locked) {
+                            lockBtn.html('<i class="fa fa-unlock"></i> Unlock Device (Allow Uploads)');
+                        } else {
+                            lockBtn.html('<i class="fa fa-lock"></i> Lock Device (Prevent Uploads)');
+                        }
                     } else {
                         Toastify({
-                            text: data.message || "Failed to unlock playlist.",
+                            text: data.message || "Failed to change device lock status.",
                             backgroundColor: "red"
                         }).showToast();
                     }
@@ -292,7 +319,7 @@
                 error: function() {
                     $('#unlock-playlist-modal').modal('hide');
                     Toastify({
-                        text: "Error occurred while unlocking playlist.",
+                        text: "Error occurred while changing device lock status.",
                         backgroundColor: "red"
                     }).showToast();
                 }

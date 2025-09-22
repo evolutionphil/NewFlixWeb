@@ -2990,41 +2990,31 @@ exports.unlockBlockedPlaylist = async (req, res) => {
             });
         }
         
-        // Update device settings to unlock blocked content
-        // This could involve updating various fields depending on your data model
-        // For now, let's assume we have fields like blocked_channels, parental_controls, etc.
+        // Get current lock status
+        const currentLockStatus = device.lock || 0;
+        const newLockStatus = currentLockStatus === 1 ? 0 : 1; // Toggle lock status
+        
+        // Update device lock status
         await Device.findByIdAndUpdate(playlist_id, {
-            $unset: {
-                blocked_channels: "",
-                content_restrictions: "",
-                parental_blocks: ""
-            },
-            blocked_content_unlocked: true,
-            unlock_timestamp: new Date()
+            lock: newLockStatus
         });
         
-        // Also update related playlists if needed
-        await PlayList.updateMany(
-            { device_id: playlist_id },
-            {
-                $unset: {
-                    blocked_channels: "",
-                    content_restrictions: ""
-                },
-                content_unlocked: true
-            }
-        );
+        const statusMessage = newLockStatus === 0 ? 
+            'Device unlocked successfully! Device can now upload and modify playlists.' :
+            'Device locked successfully! Device can no longer upload or modify playlists.';
         
         res.json({
             success: true,
-            message: 'Playlist content unlocked successfully! All parental controls and content restrictions have been removed.'
+            message: statusMessage,
+            lock_status: newLockStatus,
+            is_locked: newLockStatus === 1
         });
         
     } catch (error) {
-        console.error('Error unlocking playlist:', error);
+        console.error('Error toggling device lock:', error);
         res.json({
             success: false,
-            message: 'Error occurred while unlocking playlist'
+            message: 'Error occurred while toggling device lock'
         });
     }
 };
