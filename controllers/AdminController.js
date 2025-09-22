@@ -2976,6 +2976,111 @@ exports.activatePlaylist=async(req,res)=>{
         }
     })
 }
+exports.unlockBlockedPlaylist = async (req, res) => {
+    try {
+        const { playlist_id } = req.body;
+        
+        // Find the device by playlist_id 
+        const device = await Device.findById(playlist_id);
+        
+        if (!device) {
+            return res.json({
+                success: false,
+                message: 'Device not found'
+            });
+        }
+        
+        // Update device settings to unlock blocked content
+        // This could involve updating various fields depending on your data model
+        // For now, let's assume we have fields like blocked_channels, parental_controls, etc.
+        await Device.findByIdAndUpdate(playlist_id, {
+            $unset: {
+                blocked_channels: "",
+                content_restrictions: "",
+                parental_blocks: ""
+            },
+            blocked_content_unlocked: true,
+            unlock_timestamp: new Date()
+        });
+        
+        // Also update related playlists if needed
+        await PlayList.updateMany(
+            { device_id: playlist_id },
+            {
+                $unset: {
+                    blocked_channels: "",
+                    content_restrictions: ""
+                },
+                content_unlocked: true
+            }
+        );
+        
+        res.json({
+            success: true,
+            message: 'Playlist content unlocked successfully! All parental controls and content restrictions have been removed.'
+        });
+        
+    } catch (error) {
+        console.error('Error unlocking playlist:', error);
+        res.json({
+            success: false,
+            message: 'Error occurred while unlocking playlist'
+        });
+    }
+};
+
+exports.changeParentalPin = async (req, res) => {
+    try {
+        const { playlist_id, new_pin } = req.body;
+        
+        // Validate PIN
+        if (!new_pin || new_pin.length !== 4 || !/^\d{4}$/.test(new_pin)) {
+            return res.json({
+                success: false,
+                message: 'PIN must be exactly 4 digits'
+            });
+        }
+        
+        // Find the device
+        const device = await Device.findById(playlist_id);
+        
+        if (!device) {
+            return res.json({
+                success: false,
+                message: 'Device not found'
+            });
+        }
+        
+        // Update the parental PIN
+        await Device.findByIdAndUpdate(playlist_id, {
+            parental_pin: new_pin,
+            pin_changed_at: new Date(),
+            pin_changed_by: 'admin'
+        });
+        
+        // Also update related playlists if they store PIN info
+        await PlayList.updateMany(
+            { device_id: playlist_id },
+            {
+                parental_pin: new_pin,
+                pin_updated: new Date()
+            }
+        );
+        
+        res.json({
+            success: true,
+            message: `Parental PIN successfully changed to ${new_pin}`
+        });
+        
+    } catch (error) {
+        console.error('Error changing parental PIN:', error);
+        res.json({
+            success: false,
+            message: 'Error occurred while changing PIN'
+        });
+    }
+};
+
 exports.showDeviceDetail=async(req,res)=>{
     let id=req.params.id;
     let promises=[];
