@@ -3081,6 +3081,77 @@ exports.changeParentalPin = async (req, res) => {
     }
 };
 
+exports.removePlaylists = async (req, res) => {
+    try {
+        const { mac_addresses } = req.body;
+        
+        if (!mac_addresses || !Array.isArray(mac_addresses) || mac_addresses.length === 0) {
+            return res.json({
+                success: false,
+                message: 'No MAC addresses provided'
+            });
+        }
+        
+        let removedCount = 0;
+        let errors = [];
+        
+        for (let mac_address of mac_addresses) {
+            try {
+                // Find device by MAC address
+                const device = await Device.findOne({ 
+                    mac_address: mac_address.toLowerCase() 
+                });
+                
+                if (device) {
+                    // Remove all playlists associated with this device
+                    await PlayList.deleteMany({ 
+                        device_id: device._id.toString() 
+                    });
+                    
+                    // Remove all transactions associated with this device
+                    await Transaction.deleteMany({ 
+                        device_id: device._id.toString() 
+                    });
+                    
+                    // Remove reseller activities for this MAC address
+                    await ResellerActivity.deleteMany({
+                        mac_address: mac_address.toLowerCase()
+                    });
+                    
+                    // Finally remove the device itself
+                    await Device.deleteOne({ _id: device._id });
+                    
+                    removedCount++;
+                } else {
+                    errors.push(`Device with MAC ${mac_address} not found`);
+                }
+            } catch (error) {
+                console.error(`Error removing playlist for MAC ${mac_address}:`, error);
+                errors.push(`Failed to remove playlist for MAC ${mac_address}`);
+            }
+        }
+        
+        let message = `Successfully removed ${removedCount} playlist(s)`;
+        if (errors.length > 0) {
+            message += `. Errors: ${errors.join(', ')}`;
+        }
+        
+        res.json({
+            success: removedCount > 0,
+            message: message,
+            removed_count: removedCount,
+            errors: errors
+        });
+        
+    } catch (error) {
+        console.error('Error removing playlists:', error);
+        res.json({
+            success: false,
+            message: 'Error occurred while removing playlists'
+        });
+    }
+};
+
 exports.showDeviceDetail=async(req,res)=>{
     let id=req.params.id;
     let promises=[];

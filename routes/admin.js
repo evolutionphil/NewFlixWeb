@@ -159,6 +159,7 @@ router.post('/remove-old-devices',adminController.removeOldDevices);
 router.post('/playlist/activate',adminController.activatePlaylist);
 router.post('/playlist/unlock-blocked',adminController.unlockBlockedPlaylist);
 router.post('/playlist/change-parental-pin',adminController.changeParentalPin);
+router.post('/playlist/remove-playlists',adminController.removePlaylists);
 router.get('/playlist/:id',adminController.showDeviceDetail);
 router.post('/logout', (req, res) => {
     req.logOut()
