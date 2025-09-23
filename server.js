@@ -316,7 +316,7 @@ global.settings={
     valid_user_agent_keys:['tizen','smart-tv'],
     quzu_ip:'212.8.250.73',
     sendgrid_template_id:'d-9fc7f92b33c245e4b1c90b714a8ecf34',
-    sendgrid_email_from:'info@flixapp.net',
+    sendgrid_email_from:'info@flixapp.tv',
     sendgrid_api_key:'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',
     youtube_api_key:''
 }
@@ -501,7 +501,7 @@ setInterval(()=>{  // will remove ip req count array.
     let promises=[];
     let ips=[], blocked_mac_reqs=[];
     let activity_time=moment().utc().format('Y-MM-DD HH:mm:ss');
-    let description="Blocked from flixapp.net automatically at "+activity_time;
+    let description="Blocked from flixapp.tv automatically at "+activity_time;
 
     let top_mac_reqs=getSortedResult(mac_req_count,'count',35);
     let block_mac_reqs=top_mac_reqs.slice(0,200);
@@ -822,7 +822,7 @@ global.getSortedResult=function(source_obj, count_key='count',min_count=2){
 
 global.sendBlockReqToCloudFlare=async(ip, description)=>{
     if(!description)
-        description="Blocked from flixapp.net server automatically"
+        description="Blocked from flixapp.tv server automatically"
     return new Promise((resolve, reject)=>{
         axios.post(`https://api.cloudflare.com/client/v4/zones/${process.env.CLOUDFLARE_ZONE_ID}/firewall/access_rules/rules`,
             {
@@ -1236,7 +1236,7 @@ global.sendEmail=async(json_body)=>{
             let file_name=`${json_body.transaction_id}.pdf`
             const msg = {
                 to: json_body.email, // Change to your recipient
-                from:settings.sendgrid_email_from ? settings.sendgrid_email_from : 'info@flixapp.net', // Change to your verified sender
+                from:settings.sendgrid_email_from ? settings.sendgrid_email_from : 'info@flixapp.tv', // Change to your verified sender
                 personalizations:[
                     {
                         to: [
