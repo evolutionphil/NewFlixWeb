@@ -3183,7 +3183,7 @@ exports.showDeviceDetail=async(req,res)=>{
 }
 exports.downloadCoinList=(req,res)=>{
     CoinList.deleteMany().then(()=>{
-        axios.get("https://flixapp.tv/api/getCoinList").then(result=>{
+        axios.get("https://flixapp.net/api/getCoinList").then(result=>{
             let records=[];
             let coin_lists=result.data[0].data;
             coin_lists.map(item=>{
