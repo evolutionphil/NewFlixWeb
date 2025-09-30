@@ -402,6 +402,24 @@ async function saveExternalPurchase(req,res,decrypted_req, is_encrypted=false){
     mac_address=mac_address.toLowerCase();
     let ip=getClientIPAddress(req);
     let device=await Device.findOne({mac_address:mac_address});
+    
+    if(!device){
+        let error_result={
+            status:'error',
+            msg:'Device not found. Please register device first.'
+        }
+        if(!is_encrypted)
+            return res.json(error_result)
+        else {
+            let app_type='android';
+            if(payment_type==='app_purchase')
+                app_type='iOS'
+            return res.json({
+                data:makeEncryptResponse(decrypted_req,error_result,app_type)
+            })
+        }
+    }
+    
     let expire_date=moment().add(5000,'M').format('Y-MM-DD');
     device.expire_date=expire_date;
     device.is_trial=2;
