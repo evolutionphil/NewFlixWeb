@@ -495,6 +495,25 @@ exports.getTransactions=async (req,res)=>{
         }
     }
 
+    // Add DataTables search functionality across multiple fields
+    if(searchValue && searchValue.trim() !== '') {
+        const searchRegex = { $regex: searchValue, $options: 'i' };
+        filter_condition = combineFilterCondition(filter_condition, {
+            $or: [
+                { mac_address: searchRegex },
+                { ip: searchRegex },
+                { user_agent: searchRegex },
+                { app_type: searchRegex },
+                { pay_time: searchRegex },
+                { payment_type: searchRegex },
+                { payment_id: searchRegex },
+                { admin_activation_ip: searchRegex },
+                { admin_activation_domain: searchRegex },
+                { admin_activation_source: searchRegex }
+            ]
+        });
+    }
+
     let sort_filter={}
     if(columnName=='mac_address')
         sort_filter={mac_address:columnSortOrder==='asc' ? 1 : -1}
