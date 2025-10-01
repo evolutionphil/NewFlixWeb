@@ -304,6 +304,67 @@ exports.showTransaction=(req,res)=>{
     )
 }
 
+exports.showInvoices=async (req,res)=>{
+    const fs = require('fs');
+    const path = require('path');
+    
+    let invoices = [];
+    const receiptsDir = path.join(__dirname, '../public/receipts');
+    
+    try {
+        if (fs.existsSync(receiptsDir)) {
+            const paymentTypes = fs.readdirSync(receiptsDir);
+            
+            for (let paymentType of paymentTypes) {
+                const paymentTypePath = path.join(receiptsDir, paymentType);
+                if (!fs.statSync(paymentTypePath).isDirectory()) continue;
+                
+                const months = fs.readdirSync(paymentTypePath);
+                for (let month of months) {
+                    const monthPath = path.join(paymentTypePath, month);
+                    if (!fs.statSync(monthPath).isDirectory()) continue;
+                    
+                    const days = fs.readdirSync(monthPath);
+                    for (let day of days) {
+                        const dayPath = path.join(monthPath, day);
+                        if (!fs.statSync(dayPath).isDirectory()) continue;
+                        
+                        const files = fs.readdirSync(dayPath);
+                        for (let file of files) {
+                            if (file.endsWith('.pdf')) {
+                                const filePath = path.join(dayPath, file);
+                                const stats = fs.statSync(filePath);
+                                const transactionId = file.replace('.pdf', '');
+                                
+                                invoices.push({
+                                    transaction_id: transactionId,
+                                    payment_type: paymentType,
+                                    date: `${month}-${day}`,
+                                    file_path: `/receipts/${paymentType}/${month}/${day}/${file}`,
+                                    file_size: (stats.size / 1024).toFixed(2),
+                                    created_at: stats.birthtime
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error reading invoices:', error);
+    }
+    
+    invoices.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    res.render('admin/pages/invoices',
+        {
+            menu:'invoices',
+            layout: './admin/partials/layout',
+            invoices: invoices
+        }
+    )
+}
+
 exports.getTransactions=async (req,res)=>{
     let {
         show_samsung,

@@ -49,6 +49,8 @@ router.post('/mylist/save',adminController.saveMyListContent);
 router.get('/transactions',adminController.showTransaction);
 router.post('/getTransactions',adminController.getTransactions);
 
+router.get('/invoices',adminController.showInvoices);
+
 router.get('/language',adminController.language);
 router.post('/language/delete/:id',adminController.deleteLanguage);
 router.post('/language/create',adminController.createLanguage);

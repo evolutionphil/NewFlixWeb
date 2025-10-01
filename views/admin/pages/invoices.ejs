@@ -1,0 +1,147 @@
+<style>
+    .invoice-table {
+        width: 100%;
+    }
+    .invoice-card {
+        background: #fff;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .badge-payment {
+        padding: 5px 10px;
+        border-radius: 3px;
+        color: #fff;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+    .badge-paypal { background-color: #0070ba; }
+    .badge-stripe { background-color: #635bff; }
+    .badge-crypto { background-color: #f7931a; }
+    .badge-google_pay { background-color: #4285f4; }
+    .badge-app_purchase { background-color: #000; }
+    .no-invoices {
+        text-align: center;
+        padding: 50px;
+        color: #999;
+    }
+    .filter-section {
+        background: #fff;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+    .filter-section select, .filter-section input {
+        margin-right: 10px;
+        display: inline-block;
+        width: auto;
+    }
+</style>
+
+<div class="page-content">
+    <div class="panel panel-boxed">
+        <div class="panel-heading">
+            <h3 class="panel-title">Invoices</h3>
+        </div>
+        <div class="panel-body">
+            <div class="filter-section">
+                <label>Filter by Payment Type:</label>
+                <select id="payment-type-filter" class="form-control" onchange="filterInvoices()">
+                    <option value="all">All Payment Types</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="stripe">Stripe</option>
+                    <option value="crypto">Cryptocurrency</option>
+                    <option value="google_pay">Google Pay</option>
+                    <option value="app_purchase">App Purchase</option>
+                </select>
+                <label style="margin-left: 20px;">Search Transaction ID:</label>
+                <input type="text" id="search-transaction" class="form-control" placeholder="Enter transaction ID" onkeyup="filterInvoices()">
+            </div>
+
+            <% if (invoices && invoices.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-striped invoice-table" id="invoices-table">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Payment Type</th>
+                                <th>Date</th>
+                                <th>Created At</th>
+                                <th>Size (KB)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% invoices.forEach(function(invoice) { %>
+                                <tr data-payment-type="<%= invoice.payment_type %>" data-transaction-id="<%= invoice.transaction_id %>">
+                                    <td><strong><%= invoice.transaction_id %></strong></td>
+                                    <td>
+                                        <span class="badge-payment badge-<%= invoice.payment_type %>">
+                                            <%= invoice.payment_type.replace('_', ' ') %>
+                                        </span>
+                                    </td>
+                                    <td><%= invoice.date %></td>
+                                    <td><%= new Date(invoice.created_at).toLocaleString() %></td>
+                                    <td><%= invoice.file_size %> KB</td>
+                                    <td>
+                                        <a href="<%= invoice.file_path %>" target="_blank" class="btn btn-sm btn-primary">
+                                            <i class="fa fa-eye"></i> View
+                                        </a>
+                                        <a href="<%= invoice.file_path %>" download class="btn btn-sm btn-success">
+                                            <i class="fa fa-download"></i> Download
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="invoice-stats" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                    <strong>Total Invoices:</strong> <span id="total-invoices"><%= invoices.length %></span>
+                    <span style="margin-left: 20px;" id="filtered-count"></span>
+                </div>
+            <% } else { %>
+                <div class="no-invoices">
+                    <i class="fa fa-file-invoice" style="font-size: 48px; margin-bottom: 20px; color: #ccc;"></i>
+                    <h4>No Invoices Found</h4>
+                    <p>Invoice PDFs will appear here after successful payments.</p>
+                    <p style="color: #999; font-size: 14px;">Invoices are stored in: <code>public/receipts/{payment_type}/{YYYY-MM}/{DD}/</code></p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filterInvoices() {
+        const paymentTypeFilter = document.getElementById('payment-type-filter').value;
+        const searchText = document.getElementById('search-transaction').value.toLowerCase();
+        const rows = document.querySelectorAll('#invoices-table tbody tr');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const paymentType = row.getAttribute('data-payment-type');
+            const transactionId = row.getAttribute('data-transaction-id').toLowerCase();
+            
+            const matchesPaymentType = paymentTypeFilter === 'all' || paymentType === paymentTypeFilter;
+            const matchesSearch = searchText === '' || transactionId.includes(searchText);
+
+            if (matchesPaymentType && matchesSearch) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('filtered-count').textContent = 
+            visibleCount < rows.length ? `(Showing ${visibleCount} of ${rows.length})` : '';
+    }
+</script>
